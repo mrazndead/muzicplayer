@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Heart } from "lucide-react";
 import { AudiusTrack, getArtworkUrl } from "@/lib/audius";
 
 interface TrackListProps {
@@ -8,6 +8,8 @@ interface TrackListProps {
   isPlaying: boolean;
   onPlay: (track: AudiusTrack, index: number) => void;
   title?: string;
+  isFavorite?: (id: string) => boolean;
+  onToggleFavorite?: (track: AudiusTrack) => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -16,7 +18,7 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title }: TrackListProps) {
+export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite }: TrackListProps) {
   if (!tracks.length) return null;
 
   return (
@@ -29,20 +31,23 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title }: 
       <div className="space-y-1">
         {tracks.map((track, i) => {
           const isCurrent = track.id === currentTrackId;
+          const liked = isFavorite?.(track.id) ?? false;
           return (
-            <motion.button
+            <motion.div
               key={track.id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.02 }}
-              onClick={() => onPlay(track, i)}
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 text-left group
-                ${isCurrent 
-                  ? "bg-primary/10 border border-primary/20" 
+                ${isCurrent
+                  ? "bg-primary/10 border border-primary/20"
                   : "hover:bg-secondary border border-transparent"
                 }`}
             >
-              <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+              <button
+                onClick={() => onPlay(track, i)}
+                className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-muted"
+              >
                 <img
                   src={getArtworkUrl(track, "150x150")}
                   alt={track.title}
@@ -57,21 +62,35 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title }: 
                     <Play className="w-4 h-4 text-primary" />
                   )}
                 </div>
-              </div>
+              </button>
 
-              <div className="flex-1 min-w-0">
+              <button onClick={() => onPlay(track, i)} className="flex-1 min-w-0 text-left">
                 <p className={`text-sm font-medium line-clamp-1 ${isCurrent ? "text-primary" : "text-foreground"}`}>
                   {track.title}
                 </p>
                 <p className="text-xs text-muted-foreground line-clamp-1">
                   {track.user.name}
                 </p>
-              </div>
+              </button>
+
+              {onToggleFavorite && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite(track);
+                  }}
+                  className="p-1.5 rounded-full transition-colors flex-shrink-0"
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-colors ${liked ? "fill-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  />
+                </button>
+              )}
 
               <span className="text-xs text-muted-foreground flex-shrink-0 tabular-nums">
                 {formatDuration(track.duration)}
               </span>
-            </motion.button>
+            </motion.div>
           );
         })}
       </div>

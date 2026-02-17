@@ -9,6 +9,8 @@ export interface PlayerState {
   volume: number;
   queue: AudiusTrack[];
   queueIndex: number;
+  shuffle: boolean;
+  repeat: "off" | "all" | "one";
 }
 
 export function useAudioPlayer() {
@@ -21,7 +23,13 @@ export function useAudioPlayer() {
     volume: 0.7,
     queue: [],
     queueIndex: -1,
+    shuffle: false,
+    repeat: "off",
   });
+
+  // Store state ref for use in callbacks
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     const audio = new Audio();
@@ -35,7 +43,7 @@ export function useAudioPlayer() {
       setState((s) => ({ ...s, duration: audio.duration }));
     });
     audio.addEventListener("ended", () => {
-      nextTrack();
+      handleTrackEnd();
     });
     audio.addEventListener("pause", () => {
       setState((s) => ({ ...s, isPlaying: false }));
@@ -50,14 +58,47 @@ export function useAudioPlayer() {
     };
   }, []);
 
-  const playTrack = useCallback(async (track: AudiusTrack, queue?: AudiusTrack[], index?: number) => {
+  const playAudioForTrack = useCallback(async (track: AudiusTrack) => {
     const audio = audioRef.current;
     if (!audio) return;
-
     const url = await getStreamUrl(track.id);
     audio.src = url;
     audio.play().catch(console.error);
+  }, []);
 
+  const handleTrackEnd = useCallback(() => {
+    const s = stateRef.current;
+    if (s.repeat === "one") {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+      }
+      return;
+    }
+
+    let nextIdx: number;
+    if (s.shuffle) {
+      nextIdx = Math.floor(Math.random() * s.queue.length);
+    } else {
+      nextIdx = s.queueIndex + 1;
+    }
+
+    if (nextIdx < s.queue.length) {
+      const track = s.queue[nextIdx];
+      playAudioForTrack(track);
+      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: nextIdx, currentTime: 0 }));
+    } else if (s.repeat === "all" && s.queue.length > 0) {
+      const track = s.queue[0];
+      playAudioForTrack(track);
+      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: 0, currentTime: 0 }));
+    } else {
+      setState((prev) => ({ ...prev, isPlaying: false }));
+    }
+  }, [playAudioForTrack]);
+
+  const playTrack = useCallback(async (track: AudiusTrack, queue?: AudiusTrack[], index?: number) => {
+    await playAudioForTrack(track);
     setState((s) => ({
       ...s,
       currentTrack: track,
@@ -66,17 +107,17 @@ export function useAudioPlayer() {
       queue: queue || s.queue,
       queueIndex: index ?? s.queueIndex,
     }));
-  }, []);
+  }, [playAudioForTrack]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !state.currentTrack) return;
+    if (!audio || !stateRef.current.currentTrack) return;
     if (audio.paused) {
       audio.play().catch(console.error);
     } else {
       audio.pause();
     }
-  }, [state.currentTrack]);
+  }, []);
 
   const seek = useCallback((time: number) => {
     const audio = audioRef.current;
@@ -92,39 +133,45 @@ export function useAudioPlayer() {
   }, []);
 
   const nextTrack = useCallback(() => {
-    setState((s) => {
-      const nextIdx = s.queueIndex + 1;
-      if (nextIdx < s.queue.length) {
-        const track = s.queue[nextIdx];
-        getStreamUrl(track.id).then((url) => {
-          const audio = audioRef.current;
-          if (audio) {
-            audio.src = url;
-            audio.play().catch(console.error);
-          }
-        });
-        return { ...s, currentTrack: track, queueIndex: nextIdx, currentTime: 0 };
-      }
-      return { ...s, isPlaying: false };
-    });
-  }, []);
+    const s = stateRef.current;
+    let nextIdx: number;
+    if (s.shuffle) {
+      nextIdx = Math.floor(Math.random() * s.queue.length);
+    } else {
+      nextIdx = s.queueIndex + 1;
+    }
+    if (nextIdx < s.queue.length) {
+      const track = s.queue[nextIdx];
+      playAudioForTrack(track);
+      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: nextIdx, currentTime: 0 }));
+    }
+  }, [playAudioForTrack]);
 
   const prevTrack = useCallback(() => {
-    setState((s) => {
-      const prevIdx = s.queueIndex - 1;
-      if (prevIdx >= 0) {
-        const track = s.queue[prevIdx];
-        getStreamUrl(track.id).then((url) => {
-          const audio = audioRef.current;
-          if (audio) {
-            audio.src = url;
-            audio.play().catch(console.error);
-          }
-        });
-        return { ...s, currentTrack: track, queueIndex: prevIdx, currentTime: 0 };
-      }
-      return s;
-    });
+    const s = stateRef.current;
+    // If more than 3 seconds in, restart current track
+    if (s.currentTime > 3) {
+      const audio = audioRef.current;
+      if (audio) audio.currentTime = 0;
+      return;
+    }
+    const prevIdx = s.queueIndex - 1;
+    if (prevIdx >= 0) {
+      const track = s.queue[prevIdx];
+      playAudioForTrack(track);
+      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: prevIdx, currentTime: 0 }));
+    }
+  }, [playAudioForTrack]);
+
+  const toggleShuffle = useCallback(() => {
+    setState((s) => ({ ...s, shuffle: !s.shuffle }));
+  }, []);
+
+  const toggleRepeat = useCallback(() => {
+    setState((s) => ({
+      ...s,
+      repeat: s.repeat === "off" ? "all" : s.repeat === "all" ? "one" : "off",
+    }));
   }, []);
 
   return {
@@ -135,5 +182,7 @@ export function useAudioPlayer() {
     setVolume,
     nextTrack,
     prevTrack,
+    toggleShuffle,
+    toggleRepeat,
   };
 }
