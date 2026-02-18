@@ -24,11 +24,11 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
   return (
     <div>
       {title && (
-        <h2 className="font-heading text-lg font-semibold text-foreground mb-4 tracking-wide">
+        <h2 className="font-heading text-base font-semibold text-foreground mb-4">
           {title}
         </h2>
       )}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {tracks.map((track, i) => {
           const isCurrent = track.id === currentTrackId;
           const liked = isFavorite?.(track.id) ?? false;
@@ -38,15 +38,20 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.02 }}
-              className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 text-left group
+              className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 text-left group
                 ${isCurrent
-                  ? "bg-primary/10 border border-primary/20"
-                  : "hover:bg-secondary border border-transparent"
+                  ? "bg-primary/10"
+                  : "hover:bg-secondary/60"
                 }`}
             >
+              {/* Track number */}
+              <span className="text-xs text-muted-foreground w-5 text-right font-medium tabular-nums flex-shrink-0">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+
               <button
                 onClick={() => onPlay(track, i)}
-                className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-muted"
+                className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-muted"
               >
                 <img
                   src={getArtworkUrl(track, "150x150")}
@@ -54,12 +59,12 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className={`absolute inset-0 bg-background/60 flex items-center justify-center transition-opacity
+                <div className={`absolute inset-0 bg-background/50 flex items-center justify-center transition-opacity
                   ${isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                   {isCurrent && isPlaying ? (
                     <Pause className="w-4 h-4 text-primary" />
                   ) : (
-                    <Play className="w-4 h-4 text-primary" />
+                    <Play className="w-4 h-4 text-primary ml-0.5" />
                   )}
                 </div>
               </button>
@@ -68,7 +73,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                 <p className={`text-sm font-medium line-clamp-1 ${isCurrent ? "text-primary" : "text-foreground"}`}>
                   {track.title}
                 </p>
-                <p className="text-xs text-muted-foreground line-clamp-1">
+                <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
                   {track.user.name}
                 </p>
               </button>
@@ -82,7 +87,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   className="p-1.5 rounded-full transition-colors flex-shrink-0"
                 >
                   <Heart
-                    className={`w-4 h-4 transition-colors ${liked ? "fill-primary text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                    className={`w-4 h-4 transition-colors ${liked ? "fill-accent text-accent" : "text-muted-foreground/40 hover:text-muted-foreground"}`}
                   />
                 </button>
               )}

@@ -20,14 +20,14 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full max-w-xl mx-auto">
-      <div className="relative glass glow-border rounded-full overflow-hidden">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="relative bg-secondary/80 rounded-2xl overflow-hidden border border-border/50 focus-within:border-primary/40 transition-colors">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Search tracks, artists, genres..."
-          className="w-full bg-transparent py-3 pl-12 pr-12 text-foreground placeholder:text-muted-foreground outline-none font-body text-sm"
+          className="w-full bg-transparent py-3.5 pl-11 pr-11 text-foreground placeholder:text-muted-foreground outline-none font-body text-sm"
         />
         {value && (
           <button
@@ -40,8 +40,8 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         )}
       </div>
       {isLoading && (
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-primary/30 rounded-full overflow-hidden">
-          <div className="h-full w-1/3 bg-primary rounded-full animate-pulse-glow" />
+        <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-muted rounded-full overflow-hidden">
+          <div className="h-full w-1/3 gradient-primary rounded-full animate-pulse-glow" />
         </div>
       )}
     </form>

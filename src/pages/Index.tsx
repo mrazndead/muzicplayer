@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3, TrendingUp } from "lucide-react";
+import { Music, Disc3 } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -86,23 +86,25 @@ const Index = () => {
     }
   }, [player, favorites]);
 
-  const playerPadding = player.currentTrack ? "pb-32 sm:pb-28" : "pb-16";
+  const playerPadding = player.currentTrack ? "pb-36 sm:pb-32" : "pb-20";
 
   return (
     <div className={`min-h-screen bg-background ${playerPadding}`}>
       {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b border-border">
-        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Disc3 className="w-7 h-7 text-primary animate-spin" style={{ animationDuration: "3s" }} />
-            <h1 className="font-heading text-lg font-bold text-foreground tracking-widest glow-text">
-              PULSE
+      <header className="sticky top-0 z-40 glass-heavy border-b border-border/30">
+        <div className="max-w-screen-xl mx-auto px-4 py-3.5 flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center">
+              <Disc3 className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <h1 className="font-heading text-lg font-bold text-foreground tracking-tight">
+              Pulse
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-8">
+      <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <AnimatePresence mode="wait">
           {/* HOME TAB */}
           {activeTab === "home" && (
@@ -111,28 +113,15 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-8"
+              className="space-y-6"
             >
-              {/* Hero */}
-              <div className="text-center space-y-4">
-                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-wide">
-                  Free Music, <span className="text-primary glow-text">No Limits</span>
-                </h2>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  Stream ad-free music from independent artists worldwide
-                </p>
-                <SearchBar onSearch={handleSearch} isLoading={loading} />
-              </div>
+              {/* Search */}
+              <SearchBar onSearch={handleSearch} isLoading={loading} />
 
               {/* Genres */}
-              <section>
-                <h3 className="font-heading text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-3">
-                  Explore Genres
-                </h3>
-                <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
-              </section>
+              <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
 
-              {/* Trending carousel */}
+              {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
                 <TrendingCarousel
                   tracks={trendingTracks}
@@ -141,13 +130,14 @@ const Index = () => {
                 />
               )}
 
-              {/* Search results */}
+              {/* Loading */}
               {loading && (
-                <div className="flex items-center justify-center py-12">
-                  <Music className="w-8 h-8 text-primary animate-pulse" />
+                <div className="flex items-center justify-center py-16">
+                  <div className="w-10 h-10 rounded-full gradient-primary animate-pulse" />
                 </div>
               )}
 
+              {/* Search results */}
               {!loading && hasSearched && (
                 <TrackList
                   tracks={tracks}
@@ -161,8 +151,8 @@ const Index = () => {
               )}
 
               {!loading && hasSearched && tracks.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No tracks found. Try a different search!</p>
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground text-sm">No tracks found. Try a different search!</p>
                 </div>
               )}
             </motion.div>
@@ -177,18 +167,15 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="text-center space-y-4">
-                <h2 className="font-heading text-xl font-bold text-foreground tracking-wide">
-                  Find Your Sound
-                </h2>
-                <SearchBar onSearch={handleSearch} isLoading={loading} />
-              </div>
-
+              <h2 className="font-heading text-xl font-bold text-foreground">
+                Discover
+              </h2>
+              <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
 
               {loading && (
-                <div className="flex items-center justify-center py-12">
-                  <Music className="w-8 h-8 text-primary animate-pulse" />
+                <div className="flex items-center justify-center py-16">
+                  <div className="w-10 h-10 rounded-full gradient-primary animate-pulse" />
                 </div>
               )}
 
@@ -215,12 +202,12 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="text-center">
-                <h2 className="font-heading text-xl font-bold text-foreground tracking-wide">
-                  ❤️ Your Liked Tracks
+              <div>
+                <h2 className="font-heading text-xl font-bold text-foreground">
+                  Liked Tracks
                 </h2>
                 <p className="text-muted-foreground text-sm mt-1">
-                  {favorites.length} {favorites.length === 1 ? "track" : "tracks"} saved
+                  {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
                 </p>
               </div>
 
@@ -234,10 +221,10 @@ const Index = () => {
                   onToggleFavorite={toggleFavorite}
                 />
               ) : (
-                <div className="text-center py-16">
-                  <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">No liked tracks yet</p>
-                  <p className="text-muted-foreground text-sm mt-1">Tap the ❤️ on any track to save it here</p>
+                <div className="text-center py-20">
+                  <Music className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                  <p className="text-muted-foreground text-sm">No liked tracks yet</p>
+                  <p className="text-muted-foreground/60 text-xs mt-1">Tap the ❤️ on any track to save it</p>
                 </div>
               )}
             </motion.div>
@@ -245,7 +232,6 @@ const Index = () => {
         </AnimatePresence>
       </main>
 
-      {/* Bottom tabs */}
       <BottomTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -253,7 +239,6 @@ const Index = () => {
         hasPlayer={!!player.currentTrack}
       />
 
-      {/* Player */}
       <MusicPlayer
         currentTrack={player.currentTrack}
         isPlaying={player.isPlaying}
