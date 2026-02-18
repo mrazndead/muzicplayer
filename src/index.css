@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,52 +6,55 @@
 
 @layer base {
   :root {
-    --background: 220 40% 5%;
-    --foreground: 210 40% 95%;
+    --background: 230 35% 7%;
+    --foreground: 220 20% 95%;
 
-    --card: 220 30% 8%;
-    --card-foreground: 210 40% 95%;
+    --card: 230 30% 11%;
+    --card-foreground: 220 20% 95%;
 
-    --popover: 220 30% 8%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 230 30% 11%;
+    --popover-foreground: 220 20% 95%;
 
-    --primary: 185 100% 50%;
-    --primary-foreground: 220 40% 5%;
+    --primary: 270 80% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 25% 12%;
-    --secondary-foreground: 210 40% 90%;
+    --secondary: 230 25% 14%;
+    --secondary-foreground: 220 20% 90%;
 
-    --muted: 220 20% 15%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 230 20% 16%;
+    --muted-foreground: 225 15% 50%;
 
-    --accent: 160 100% 45%;
-    --accent-foreground: 220 40% 5%;
+    --accent: 320 70% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 185 100% 50%;
+    --border: 230 20% 15%;
+    --input: 230 20% 15%;
+    --ring: 270 80% 65%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 30% 6%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 220 40% 5%;
-    --sidebar-accent: 220 25% 12%;
-    --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-background: 230 30% 8%;
+    --sidebar-foreground: 220 20% 90%;
+    --sidebar-primary: 270 80% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 25% 14%;
+    --sidebar-accent-foreground: 220 20% 90%;
+    --sidebar-border: 230 20% 15%;
+    --sidebar-ring: 270 80% 65%;
 
     /* Custom tokens */
-    --glow-primary: 185 100% 50%;
-    --glow-accent: 160 100% 45%;
-    --glass-bg: 220 30% 10% / 0.6;
-    --glass-border: 220 20% 25% / 0.3;
+    --glow-primary: 270 80% 65%;
+    --glow-accent: 320 70% 55%;
+    --glass-bg: 230 30% 12% / 0.7;
+    --glass-border: 230 20% 22% / 0.4;
 
-    --font-heading: 'Orbitron', sans-serif;
+    --gradient-start: 270 80% 65%;
+    --gradient-end: 320 70% 55%;
+
+    --font-heading: 'Outfit', sans-serif;
     --font-body: 'Inter', sans-serif;
   }
 }
@@ -74,8 +77,15 @@
 @layer utilities {
   .glass {
     background: hsla(var(--glass-bg));
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border: 1px solid hsla(var(--glass-border));
+  }
+
+  .glass-heavy {
+    background: hsla(230, 30%, 10%, 0.85);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
   }
 
   .glow-text {
@@ -84,12 +94,23 @@
   }
 
   .glow-border {
-    box-shadow: 0 0 15px hsl(var(--glow-primary) / 0.15),
-                inset 0 0 15px hsl(var(--glow-primary) / 0.05);
+    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.15),
+                0 0 60px hsl(var(--glow-primary) / 0.05);
   }
 
   .glow-sm {
-    box-shadow: 0 0 8px hsl(var(--glow-primary) / 0.2);
+    box-shadow: 0 0 12px hsl(var(--glow-primary) / 0.3);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .scrollbar-hide {
@@ -112,5 +133,13 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .artwork-ring {
+    box-shadow: 
+      0 0 0 4px hsl(var(--background)),
+      0 0 0 6px hsl(var(--glow-primary) / 0.4),
+      0 0 40px hsl(var(--glow-primary) / 0.2),
+      0 0 80px hsl(var(--glow-accent) / 0.1);
   }
 }

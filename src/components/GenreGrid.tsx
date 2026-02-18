@@ -6,44 +6,38 @@ interface GenreGridProps {
   onSelectGenre: (genre: typeof DEFAULT_GENRES[number]) => void;
 }
 
-const genreColors: Record<string, string> = {
-  "soft-rock": "from-rose-500/20 to-orange-500/20 hover:from-rose-500/30 hover:to-orange-500/30",
-  jazz: "from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30",
-  vietnamese: "from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30",
-  korean: "from-pink-500/20 to-fuchsia-500/20 hover:from-pink-500/30 hover:to-fuchsia-500/30",
-  trance: "from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30",
-  house: "from-violet-500/20 to-indigo-500/20 hover:from-violet-500/30 hover:to-indigo-500/30",
+const genreGradients: Record<string, string> = {
+  "soft-rock": "from-rose-600 to-orange-500",
+  jazz: "from-amber-600 to-yellow-500",
+  vietnamese: "from-emerald-600 to-teal-400",
+  korean: "from-pink-600 to-fuchsia-400",
+  trance: "from-violet-600 to-blue-500",
+  house: "from-indigo-600 to-purple-400",
 };
 
 export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {DEFAULT_GENRES.map((genre, i) => (
-        <motion.button
-          key={genre.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          onClick={() => onSelectGenre(genre)}
-          className={`relative p-4 rounded-xl bg-gradient-to-br ${genreColors[genre.id] || ""} 
-            border transition-all duration-300 text-left group
-            ${activeGenre === genre.id 
-              ? "border-primary glow-border" 
-              : "border-border hover:border-primary/40"
-            }`}
-        >
-          <span className="text-2xl mb-2 block">{genre.emoji}</span>
-          <span className="font-heading text-xs font-semibold text-foreground tracking-wider uppercase">
+    <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+      {DEFAULT_GENRES.map((genre, i) => {
+        const isActive = activeGenre === genre.id;
+        return (
+          <motion.button
+            key={genre.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.04 }}
+            onClick={() => onSelectGenre(genre)}
+            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 
+              ${isActive 
+                ? `bg-gradient-to-r ${genreGradients[genre.id] || "gradient-primary"} text-white shadow-lg` 
+                : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+          >
+            <span className="mr-1.5">{genre.emoji}</span>
             {genre.label}
-          </span>
-          {activeGenre === genre.id && (
-            <motion.div
-              layoutId="activeGenre"
-              className="absolute inset-0 rounded-xl border-2 border-primary pointer-events-none"
-            />
-          )}
-        </motion.button>
-      ))}
+          </motion.button>
+        );
+      })}
     </div>
   );
 }
