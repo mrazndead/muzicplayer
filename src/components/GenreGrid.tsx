@@ -13,11 +13,17 @@ const genreGradients: Record<string, string> = {
   korean: "from-pink-600 to-fuchsia-400",
   trance: "from-violet-600 to-blue-500",
   house: "from-indigo-600 to-purple-400",
+  lofi: "from-sky-600 to-cyan-400",
+  rnb: "from-red-600 to-pink-400",
+  classical: "from-slate-600 to-zinc-400",
+  hiphop: "from-orange-600 to-red-500",
+  ambient: "from-teal-600 to-emerald-400",
+  reggae: "from-green-600 to-lime-400",
 };
 
 export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
   return (
-    <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+    <div className="flex flex-wrap gap-2.5">
       {DEFAULT_GENRES.map((genre, i) => {
         const isActive = activeGenre === genre.id;
         return (

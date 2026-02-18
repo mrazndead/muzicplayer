@@ -63,4 +63,10 @@ export const DEFAULT_GENRES = [
   { id: "korean", label: "Korean", query: "korean kpop", emoji: "🇰🇷" },
   { id: "trance", label: "Epic Trance", query: "epic trance", emoji: "🌀" },
   { id: "house", label: "House", query: "house music", emoji: "🏠" },
+  { id: "lofi", label: "Lo-Fi", query: "lofi chill beats", emoji: "🎧" },
+  { id: "rnb", label: "R&B", query: "r&b soul", emoji: "🎤" },
+  { id: "classical", label: "Classical", query: "classical orchestra", emoji: "🎻" },
+  { id: "hiphop", label: "Hip Hop", query: "hip hop rap", emoji: "🔥" },
+  { id: "ambient", label: "Ambient", query: "ambient chillout", emoji: "🌊" },
+  { id: "reggae", label: "Reggae", query: "reggae dub", emoji: "🌴" },
 ];
