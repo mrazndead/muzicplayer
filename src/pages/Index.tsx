@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3 } from "lucide-react";
+import { Music, Disc3, Clock } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -9,11 +9,15 @@ import { TrendingCarousel } from "@/components/TrendingCarousel";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { searchTracks, getTrendingTracks, AudiusTrack, DEFAULT_GENRES } from "@/lib/audius";
 
 const Index = () => {
   const player = useAudioPlayer();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { recentlyPlayed, addToRecentlyPlayed } = useRecentlyPlayed();
   const [tracks, setTracks] = useState<AudiusTrack[]>([]);
   const [trendingTracks, setTrendingTracks] = useState<AudiusTrack[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,6 +27,28 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const abortRef = useRef<AbortController | null>(null);
   const trendingLoaded = useRef(false);
+
+  // Sleep timer pauses playback
+  const sleepTimer = useSleepTimer(player.togglePlay);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onTogglePlay: player.togglePlay,
+    onNext: player.nextTrack,
+    onPrev: player.prevTrack,
+    onVolumeUp: useCallback(() => player.setVolume(Math.min(1, player.volume + 0.1)), [player]),
+    onVolumeDown: useCallback(() => player.setVolume(Math.max(0, player.volume - 0.1)), [player]),
+    hasTrack: !!player.currentTrack,
+  });
+
+  // Track recently played
+  const prevTrackId = useRef<string | null>(null);
+  useEffect(() => {
+    if (player.currentTrack && player.currentTrack.id !== prevTrackId.current) {
+      prevTrackId.current = player.currentTrack.id;
+      addToRecentlyPlayed(player.currentTrack);
+    }
+  }, [player.currentTrack, addToRecentlyPlayed]);
 
   // Load trending on mount
   useEffect(() => {
@@ -86,6 +112,18 @@ const Index = () => {
     }
   }, [player, favorites]);
 
+  const handlePlayRecent = useCallback((track: AudiusTrack, index: number) => {
+    if (track.id === player.currentTrack?.id) {
+      player.togglePlay();
+    } else {
+      player.playTrack(track, recentlyPlayed, index);
+    }
+  }, [player, recentlyPlayed]);
+
+  const handlePlayFromQueue = useCallback((track: AudiusTrack, index: number) => {
+    player.playTrack(track, player.queue, index);
+  }, [player]);
+
   const playerPadding = player.currentTrack ? "pb-36 sm:pb-32" : "pb-20";
 
   return (
@@ -115,10 +153,7 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              {/* Search */}
               <SearchBar onSearch={handleSearch} isLoading={loading} />
-
-              {/* Genres */}
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
 
               {/* Trending */}
@@ -130,14 +165,48 @@ const Index = () => {
                 />
               )}
 
-              {/* Loading */}
+              {/* Recently Played */}
+              {!hasSearched && recentlyPlayed.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <h2 className="font-heading text-base font-semibold text-foreground">Recently Played</h2>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+                    {recentlyPlayed.slice(0, 10).map((track, i) => {
+                      const isCurrent = track.id === player.currentTrack?.id;
+                      return (
+                        <motion.button
+                          key={track.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.03 }}
+                          onClick={() => handlePlayRecent(track, i)}
+                          className="flex-shrink-0 w-28 group text-left"
+                        >
+                          <div className={`relative w-28 h-28 rounded-2xl overflow-hidden mb-2 ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
+                            <img
+                              src={track.artwork?.["480x480"] || track.artwork?.["150x150"] || "/placeholder.svg"}
+                              alt={track.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          </div>
+                          <p className="text-xs font-medium text-foreground line-clamp-1">{track.title}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{track.user.name}</p>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {loading && (
                 <div className="flex items-center justify-center py-16">
                   <div className="w-10 h-10 rounded-full gradient-primary animate-pulse" />
                 </div>
               )}
 
-              {/* Search results */}
               {!loading && hasSearched && (
                 <TrackList
                   tracks={tracks}
@@ -167,9 +236,7 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <h2 className="font-heading text-xl font-bold text-foreground">
-                Discover
-              </h2>
+              <h2 className="font-heading text-xl font-bold text-foreground">Discover</h2>
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
 
@@ -203,9 +270,7 @@ const Index = () => {
               className="space-y-6"
             >
               <div>
-                <h2 className="font-heading text-xl font-bold text-foreground">
-                  Liked Tracks
-                </h2>
+                <h2 className="font-heading text-xl font-bold text-foreground">Liked Tracks</h2>
                 <p className="text-muted-foreground text-sm mt-1">
                   {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
                 </p>
@@ -247,6 +312,8 @@ const Index = () => {
         volume={player.volume}
         shuffle={player.shuffle}
         repeat={player.repeat}
+        queue={player.queue}
+        queueIndex={player.queueIndex}
         onTogglePlay={player.togglePlay}
         onSeek={player.seek}
         onVolume={player.setVolume}
@@ -256,6 +323,11 @@ const Index = () => {
         onToggleRepeat={player.toggleRepeat}
         isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
         onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
+        onPlayFromQueue={handlePlayFromQueue}
+        sleepTimerActive={sleepTimer.isActive}
+        sleepTimerRemaining={sleepTimer.remainingSeconds}
+        onStartSleepTimer={sleepTimer.startTimer}
+        onCancelSleepTimer={sleepTimer.cancelTimer}
       />
     </div>
   );
