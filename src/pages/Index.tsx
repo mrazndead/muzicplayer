@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock } from "lucide-react";
+import { MusicVisualizer } from "@/components/MusicVisualizer";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -155,6 +156,8 @@ const Index = () => {
             >
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
+
+              <MusicVisualizer isPlaying={player.isPlaying} />
 
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
