@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Play, Pause, Heart } from "lucide-react";
 import { AudiusTrack, getArtworkUrl } from "@/lib/audius";
+import { EqualizerBars } from "./EqualizerBars";
 
 interface TrackListProps {
   tracks: AudiusTrack[];
@@ -44,9 +45,9 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   : "hover:bg-secondary/60"
                 }`}
             >
-              {/* Track number */}
-              <span className="text-xs text-muted-foreground w-5 text-right font-medium tabular-nums flex-shrink-0">
-                {String(i + 1).padStart(2, "0")}
+              {/* Track number or equalizer */}
+              <span className="text-xs text-muted-foreground w-5 flex items-center justify-end font-medium tabular-nums flex-shrink-0">
+                {isCurrent ? <EqualizerBars isPlaying={isPlaying} barCount={3} /> : String(i + 1).padStart(2, "0")}
               </span>
 
               <button
