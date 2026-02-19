@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AudiusTrack, getArtworkUrl } from "@/lib/audius";
 import { Play } from "lucide-react";
@@ -9,11 +10,12 @@ interface TrendingCarouselProps {
 }
 
 export function TrendingCarousel({ tracks, onPlay, currentTrackId }: TrendingCarouselProps) {
+  const heroIndex = useMemo(() => Math.floor(Math.random() * Math.min(Math.max(tracks.length, 1), 5)), [tracks]);
+
   if (!tracks.length) return null;
 
-  // Feature the first track as a hero card
-  const heroTrack = tracks[0];
-  const restTracks = tracks.slice(1, 10);
+  const heroTrack = tracks[heroIndex];
+  const restTracks = tracks.filter((_, i) => i !== heroIndex).slice(0, 9);
 
   return (
     <div className="space-y-5">
