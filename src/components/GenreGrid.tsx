@@ -19,11 +19,17 @@ const genreGradients: Record<string, string> = {
   hiphop: "from-orange-600 to-red-500",
   ambient: "from-teal-600 to-emerald-400",
   reggae: "from-green-600 to-lime-400",
+  pop: "from-fuchsia-500 to-pink-400",
+  edm: "from-yellow-500 to-amber-400",
+  latin: "from-red-500 to-rose-400",
+  country: "from-amber-700 to-orange-400",
+  metal: "from-zinc-600 to-neutral-400",
+  funk: "from-purple-500 to-indigo-400",
 };
 
 export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
       {DEFAULT_GENRES.map((genre, i) => {
         const isActive = activeGenre === genre.id;
         return (
@@ -31,15 +37,15 @@ export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
             key={genre.id}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.04 }}
+            transition={{ delay: i * 0.03 }}
             onClick={() => onSelectGenre(genre)}
-            className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 
+            className={`w-full px-2 py-2.5 rounded-xl text-xs font-medium transition-all duration-300 text-center
               ${isActive 
                 ? `bg-gradient-to-r ${genreGradients[genre.id] || "gradient-primary"} text-white shadow-lg` 
                 : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
           >
-            <span className="mr-1.5">{genre.emoji}</span>
+            <span className="block text-base mb-0.5">{genre.emoji}</span>
             {genre.label}
           </motion.button>
         );
