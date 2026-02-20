@@ -31,6 +31,8 @@ export function useAudioPlayer() {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const handleTrackEndRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     const audio = new Audio();
     audio.volume = 0.7;
@@ -43,7 +45,7 @@ export function useAudioPlayer() {
       setState((s) => ({ ...s, duration: audio.duration }));
     });
     audio.addEventListener("ended", () => {
-      handleTrackEnd();
+      handleTrackEndRef.current();
     });
     audio.addEventListener("pause", () => {
       setState((s) => ({ ...s, isPlaying: false }));
@@ -96,6 +98,9 @@ export function useAudioPlayer() {
       setState((prev) => ({ ...prev, isPlaying: false }));
     }
   }, [playAudioForTrack]);
+
+  // Keep ref in sync so the ended listener always calls the latest version
+  handleTrackEndRef.current = handleTrackEnd;
 
   const playTrack = useCallback(async (track: AudiusTrack, queue?: AudiusTrack[], index?: number) => {
     await playAudioForTrack(track);

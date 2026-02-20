@@ -17,7 +17,7 @@ const tabs = [
 
 export function BottomTabs({ activeTab, onTabChange, favCount, hasPlayer }: BottomTabsProps) {
   return (
-    <nav className={`fixed left-0 right-0 z-40 glass-heavy border-t border-border/50 transition-all ${hasPlayer ? "bottom-[64px]" : "bottom-0"}`}>
+    <nav className={`fixed left-0 right-0 z-40 glass-heavy border-t border-border/50 transition-all ${hasPlayer ? "bottom-[84px]" : "bottom-[20px]"}`}>
       <div className="flex items-center justify-around max-w-screen-sm mx-auto py-1">
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
