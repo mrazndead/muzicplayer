@@ -271,7 +271,7 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
       {/* Settings toggle */}
       <button
         onClick={() => setShowSettings(!showSettings)}
-        className="absolute top-3 right-3 p-2 rounded-xl glass text-muted-foreground hover:text-foreground transition-colors z-10"
+        className="absolute top-3 right-3 p-2 rounded-xl glass text-muted-foreground hover:text-foreground transition-colors z-20"
       >
         <Settings2 className="w-4 h-4" />
       </button>
