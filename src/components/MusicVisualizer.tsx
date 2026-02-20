@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings2, Palette, Shapes } from "lucide-react";
 
-type VisualizerShape = "bars" | "circle" | "wave" | "starburst" | "blob";
+type VisualizerShape = "bars" | "circle" | "wave" | "starburst" | "blob" | "dna" | "galaxy" | "matrix" | "rings" | "terrain";
 
 interface ColorTheme {
   id: string;
@@ -27,6 +27,11 @@ const SHAPES: { id: VisualizerShape; label: string }[] = [
   { id: "wave", label: "Wave" },
   { id: "starburst", label: "Starburst" },
   { id: "blob", label: "Blob" },
+  { id: "dna", label: "DNA" },
+  { id: "galaxy", label: "Galaxy" },
+  { id: "matrix", label: "Matrix" },
+  { id: "rings", label: "Rings" },
+  { id: "terrain", label: "Terrain" },
 ];
 
 interface MusicVisualizerProps {
@@ -242,6 +247,146 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
             ctx.fillStyle = grad;
             ctx.shadowBlur = 25;
             ctx.shadowColor = theme.colors[layer % theme.colors.length];
+            ctx.fill();
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "dna": {
+          const amplitude = Math.min(w, h) * 0.15;
+          for (let strand = 0; strand < 2; strand++) {
+            ctx.beginPath();
+            for (let x = 0; x <= w; x += 2) {
+              const i = Math.floor((x / w) * (NUM_BARS - 1));
+              const phase = strand * Math.PI;
+              const y = cy + Math.sin(t * 2 + x * 0.03 + phase) * (amplitude + bars[i] * amplitude * 0.8);
+              if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = theme.colors[strand % theme.colors.length];
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = theme.colors[strand % theme.colors.length];
+            ctx.stroke();
+          }
+          for (let x = 0; x < w; x += 20) {
+            const i = Math.floor((x / w) * (NUM_BARS - 1));
+            if (bars[i] > 0.3) {
+              const y1 = cy + Math.sin(t * 2 + x * 0.03) * (amplitude + bars[i] * amplitude * 0.8);
+              const y2 = cy + Math.sin(t * 2 + x * 0.03 + Math.PI) * (amplitude + bars[i] * amplitude * 0.8);
+              ctx.strokeStyle = theme.colors[2 % theme.colors.length] + "60";
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.moveTo(x, y1);
+              ctx.lineTo(x, y2);
+              ctx.stroke();
+            }
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "galaxy": {
+          const arms = 4;
+          const maxRG = Math.min(w, h) * 0.4;
+          for (let arm = 0; arm < arms; arm++) {
+            const baseAngle = (arm / arms) * Math.PI * 2 + t * 0.2;
+            for (let i = 0; i < 60; i++) {
+              const ratio = i / 60;
+              const barIdx = Math.floor(ratio * (NUM_BARS - 1));
+              const spiral = ratio * Math.PI * 2.5;
+              const r = ratio * maxRG * (0.5 + bars[barIdx] * 0.5);
+              const angle = baseAngle + spiral;
+              const px = cx + Math.cos(angle) * r;
+              const py = cy + Math.sin(angle) * r;
+              const size = (1 - ratio) * 4 * (0.5 + bars[barIdx]);
+              const a = Math.floor((1 - ratio * 0.5) * 255).toString(16).padStart(2, "0");
+              ctx.fillStyle = theme.colors[arm % theme.colors.length] + a;
+              ctx.shadowBlur = 6;
+              ctx.shadowColor = theme.colors[arm % theme.colors.length];
+              ctx.beginPath();
+              ctx.arc(px, py, size, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          const gg = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxRG * 0.15);
+          gg.addColorStop(0, theme.colors[0] + "80");
+          gg.addColorStop(1, "transparent");
+          ctx.fillStyle = gg;
+          ctx.beginPath();
+          ctx.arc(cx, cy, maxRG * 0.15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "matrix": {
+          const cols = 32;
+          const colW = w / cols;
+          for (let c = 0; c < cols; c++) {
+            const barIdx = Math.floor((c / cols) * (NUM_BARS - 1));
+            const mh = bars[barIdx] * h * 0.8;
+            const numDots = Math.floor(mh / 12);
+            for (let d = 0; d < numDots; d++) {
+              const mx = c * colW + colW / 2;
+              const my = h - d * 12;
+              const alpha = (1 - d / numDots) * bars[barIdx];
+              const a = Math.floor(alpha * 200 + 55).toString(16).padStart(2, "0");
+              ctx.fillStyle = theme.colors[0] + a;
+              ctx.shadowBlur = 4;
+              ctx.shadowColor = theme.colors[0];
+              ctx.fillRect(mx - 3, my - 3, 6, 6);
+            }
+            if (numDots > 0) {
+              ctx.fillStyle = theme.colors[1];
+              ctx.shadowBlur = 15;
+              ctx.shadowColor = theme.colors[1];
+              ctx.beginPath();
+              ctx.arc(c * colW + colW / 2, h - numDots * 12, 4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "rings": {
+          const numRings = 6;
+          const maxRadius = Math.min(w, h) * 0.4;
+          for (let r = 0; r < numRings; r++) {
+            const barIdx = Math.floor((r / numRings) * NUM_BARS);
+            const rr = ((r + 1) / numRings) * maxRadius * (0.6 + bars[barIdx] * 0.4);
+            const cIdx = r % theme.colors.length;
+            const a = Math.floor((1 - (r / numRings) * 0.5) * 200).toString(16).padStart(2, "0");
+            ctx.strokeStyle = theme.colors[cIdx] + a;
+            ctx.lineWidth = 2 + bars[barIdx] * 3;
+            ctx.shadowBlur = 10 + bars[barIdx] * 15;
+            ctx.shadowColor = theme.colors[cIdx];
+            ctx.beginPath();
+            ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "terrain": {
+          const layers = 5;
+          for (let l = layers - 1; l >= 0; l--) {
+            ctx.beginPath();
+            const baseY = h * 0.4 + l * h * 0.1;
+            ctx.moveTo(0, h);
+            for (let x = 0; x <= w; x += 3) {
+              const i = Math.floor((x / w) * (NUM_BARS - 1));
+              const mountain = bars[i] * h * 0.3 * (1 - l * 0.15);
+              const y = baseY - mountain + Math.sin(x * 0.01 + t + l * 2) * 15;
+              ctx.lineTo(x, y);
+            }
+            ctx.lineTo(w, h);
+            ctx.closePath();
+            const cIdx = l % theme.colors.length;
+            const a = Math.floor((1 - l * 0.15) * 180).toString(16).padStart(2, "0");
+            const tg = ctx.createLinearGradient(0, baseY - h * 0.3, 0, h);
+            tg.addColorStop(0, theme.colors[cIdx] + a);
+            tg.addColorStop(1, theme.colors[cIdx] + "10");
+            ctx.fillStyle = tg;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = theme.colors[cIdx];
             ctx.fill();
           }
           ctx.shadowBlur = 0;

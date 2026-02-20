@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock } from "lucide-react";
+import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MusicVisualizer } from "@/components/MusicVisualizer";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
@@ -139,6 +141,9 @@ const Index = () => {
             <h1 className="font-heading text-lg font-bold text-foreground tracking-tight">
               Pulse
             </h1>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <ThemeSwitcher />
           </div>
         </div>
       </header>
