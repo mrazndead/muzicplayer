@@ -73,6 +73,9 @@ export const DEFAULT_GENRES = [
   { id: "edm", label: "EDM", query: "edm electronic", emoji: "⚡" },
   { id: "latin", label: "Latin", query: "latin reggaeton", emoji: "💃" },
   { id: "country", label: "Country", query: "country music", emoji: "🤠" },
-  { id: "metal", label: "Metal", query: "heavy metal", emoji: "🤘" },
+  { id: "opera", label: "Opera", query: "opera classical vocals", emoji: "🎭" },
   { id: "funk", label: "Funk", query: "funk groove", emoji: "🕺" },
+  { id: "chinese", label: "Chinese", query: "chinese music", emoji: "🇨🇳" },
+  { id: "french", label: "French", query: "french music chanson", emoji: "🇫🇷" },
+  { id: "italian", label: "Italian", query: "italian music", emoji: "🇮🇹" },
 ];
