@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 230 35% 7%;
+    --background: 265 45% 8%;
     --foreground: 220 20% 95%;
 
-    --card: 230 30% 11%;
+    --card: 265 38% 12%;
     --card-foreground: 220 20% 95%;
 
-    --popover: 230 30% 11%;
+    --popover: 265 38% 12%;
     --popover-foreground: 220 20% 95%;
 
     --primary: 270 80% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 230 25% 14%;
+    --secondary: 265 32% 16%;
     --secondary-foreground: 220 20% 90%;
 
-    --muted: 230 20% 16%;
-    --muted-foreground: 225 15% 50%;
+    --muted: 265 25% 19%;
+    --muted-foreground: 260 20% 55%;
 
     --accent: 320 70% 55%;
     --accent-foreground: 0 0% 100%;
@@ -30,26 +30,28 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 230 20% 15%;
-    --input: 230 20% 15%;
+    --border: 265 28% 18%;
+    --input: 265 28% 18%;
     --ring: 270 80% 65%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 230 30% 8%;
+    --sidebar-background: 265 42% 9%;
     --sidebar-foreground: 220 20% 90%;
     --sidebar-primary: 270 80% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 25% 14%;
+    --sidebar-accent: 265 32% 16%;
     --sidebar-accent-foreground: 220 20% 90%;
-    --sidebar-border: 230 20% 15%;
+    --sidebar-border: 265 28% 18%;
     --sidebar-ring: 270 80% 65%;
 
     /* Custom tokens */
     --glow-primary: 270 80% 65%;
     --glow-accent: 320 70% 55%;
-    --glass-bg: 230 30% 12% / 0.7;
-    --glass-border: 230 20% 22% / 0.4;
+    --glass-bg: 265 38% 13% / 0.75;
+    --glass-border: 265 25% 25% / 0.4;
+    --glass-heavy-bg: 265 40% 10% / 0.88;
+    --bg-glow: 270 80% 65%;
 
     --gradient-start: 270 80% 65%;
     --gradient-end: 320 70% 55%;
@@ -67,6 +69,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    background-image: radial-gradient(ellipse at 50% 0%, hsl(var(--bg-glow) / 0.08) 0%, transparent 60%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -83,7 +87,7 @@
   }
 
   .glass-heavy {
-    background: hsla(230, 30%, 10%, 0.85);
+    background: hsla(var(--glass-heavy-bg));
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
   }
