@@ -3,6 +3,7 @@ import { getArtworkUrl, AudiusTrack } from "@/lib/audius";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useState } from "react";
 import { SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
+import { Equalizer } from "./Equalizer";
 
 interface MusicPlayerProps {
   currentTrack: AudiusTrack | null;
@@ -29,6 +30,9 @@ interface MusicPlayerProps {
   sleepTimerRemaining?: number;
   onStartSleepTimer?: (minutes: number) => void;
   onCancelSleepTimer?: () => void;
+  // Equalizer
+  audioContext?: AudioContext | null;
+  eqFilters?: BiquadFilterNode[];
 }
 
 function formatTime(s: number): string {
@@ -62,6 +66,8 @@ export function MusicPlayer({
   sleepTimerRemaining,
   onStartSleepTimer,
   onCancelSleepTimer,
+  audioContext,
+  eqFilters,
 }: MusicPlayerProps) {
   const [showVolume, setShowVolume] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -113,6 +119,7 @@ export function MusicPlayer({
                     </button>
                     <span className="font-heading text-xs tracking-wider text-muted-foreground uppercase">Now Playing</span>
                     <div className="flex items-center gap-1">
+                      <Equalizer audioContext={audioContext ?? null} filters={eqFilters ?? []} />
                       <button
                         onClick={() => { setShowSleepTimer(!showSleepTimer); setShowQueue(false); }}
                         className={`p-2 transition-colors ${sleepTimerActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}

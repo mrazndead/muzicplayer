@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3, Clock } from "lucide-react";
+import { Music, Disc3, Clock, PlayCircle } from "lucide-react";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MusicVisualizer } from "@/components/MusicVisualizer";
@@ -277,11 +277,22 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div>
-                <h2 className="font-heading text-xl font-bold text-foreground">Liked Tracks</h2>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-heading text-xl font-bold text-foreground">Liked Tracks</h2>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
+                  </p>
+                </div>
+                {favorites.length > 0 && (
+                  <button
+                    onClick={() => handlePlayFavorite(favorites[0], 0)}
+                    className="flex items-center gap-2 px-4 py-2 gradient-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    <PlayCircle className="w-4 h-4" />
+                    Play All
+                  </button>
+                )}
               </div>
 
               {favorites.length > 0 ? (
@@ -336,6 +347,8 @@ const Index = () => {
         sleepTimerRemaining={sleepTimer.remainingSeconds}
         onStartSleepTimer={sleepTimer.startTimer}
         onCancelSleepTimer={sleepTimer.cancelTimer}
+        audioContext={player.audioContext}
+        eqFilters={player.eqFilters}
       />
     </div>
   );

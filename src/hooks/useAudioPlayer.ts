@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { AudiusTrack, getStreamUrl } from "@/lib/audius";
 
 export interface PlayerState {
@@ -33,9 +33,14 @@ export function useAudioPlayer() {
 
   const handleTrackEndRef = useRef<() => void>(() => {});
 
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const filtersRef = useRef<BiquadFilterNode[]>([]);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+
   useEffect(() => {
     const audio = new Audio();
     audio.volume = 0.7;
+    audio.crossOrigin = "anonymous";
     audioRef.current = audio;
 
     audio.addEventListener("timeupdate", () => {
@@ -51,6 +56,31 @@ export function useAudioPlayer() {
       setState((s) => ({ ...s, isPlaying: false }));
     });
     audio.addEventListener("play", () => {
+      // Lazily create AudioContext + EQ filters on first play
+      if (!audioContextRef.current) {
+        const ctx = new AudioContext();
+        audioContextRef.current = ctx;
+        const source = ctx.createMediaElementSource(audio);
+        sourceRef.current = source;
+
+        const EQ_FREQS = [60, 230, 910, 3600, 14000];
+        const filters = EQ_FREQS.map((freq, i) => {
+          const f = ctx.createBiquadFilter();
+          f.type = i === 0 ? "lowshelf" : i === EQ_FREQS.length - 1 ? "highshelf" : "peaking";
+          f.frequency.value = freq;
+          f.gain.value = 0;
+          f.Q.value = 1;
+          return f;
+        });
+        // Chain: source -> filters -> destination
+        let prev: AudioNode = source;
+        filters.forEach((f) => { prev.connect(f); prev = f; });
+        prev.connect(ctx.destination);
+        filtersRef.current = filters;
+      }
+      if (audioContextRef.current.state === "suspended") {
+        audioContextRef.current.resume();
+      }
       setState((s) => ({ ...s, isPlaying: true }));
     });
 
@@ -189,5 +219,7 @@ export function useAudioPlayer() {
     prevTrack,
     toggleShuffle,
     toggleRepeat,
+    audioContext: audioContextRef.current,
+    eqFilters: filtersRef.current,
   };
 }
