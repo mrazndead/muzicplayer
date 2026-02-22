@@ -9,13 +9,14 @@ import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { TrendingCarousel } from "@/components/TrendingCarousel";
+import { MoodGrid } from "@/components/MoodGrid";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
-import { searchTracks, getTrendingTracks, AudiusTrack, DEFAULT_GENRES } from "@/lib/audius";
+import { searchTracks, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 const Index = () => {
   const player = useAudioPlayer();
@@ -26,6 +27,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
   const [searchLabel, setSearchLabel] = useState<string>("");
+  const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const abortRef = useRef<AbortController | null>(null);
@@ -88,7 +90,14 @@ const Index = () => {
   }, [fetchTracks]);
 
   const handleGenreSelect = useCallback((genre: typeof DEFAULT_GENRES[number]) => {
+    setActiveMood(null);
     fetchTracks(genre.query, `${genre.emoji} ${genre.label}`, genre.id);
+  }, [fetchTracks]);
+
+  const handleMoodSelect = useCallback((mood: typeof DEFAULT_MOODS[number]) => {
+    setActiveMood(mood.id);
+    setActiveGenre(null);
+    fetchTracks(mood.query, `${mood.emoji} ${mood.label}`);
   }, [fetchTracks]);
 
   const handlePlayTrack = useCallback((track: AudiusTrack, index: number) => {
@@ -161,6 +170,7 @@ const Index = () => {
             >
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
+              <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
 
               <MusicVisualizer isPlaying={player.isPlaying} />
 

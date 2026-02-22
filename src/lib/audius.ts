@@ -79,3 +79,14 @@ export const DEFAULT_GENRES = [
   { id: "french", label: "French", query: "french", emoji: "🇫🇷" },
   { id: "italian", label: "Italian", query: "italian music", emoji: "🇮🇹" },
 ];
+
+export const DEFAULT_MOODS = [
+  { id: "chill", label: "Chill", query: "chill vibes relaxing", emoji: "😌" },
+  { id: "energetic", label: "Energetic", query: "energetic upbeat workout", emoji: "⚡" },
+  { id: "melancholy", label: "Melancholy", query: "sad emotional melancholy", emoji: "🌧️" },
+  { id: "romantic", label: "Romantic", query: "romantic love songs", emoji: "💕" },
+  { id: "focus", label: "Focus", query: "focus concentration study", emoji: "🧠" },
+  { id: "party", label: "Party", query: "party dance club", emoji: "🎉" },
+  { id: "dreamy", label: "Dreamy", query: "dreamy ethereal ambient", emoji: "✨" },
+  { id: "uplifting", label: "Uplifting", query: "uplifting happy positive", emoji: "☀️" },
+];
