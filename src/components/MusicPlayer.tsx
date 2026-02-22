@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useState } from "react";
 import { SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
 import { Equalizer } from "./Equalizer";
+import { EqualizerBars } from "./EqualizerBars";
 
 interface MusicPlayerProps {
   currentTrack: AudiusTrack | null;
@@ -319,6 +320,7 @@ export function MusicPlayer({
                   alt={currentTrack.title}
                   className="w-11 h-11 rounded-xl object-cover flex-shrink-0"
                 />
+                <EqualizerBars isPlaying={isPlaying} barCount={3} className="h-3.5 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground line-clamp-1">{currentTrack.title}</p>
                   <p className="text-xs text-muted-foreground line-clamp-1">{currentTrack.user.name}</p>
