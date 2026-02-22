@@ -75,7 +75,7 @@ export const DEFAULT_GENRES = [
   { id: "country", label: "Country", query: "country music", emoji: "🤠" },
   { id: "opera", label: "Opera", query: "opera", emoji: "🎭" },
   { id: "funk", label: "Funk", query: "funk groove", emoji: "🕺" },
-  { id: "chinese", label: "Chinese", query: "中文歌曲 chinese mandarin", emoji: "🇨🇳" },
+  { id: "japanese", label: "Japanese", query: "japanese 日本語 j-pop", emoji: "🇯🇵" },
   { id: "french", label: "French", query: "french", emoji: "🇫🇷" },
   { id: "italian", label: "Italian", query: "italian music", emoji: "🇮🇹" },
 ];
