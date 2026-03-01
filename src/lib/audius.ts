@@ -29,10 +29,12 @@ export interface AudiusTrack {
   description?: string;
 }
 
-export async function searchTracks(query: string, limit = 20): Promise<AudiusTrack[]> {
+export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
   const host = await getHost();
+  const sortOptions = ["relevant", "popular", "recent"] as const;
+  const sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
   const res = await fetch(
-    `${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=${limit}&app_name=${APP_NAME}`
+    `${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&sort_method=${sort}&app_name=${APP_NAME}`
   );
   const json = await res.json();
   return json.data || [];
