@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { AudiusTrack, getStreamUrl } from "@/lib/audius";
+import { AudiusTrack, getStreamUrl, getArtworkUrl } from "@/lib/audius";
 
 export interface PlayerState {
   currentTrack: AudiusTrack | null;
@@ -32,6 +32,8 @@ export function useAudioPlayer() {
   stateRef.current = state;
 
   const handleTrackEndRef = useRef<() => void>(() => {});
+  const nextTrackRef = useRef<() => void>(() => {});
+  const prevTrackRef = useRef<() => void>(() => {});
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
@@ -90,13 +92,45 @@ export function useAudioPlayer() {
     };
   }, []);
 
+  const updateMediaSession = useCallback((track: AudiusTrack) => {
+    if (!("mediaSession" in navigator)) return;
+    const artwork = track.artwork;
+    const artworkSources: MediaImage[] = [];
+    if (artwork?.["150x150"]) artworkSources.push({ src: artwork["150x150"], sizes: "150x150", type: "image/jpeg" });
+    if (artwork?.["480x480"]) artworkSources.push({ src: artwork["480x480"], sizes: "480x480", type: "image/jpeg" });
+    if (artwork?.["1000x1000"]) artworkSources.push({ src: artwork["1000x1000"], sizes: "1000x1000", type: "image/jpeg" });
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title,
+      artist: track.user.name,
+      album: track.genre || "Pulse",
+      artwork: artworkSources,
+    });
+  }, []);
+
+  // Keep MediaSession action handlers in sync
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    navigator.mediaSession.setActionHandler("play", () => audioRef.current?.play());
+    navigator.mediaSession.setActionHandler("pause", () => audioRef.current?.pause());
+    navigator.mediaSession.setActionHandler("previoustrack", () => handleTrackEndRef.current && prevTrackRef.current());
+    navigator.mediaSession.setActionHandler("nexttrack", () => nextTrackRef.current());
+    return () => {
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+    };
+  }, []);
+
   const playAudioForTrack = useCallback(async (track: AudiusTrack) => {
     const audio = audioRef.current;
     if (!audio) return;
     const url = await getStreamUrl(track.id);
     audio.src = url;
     audio.play().catch(console.error);
-  }, []);
+    updateMediaSession(track);
+  }, [updateMediaSession]);
 
   const handleTrackEnd = useCallback(() => {
     const s = stateRef.current;
@@ -129,7 +163,7 @@ export function useAudioPlayer() {
     }
   }, [playAudioForTrack]);
 
-  // Keep ref in sync so the ended listener always calls the latest version
+  // Keep refs in sync so listeners always call the latest version
   handleTrackEndRef.current = handleTrackEnd;
 
   const playTrack = useCallback(async (track: AudiusTrack, queue?: AudiusTrack[], index?: number) => {
@@ -197,6 +231,10 @@ export function useAudioPlayer() {
       setState((prev) => ({ ...prev, currentTrack: track, queueIndex: prevIdx, currentTime: 0 }));
     }
   }, [playAudioForTrack]);
+
+  // Sync refs for MediaSession handlers
+  nextTrackRef.current = nextTrack;
+  prevTrackRef.current = prevTrack;
 
   const toggleShuffle = useCallback(() => {
     setState((s) => ({ ...s, shuffle: !s.shuffle }));

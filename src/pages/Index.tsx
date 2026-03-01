@@ -74,7 +74,7 @@ const Index = () => {
     setActiveTab("home");
 
     try {
-      const results = await searchTracks(query, 30);
+      const results = await searchTracks(query, 50);
       if (!controller.signal.aborted) {
         setTracks(results);
       }
