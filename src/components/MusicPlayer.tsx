@@ -1,5 +1,6 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2 } from "lucide-react";
 import { getArtworkUrl, AudiusTrack } from "@/lib/audius";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useState } from "react";
 import { SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
@@ -277,13 +278,26 @@ export function MusicPlayer({
                           </button>
                         </div>
 
-                        {/* Favorite + sleep indicator */}
+                        {/* Favorite + Share + sleep indicator */}
                         <div className="flex items-center gap-4">
                           {onToggleFavorite && (
                             <button onClick={onToggleFavorite} className="p-2">
                               <Heart className={`w-6 h-6 transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground hover:text-foreground"}`} />
                             </button>
                           )}
+                          <button
+                            onClick={() => {
+                              const url = `https://audius.co${currentTrack.permalink}`;
+                              if (navigator.share) {
+                                navigator.share({ title: currentTrack.title, text: `${currentTrack.title} by ${currentTrack.user.name}`, url }).catch(() => {});
+                              } else {
+                                navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => {});
+                              }
+                            }}
+                            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Share2 className="w-5 h-5" />
+                          </button>
                           {sleepTimerActive && (
                             <span className="text-xs text-primary font-medium">⏱ {formatTime(sleepTimerRemaining || 0)}</span>
                           )}

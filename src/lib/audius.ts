@@ -1,19 +1,58 @@
 const APP_NAME = "lovable_pulse";
 
-let cachedHost: string | null = null;
+let cachedHosts: string[] = [];
+let currentHostIdx = 0;
 
-async function getHost(): Promise<string> {
-  if (cachedHost) return cachedHost;
+async function fetchHosts(): Promise<string[]> {
   try {
     const res = await fetch("https://api.audius.co");
     const json = await res.json();
-    const hosts: string[] = json.data;
-    cachedHost = hosts[Math.floor(Math.random() * hosts.length)];
-    return cachedHost!;
+    return json.data || ["https://discoveryprovider.audius.co"];
   } catch {
-    cachedHost = "https://discoveryprovider.audius.co";
-    return cachedHost;
+    return ["https://discoveryprovider.audius.co", "https://api.audius.co"];
   }
+}
+
+async function getHost(): Promise<string> {
+  if (cachedHosts.length === 0) {
+    cachedHosts = await fetchHosts();
+    currentHostIdx = Math.floor(Math.random() * cachedHosts.length);
+  }
+  return cachedHosts[currentHostIdx % cachedHosts.length];
+}
+
+function rotateHost() {
+  if (cachedHosts.length > 1) {
+    currentHostIdx = (currentHostIdx + 1) % cachedHosts.length;
+  }
+}
+
+async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res;
+      // On 500/503, rotate host and retry
+      if (res.status >= 500 && attempt < retries) {
+        rotateHost();
+        const host = cachedHosts[currentHostIdx % cachedHosts.length];
+        const path = new URL(url).pathname + new URL(url).search;
+        url = host + path;
+        continue;
+      }
+      return res;
+    } catch (err) {
+      if (attempt < retries) {
+        rotateHost();
+        const host = cachedHosts[currentHostIdx % cachedHosts.length];
+        const path = new URL(url).pathname + new URL(url).search;
+        url = host + path;
+        continue;
+      }
+      throw err;
+    }
+  }
+  return fetch(url); // fallback
 }
 
 export interface AudiusTrack {
@@ -33,9 +72,8 @@ export async function searchTracks(query: string, limit = 20, offset = 0): Promi
   const host = await getHost();
   const sortOptions = ["relevant", "popular", "recent"] as const;
   const sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
-  const res = await fetch(
-    `${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&sort_method=${sort}&app_name=${APP_NAME}`
-  );
+  const url = `${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&sort_method=${sort}&app_name=${APP_NAME}`;
+  const res = await fetchWithRetry(url);
   const json = await res.json();
   return json.data || [];
 }
@@ -44,7 +82,7 @@ export async function getTrendingTracks(genre?: string, limit = 20): Promise<Aud
   const host = await getHost();
   let url = `${host}/v1/tracks/trending?limit=${limit}&app_name=${APP_NAME}`;
   if (genre) url += `&genre=${encodeURIComponent(genre)}`;
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   const json = await res.json();
   return json.data || [];
 }
@@ -56,6 +94,12 @@ export async function getStreamUrl(trackId: string): Promise<string> {
 
 export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
   return track.artwork?.[size] || track.artwork?.["150x150"] || "/placeholder.svg";
+}
+
+export function formatPlayCount(count: number): string {
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
+  return String(count);
 }
 
 export const DEFAULT_GENRES = [

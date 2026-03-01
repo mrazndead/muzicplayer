@@ -18,6 +18,8 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { searchTracks, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
+const TRACKS_PER_PAGE = 50;
+
 const Index = () => {
   const player = useAudioPlayer();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
@@ -25,11 +27,14 @@ const Index = () => {
   const [tracks, setTracks] = useState<AudiusTrack[]>([]);
   const [trendingTracks, setTrendingTracks] = useState<AudiusTrack[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
   const [searchLabel, setSearchLabel] = useState<string>("");
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [currentQuery, setCurrentQuery] = useState<string>("");
+  const [hasMore, setHasMore] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
   const trendingLoaded = useRef(false);
 
@@ -72,11 +77,14 @@ const Index = () => {
     setActiveGenre(genreId || null);
     setHasSearched(true);
     setActiveTab("home");
+    setCurrentQuery(query);
+    setHasMore(true);
 
     try {
-      const results = await searchTracks(query, 50);
+      const results = await searchTracks(query, TRACKS_PER_PAGE);
       if (!controller.signal.aborted) {
         setTracks(results);
+        setHasMore(results.length >= TRACKS_PER_PAGE);
       }
     } catch (err) {
       if (!controller.signal.aborted) console.error("Failed to fetch tracks:", err);
@@ -84,6 +92,22 @@ const Index = () => {
       if (!controller.signal.aborted) setLoading(false);
     }
   }, []);
+
+  const loadMoreTracks = useCallback(async () => {
+    if (loadingMore || !currentQuery) return;
+    setLoadingMore(true);
+    try {
+      const results = await searchTracks(currentQuery, TRACKS_PER_PAGE, tracks.length);
+      const existingIds = new Set(tracks.map(t => t.id));
+      const newTracks = results.filter(t => !existingIds.has(t.id));
+      setTracks(prev => [...prev, ...newTracks]);
+      setHasMore(results.length >= TRACKS_PER_PAGE);
+    } catch (err) {
+      console.error("Failed to load more:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, currentQuery, tracks]);
 
   const handleSearch = useCallback((query: string) => {
     fetchTracks(query, `Results for "${query}"`);
@@ -234,6 +258,9 @@ const Index = () => {
                   title={searchLabel}
                   isFavorite={isFavorite}
                   onToggleFavorite={toggleFavorite}
+                  onLoadMore={loadMoreTracks}
+                  isLoadingMore={loadingMore}
+                  hasMore={hasMore}
                 />
               )}
 
@@ -273,6 +300,9 @@ const Index = () => {
                   title={searchLabel}
                   isFavorite={isFavorite}
                   onToggleFavorite={toggleFavorite}
+                  onLoadMore={loadMoreTracks}
+                  isLoadingMore={loadingMore}
+                  hasMore={hasMore}
                 />
               )}
             </motion.div>
