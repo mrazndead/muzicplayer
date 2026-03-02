@@ -115,7 +115,8 @@ const Index = () => {
 
   const handleGenreSelect = useCallback((genre: typeof DEFAULT_GENRES[number]) => {
     setActiveMood(null);
-    fetchTracks(genre.query, `${genre.emoji} ${genre.label}`, genre.id);
+    const query = genre.queries[Math.floor(Math.random() * genre.queries.length)];
+    fetchTracks(query, `${genre.emoji} ${genre.label}`, genre.id);
   }, [fetchTracks]);
 
   const handleMoodSelect = useCallback((mood: typeof DEFAULT_MOODS[number]) => {
