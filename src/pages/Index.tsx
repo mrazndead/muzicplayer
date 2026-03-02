@@ -161,6 +161,12 @@ const Index = () => {
     player.playTrack(track, player.queue, index);
   }, [player]);
 
+  const handleMoreByArtist = useCallback(() => {
+    if (!player.currentTrack) return;
+    const artistName = player.currentTrack.user.name;
+    fetchTracks(artistName, `🎤 More by ${artistName}`);
+  }, [player.currentTrack, fetchTracks]);
+
   const playerPadding = player.currentTrack ? "pb-36 sm:pb-32" : "pb-20";
 
   return (
@@ -390,6 +396,7 @@ const Index = () => {
         onCancelSleepTimer={sleepTimer.cancelTimer}
         audioContext={player.audioContext}
         eqFilters={player.eqFilters}
+        onMoreByArtist={handleMoreByArtist}
       />
     </div>
   );

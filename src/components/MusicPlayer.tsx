@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2 } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2, User } from "lucide-react";
 import { getArtworkUrl, AudiusTrack } from "@/lib/audius";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +35,7 @@ interface MusicPlayerProps {
   // Equalizer
   audioContext?: AudioContext | null;
   eqFilters?: BiquadFilterNode[];
+  onMoreByArtist?: () => void;
 }
 
 function formatTime(s: number): string {
@@ -70,6 +71,7 @@ export function MusicPlayer({
   onCancelSleepTimer,
   audioContext,
   eqFilters,
+  onMoreByArtist,
 }: MusicPlayerProps) {
   const [showVolume, setShowVolume] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -278,7 +280,7 @@ export function MusicPlayer({
                           </button>
                         </div>
 
-                        {/* Favorite + Share + sleep indicator */}
+                        {/* Favorite + Share + More by artist + sleep indicator */}
                         <div className="flex items-center gap-4">
                           {onToggleFavorite && (
                             <button onClick={onToggleFavorite} className="p-2">
@@ -298,6 +300,15 @@ export function MusicPlayer({
                           >
                             <Share2 className="w-5 h-5" />
                           </button>
+                          {onMoreByArtist && (
+                            <button
+                              onClick={() => { onMoreByArtist(); setExpanded(false); }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              More by {currentTrack.user.name}
+                            </button>
+                          )}
                           {sleepTimerActive && (
                             <span className="text-xs text-primary font-medium">⏱ {formatTime(sleepTimerRemaining || 0)}</span>
                           )}
