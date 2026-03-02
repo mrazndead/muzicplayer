@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings2, Palette, Shapes } from "lucide-react";
 
-type VisualizerShape = "bars" | "circle" | "wave" | "starburst" | "blob" | "dna" | "galaxy" | "matrix" | "rings" | "terrain";
+type VisualizerShape = "bars" | "circle" | "wave" | "starburst" | "blob" | "dna" | "galaxy" | "matrix" | "rings" | "terrain" | "helix" | "fireworks" | "radar" | "diamonds" | "spectrum";
 
 interface ColorTheme {
   id: string;
@@ -19,6 +19,10 @@ const COLOR_THEMES: ColorTheme[] = [
   { id: "aurora", label: "Aurora", colors: ["#34d399", "#818cf8", "#c084fc"] },
   { id: "candy", label: "Candy", colors: ["#f472b6", "#c084fc", "#60a5fa"] },
   { id: "mono", label: "Mono", colors: ["#e2e8f0", "#94a3b8", "#64748b"] },
+  { id: "cyberpunk", label: "Cyberpunk", colors: ["#00fff5", "#ff00e5", "#ffff00"] },
+  { id: "lavender", label: "Lavender", colors: ["#c4b5fd", "#a78bfa", "#7c3aed"] },
+  { id: "midnight", label: "Midnight", colors: ["#1e3a5f", "#3b82f6", "#93c5fd"] },
+  { id: "tropical", label: "Tropical", colors: ["#f472b6", "#34d399", "#fbbf24"] },
 ];
 
 const SHAPES: { id: VisualizerShape; label: string }[] = [
@@ -32,6 +36,11 @@ const SHAPES: { id: VisualizerShape; label: string }[] = [
   { id: "matrix", label: "Matrix" },
   { id: "rings", label: "Rings" },
   { id: "terrain", label: "Terrain" },
+  { id: "helix", label: "Helix" },
+  { id: "fireworks", label: "Fireworks" },
+  { id: "radar", label: "Radar" },
+  { id: "diamonds", label: "Diamonds" },
+  { id: "spectrum", label: "Spectrum" },
 ];
 
 interface MusicVisualizerProps {
@@ -389,6 +398,186 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
             ctx.shadowColor = theme.colors[cIdx];
             ctx.fill();
           }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "helix": {
+          const helixR = Math.min(w, h) * 0.18;
+          const strands = 3;
+          for (let s = 0; s < strands; s++) {
+            ctx.beginPath();
+            for (let x = 0; x <= w; x += 2) {
+              const i = Math.floor((x / w) * (NUM_BARS - 1));
+              const phase = (s / strands) * Math.PI * 2;
+              const depth = Math.sin(t * 2 + x * 0.025 + phase);
+              const y = cy + depth * (helixR + bars[i] * helixR * 0.8);
+              if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            const cIdx = s % theme.colors.length;
+            ctx.strokeStyle = theme.colors[cIdx];
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = theme.colors[cIdx];
+            ctx.stroke();
+          }
+          // Connection dots
+          for (let x = 0; x < w; x += 25) {
+            const i = Math.floor((x / w) * (NUM_BARS - 1));
+            if (bars[i] > 0.35) {
+              for (let s = 0; s < strands; s++) {
+                const phase = (s / strands) * Math.PI * 2;
+                const depth = Math.sin(t * 2 + x * 0.025 + phase);
+                const y = cy + depth * (helixR + bars[i] * helixR * 0.8);
+                ctx.fillStyle = theme.colors[s % theme.colors.length];
+                ctx.beginPath();
+                ctx.arc(x, y, 2.5 * bars[i], 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "fireworks": {
+          const numBursts = 8;
+          for (let b = 0; b < numBursts; b++) {
+            const barIdx = Math.floor((b / numBursts) * NUM_BARS);
+            const val = bars[barIdx];
+            const bx = (b + 0.5) / numBursts * w;
+            const by = h * 0.3 + Math.sin(t * 0.5 + b * 1.7) * h * 0.15;
+            const rays = 16;
+            const maxLen = val * Math.min(w, h) * 0.18;
+            for (let r = 0; r < rays; r++) {
+              const angle = (r / rays) * Math.PI * 2 + t * 0.5 + b;
+              const len = maxLen * (0.5 + 0.5 * Math.sin(t * 3 + r + b));
+              const cIdx = (b + r) % theme.colors.length;
+              const alpha = val * 0.8;
+              const a = Math.floor(alpha * 255).toString(16).padStart(2, "0");
+              ctx.strokeStyle = theme.colors[cIdx] + a;
+              ctx.lineWidth = 2;
+              ctx.shadowBlur = 8;
+              ctx.shadowColor = theme.colors[cIdx];
+              ctx.lineCap = "round";
+              ctx.beginPath();
+              ctx.moveTo(bx, by);
+              ctx.lineTo(bx + Math.cos(angle) * len, by + Math.sin(angle) * len);
+              ctx.stroke();
+              // Sparkle at tip
+              if (val > 0.4) {
+                ctx.fillStyle = theme.colors[cIdx];
+                ctx.beginPath();
+                ctx.arc(bx + Math.cos(angle) * len, by + Math.sin(angle) * len, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "radar": {
+          const radarR = Math.min(w, h) * 0.38;
+          // Grid rings
+          for (let r = 1; r <= 4; r++) {
+            ctx.strokeStyle = theme.colors[0] + "20";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, (r / 4) * radarR, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          // Sweep line
+          const sweepAngle = t * 1.5;
+          ctx.strokeStyle = theme.colors[0] + "80";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(sweepAngle) * radarR, cy + Math.sin(sweepAngle) * radarR);
+          ctx.stroke();
+          // Sweep fade trail
+          const sweepGrad = ctx.createConicGradient(sweepAngle - Math.PI * 0.3, cx, cy);
+          sweepGrad.addColorStop(0, "transparent");
+          sweepGrad.addColorStop(0.15, theme.colors[0] + "25");
+          sweepGrad.addColorStop(0.16, "transparent");
+          ctx.fillStyle = sweepGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radarR, 0, Math.PI * 2);
+          ctx.fill();
+          // Data blips
+          for (let i = 0; i < NUM_BARS; i++) {
+            const angle = (i / NUM_BARS) * Math.PI * 2;
+            const dist = bars[i] * radarR * 0.9;
+            const px = cx + Math.cos(angle) * dist;
+            const py = cy + Math.sin(angle) * dist;
+            const size = 2 + bars[i] * 4;
+            const cIdx = i % theme.colors.length;
+            ctx.fillStyle = theme.colors[cIdx];
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = theme.colors[cIdx];
+            ctx.beginPath();
+            ctx.arc(px, py, size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "diamonds": {
+          const cols = 12;
+          const rows = 8;
+          const dw = w / cols;
+          const dh = h / rows;
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const barIdx = Math.floor(((r * cols + c) / (rows * cols)) * (NUM_BARS - 1));
+              const val = bars[barIdx];
+              const dx = c * dw + dw / 2;
+              const dy = r * dh + dh / 2;
+              const size = (dw * 0.3 + val * dw * 0.35);
+              const cIdx = (r + c) % theme.colors.length;
+              const alpha = 0.2 + val * 0.7;
+              const a = Math.floor(alpha * 255).toString(16).padStart(2, "0");
+              ctx.fillStyle = theme.colors[cIdx] + a;
+              ctx.shadowBlur = val * 12;
+              ctx.shadowColor = theme.colors[cIdx];
+              ctx.save();
+              ctx.translate(dx, dy);
+              ctx.rotate(Math.PI / 4 + Math.sin(t + r + c) * 0.1);
+              ctx.fillRect(-size / 2, -size / 2, size, size);
+              ctx.restore();
+            }
+          }
+          ctx.shadowBlur = 0;
+          break;
+        }
+        case "spectrum": {
+          // Mirrored spectrum analyzer
+          const barW2 = w / NUM_BARS;
+          for (let i = 0; i < NUM_BARS; i++) {
+            const barH = bars[i] * h * 0.4;
+            const x = i * barW2;
+            const cIdx = Math.floor((i / NUM_BARS) * (theme.colors.length - 1));
+            const c1 = theme.colors[cIdx];
+            const c2 = theme.colors[Math.min(cIdx + 1, theme.colors.length - 1)];
+            // Top half
+            const grad1 = ctx.createLinearGradient(x, cy, x, cy - barH);
+            grad1.addColorStop(0, c1 + "40");
+            grad1.addColorStop(1, c2);
+            ctx.fillStyle = grad1;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = c1;
+            ctx.fillRect(x + 1, cy - barH, barW2 - 2, barH);
+            // Bottom half (mirror)
+            const grad2 = ctx.createLinearGradient(x, cy, x, cy + barH);
+            grad2.addColorStop(0, c1 + "40");
+            grad2.addColorStop(1, c2);
+            ctx.fillStyle = grad2;
+            ctx.fillRect(x + 1, cy, barW2 - 2, barH);
+          }
+          // Center line
+          ctx.strokeStyle = theme.colors[0] + "60";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, cy);
+          ctx.lineTo(w, cy);
+          ctx.stroke();
           ctx.shadowBlur = 0;
           break;
         }
