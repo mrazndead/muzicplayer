@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3, Clock, PlayCircle } from "lucide-react";
+import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MusicVisualizer } from "@/components/MusicVisualizer";
@@ -71,7 +71,6 @@ const Index = () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
     setLoading(true);
     setSearchLabel(label);
     setActiveGenre(genreId || null);
@@ -79,7 +78,6 @@ const Index = () => {
     setActiveTab("home");
     setCurrentQuery(query);
     setHasMore(true);
-
     try {
       const results = await searchTracks(query, TRACKS_PER_PAGE);
       if (!controller.signal.aborted) {
@@ -167,18 +165,21 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
-  const playerPadding = player.currentTrack ? "pb-36 sm:pb-32" : "pb-20";
+  const playerPadding = player.currentTrack ? "pb-40 sm:pb-36" : "pb-24";
 
   return (
-    <div className={`min-h-screen bg-background ${playerPadding}`}>
+    <div className={`min-h-screen ${playerPadding}`}>
+      {/* Ambient background */}
+      <div className="app-bg" />
+
       {/* Header */}
-      <header className="sticky top-0 z-40 glass-heavy border-b border-border/30">
-        <div className="max-w-screen-xl mx-auto px-4 py-3.5 flex items-center gap-3">
+      <header className="sticky top-0 z-40 glass-heavy border-b border-border/20">
+        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center">
-              <Disc3 className="w-4 h-4 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-2xl gradient-primary flex items-center justify-center glow-sm">
+              <Disc3 className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <h1 className="font-heading text-lg font-bold text-foreground tracking-tight">
+            <h1 className="font-heading text-xl font-bold gradient-text tracking-tight">
               Pulse
             </h1>
           </div>
@@ -188,7 +189,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-screen-xl mx-auto px-4 py-5 space-y-6">
         <AnimatePresence mode="wait">
           {/* HOME TAB */}
           {activeTab === "home" && (
@@ -197,8 +198,27 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
+              className="space-y-7"
             >
+              {/* Welcome text */}
+              {!hasSearched && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="pt-2"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Discover</p>
+                  </div>
+                  <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+                    Enjoy your music,<br />
+                    <span className="gradient-text">enjoy your life</span>
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2">Listen to your favorite tracks for free.</p>
+                </motion.div>
+              )}
+
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
               <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
@@ -217,27 +237,27 @@ const Index = () => {
               {/* Recently Played */}
               {!hasSearched && recentlyPlayed.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <h2 className="font-heading text-base font-semibold text-foreground">Recently Played</h2>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <h2 className="font-heading text-sm font-semibold text-foreground tracking-wide uppercase opacity-70">Recently Played</h2>
                   </div>
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+                  <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
                     {recentlyPlayed.slice(0, 10).map((track, i) => {
                       const isCurrent = track.id === player.currentTrack?.id;
                       return (
                         <motion.button
                           key={track.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: i * 0.03 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.04 }}
                           onClick={() => handlePlayRecent(track, i)}
-                          className="flex-shrink-0 w-28 group text-left"
+                          className="flex-shrink-0 w-32 group text-left"
                         >
-                          <div className={`relative w-28 h-28 rounded-2xl overflow-hidden mb-2 ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
+                          <div className={`relative w-32 h-32 rounded-2xl overflow-hidden mb-2 card-hover ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
                             <img
                               src={track.artwork?.["480x480"] || track.artwork?.["150x150"] || "/placeholder.svg"}
                               alt={track.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               loading="lazy"
                             />
                           </div>
@@ -251,8 +271,8 @@ const Index = () => {
               )}
 
               {loading && (
-                <div className="flex items-center justify-center py-16">
-                  <div className="w-10 h-10 rounded-full gradient-primary animate-pulse" />
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
                 </div>
               )}
 
@@ -272,7 +292,7 @@ const Index = () => {
               )}
 
               {!loading && hasSearched && tracks.length === 0 && (
-                <div className="text-center py-16">
+                <div className="text-center py-20">
                   <p className="text-muted-foreground text-sm">No tracks found. Try a different search!</p>
                 </div>
               )}
@@ -288,13 +308,13 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <h2 className="font-heading text-xl font-bold text-foreground">Discover</h2>
+              <h2 className="font-heading text-2xl font-bold gradient-text">Discover</h2>
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
 
               {loading && (
                 <div className="flex items-center justify-center py-16">
-                  <div className="w-10 h-10 rounded-full gradient-primary animate-pulse" />
+                  <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
                 </div>
               )}
 
@@ -326,15 +346,15 @@ const Index = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-heading text-xl font-bold text-foreground">Liked Tracks</h2>
-                  <p className="text-muted-foreground text-sm mt-1">
+                  <h2 className="font-heading text-2xl font-bold gradient-text">Liked Tracks</h2>
+                  <p className="text-muted-foreground text-xs mt-1 uppercase tracking-wider">
                     {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
                   </p>
                 </div>
                 {favorites.length > 0 && (
                   <button
                     onClick={() => handlePlayFavorite(favorites[0], 0)}
-                    className="flex items-center gap-2 px-4 py-2 gradient-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+                    className="flex items-center gap-2 px-5 py-2.5 gradient-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity glow-sm"
                   >
                     <PlayCircle className="w-4 h-4" />
                     Play All
@@ -353,9 +373,9 @@ const Index = () => {
                 />
               ) : (
                 <div className="text-center py-20">
-                  <Music className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-40" />
+                  <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-30" />
                   <p className="text-muted-foreground text-sm">No liked tracks yet</p>
-                  <p className="text-muted-foreground/60 text-xs mt-1">Tap the ❤️ on any track to save it</p>
+                  <p className="text-muted-foreground/50 text-xs mt-1">Tap the ❤️ on any track to save it</p>
                 </div>
               )}
             </motion.div>

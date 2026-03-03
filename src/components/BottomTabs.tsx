@@ -1,4 +1,5 @@
-import { Home, Search, Heart, Volume2 } from "lucide-react";
+import { Home, Search, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 
 export type TabId = "home" | "search" | "favorites";
 
@@ -17,21 +18,28 @@ const tabs = [
 
 export function BottomTabs({ activeTab, onTabChange, favCount, hasPlayer }: BottomTabsProps) {
   return (
-    <nav className={`fixed left-0 right-0 z-40 glass-heavy border-t border-border/50 transition-all ${hasPlayer ? "bottom-[84px]" : "bottom-[20px]"}`}>
-      <div className="flex items-center justify-around max-w-screen-sm mx-auto py-1">
+    <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
+      <div className="glass-card flex items-center justify-around max-w-sm mx-auto py-1.5 px-2 neon-border">
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center gap-0.5 py-2 px-6 transition-all duration-200 relative
+              className={`flex flex-col items-center gap-0.5 py-2 px-6 transition-all duration-300 relative rounded-xl
                 ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <tab.icon className={`w-5 h-5 ${active ? "drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]" : ""}`} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              {active && (
+                <motion.div
+                  layoutId="tab-bg"
+                  className="absolute inset-0 gradient-primary opacity-15 rounded-xl"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <tab.icon className={`w-5 h-5 relative z-10 ${active ? "drop-shadow-[0_0_8px_hsl(var(--primary)/0.6)]" : ""}`} />
+              <span className="text-[10px] font-medium relative z-10">{tab.label}</span>
               {tab.id === "favorites" && favCount > 0 && (
-                <span className="absolute top-1 right-3 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+                <span className="absolute top-0.5 right-2 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center z-10">
                   {favCount > 9 ? "9+" : favCount}
                 </span>
               )}

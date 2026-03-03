@@ -20,7 +20,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full max-w-xl mx-auto">
-      <div className="relative bg-secondary/80 rounded-2xl overflow-hidden border border-border/50 focus-within:border-primary/40 transition-colors">
+      <div className="relative glass-card overflow-hidden focus-within:ring-1 focus-within:ring-primary/40 transition-all">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
@@ -40,7 +40,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         )}
       </div>
       {isLoading && (
-        <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-muted rounded-full overflow-hidden">
+        <div className="absolute bottom-0 left-6 right-6 h-0.5 bg-muted rounded-full overflow-hidden">
           <div className="h-full w-1/3 gradient-primary rounded-full animate-pulse-glow" />
         </div>
       )}
