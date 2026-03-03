@@ -624,7 +624,7 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute bottom-0 inset-x-0 p-4 glass-heavy rounded-t-2xl space-y-3 z-10"
+            className="absolute bottom-0 inset-x-0 p-4 glass-heavy rounded-t-2xl space-y-3 z-10 max-h-[70%] overflow-y-auto"
           >
             {/* Shape picker */}
             <div>
