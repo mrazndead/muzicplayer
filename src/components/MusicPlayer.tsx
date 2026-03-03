@@ -326,7 +326,7 @@ export function MusicPlayer({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-[20px] left-0 right-0 z-50 glass-heavy border-t border-border/50"
+            className="fixed bottom-[20px] left-2 right-2 z-50 glass-card neon-border overflow-hidden"
           >
             {/* Progress bar */}
             <div className="h-0.5 w-full cursor-pointer group relative" onClick={handleSeek}>
@@ -366,7 +366,7 @@ export function MusicPlayer({
                 </button>
                 <button
                   onClick={onTogglePlay}
-                  className="p-2.5 gradient-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity"
+                  className="p-2.5 gradient-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity glow-sm"
                 >
                   {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                 </button>
@@ -384,7 +384,7 @@ export function MusicPlayer({
                   {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
                 {showVolume && (
-                  <div className="absolute bottom-full right-0 mb-2 p-3 glass rounded-xl">
+                  <div className="absolute bottom-full right-0 mb-2 p-3 glass-card">
                     <input
                       type="range"
                       min={0}

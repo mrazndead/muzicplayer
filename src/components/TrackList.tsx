@@ -39,13 +39,13 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
     <div>
       {title && (
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-base font-semibold text-foreground">
+          <h2 className="font-heading text-sm font-semibold text-foreground tracking-wide uppercase opacity-70">
             {title}
           </h2>
-          <span className="text-xs text-muted-foreground">{tracks.length} tracks</span>
+          <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">{tracks.length} tracks</span>
         </div>
       )}
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {tracks.map((track, i) => {
           const isCurrent = track.id === currentTrackId;
           const liked = isFavorite?.(track.id) ?? false;
@@ -55,10 +55,10 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: Math.min(i * 0.02, 0.5) }}
-              className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 text-left group
+              className={`w-full flex items-center gap-3 p-2.5 rounded-2xl transition-all duration-200 text-left group
                 ${isCurrent
-                  ? "bg-primary/10"
-                  : "hover:bg-secondary/60"
+                  ? "glass-card ring-1 ring-primary/30"
+                  : "hover:bg-secondary/40"
                 }`}
             >
               {/* Track number or equalizer */}
@@ -68,7 +68,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
 
               <button
                 onClick={() => onPlay(track, i)}
-                className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-muted"
+                className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-muted"
               >
                 <img
                   src={getArtworkUrl(track, "150x150")}
@@ -139,7 +139,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
           <button
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="px-6 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+            className="px-8 py-2.5 rounded-full glass-card text-foreground text-sm font-medium hover:bg-secondary/40 transition-colors disabled:opacity-50 neon-border"
           >
             {isLoadingMore ? (
               <span className="flex items-center gap-2">
