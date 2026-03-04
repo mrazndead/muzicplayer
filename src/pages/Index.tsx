@@ -165,7 +165,7 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
-  const playerPadding = player.currentTrack ? "pb-40 sm:pb-36" : "pb-24";
+  const playerPadding = player.currentTrack ? "pt-16 pb-24" : "pb-24";
 
   return (
     <div className={`min-h-screen ${playerPadding}`}>
