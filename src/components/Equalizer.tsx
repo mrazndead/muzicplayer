@@ -21,7 +21,9 @@ interface EqualizerProps {
 export function Equalizer({ audioContext, filters }: EqualizerProps) {
   const [open, setOpen] = useState(false);
   const [activePreset, setActivePreset] = useState("Flat");
-  const [gains, setGains] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [gains, setGains] = useState<number[]>(() =>
+    filters.length > 0 ? filters.map(f => f.gain.value) : [0, 0, 0, 0, 0]
+  );
 
   const applyGain = (index: number, value: number) => {
     const newGains = [...gains];
