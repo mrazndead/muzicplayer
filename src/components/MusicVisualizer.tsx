@@ -617,27 +617,34 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
         </div>
       )}
 
-      {/* Settings panel */}
+      {/* Settings panel - full overlay */}
       <AnimatePresence>
         {showSettings && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute bottom-0 inset-x-0 p-4 glass-heavy rounded-t-2xl space-y-3 z-10 max-h-[70%] overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 p-4 bg-background/90 backdrop-blur-xl rounded-3xl z-10 flex flex-col gap-4 overflow-y-auto"
           >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground uppercase tracking-widest">Visualizer Settings</span>
+              <button onClick={() => setShowSettings(false)} className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                <Settings2 className="w-4 h-4" />
+              </button>
+            </div>
+
             {/* Shape picker */}
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <Shapes className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Shape</span>
               </div>
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="grid grid-cols-5 gap-1.5">
                 {SHAPES.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setShape(s.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    className={`px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
                       shape === s.id
                         ? "gradient-primary text-primary-foreground"
                         : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -655,12 +662,12 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
                 <Palette className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Colors</span>
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-4 gap-1.5">
                 {COLOR_THEMES.map((ct) => (
                   <button
                     key={ct.id}
                     onClick={() => setThemeId(ct.id)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
                       themeId === ct.id
                         ? "ring-2 ring-primary bg-secondary"
                         : "bg-secondary/60 hover:bg-secondary"
