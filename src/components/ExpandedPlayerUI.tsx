@@ -1,0 +1,305 @@
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, Share2, User } from "lucide-react";
+import { getArtworkUrl, AudiusTrack } from "@/lib/audius";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { SLEEP_TIMER_OPTIONS } from "@/hooks/useSleepTimer";
+import { Equalizer } from "./Equalizer";
+
+interface ExpandedPlayerUIProps {
+  currentTrack: AudiusTrack;
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  progress: number;
+  shuffle: boolean;
+  repeat: "off" | "all" | "one";
+  queue: AudiusTrack[];
+  queueIndex: number;
+  onTogglePlay: () => void;
+  onSeek: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onNext: () => void;
+  onPrev: () => void;
+  onToggleShuffle: () => void;
+  onToggleRepeat: () => void;
+  onClose: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  onPlayFromQueue?: (track: AudiusTrack, index: number) => void;
+  sleepTimerActive?: boolean;
+  sleepTimerRemaining?: number;
+  onStartSleepTimer?: (minutes: number) => void;
+  onCancelSleepTimer?: () => void;
+  audioContext?: AudioContext | null;
+  eqFilters?: BiquadFilterNode[];
+  onMoreByArtist?: () => void;
+  showQueue: boolean;
+  setShowQueue: (show: boolean) => void;
+  showSleepTimer: boolean;
+  setShowSleepTimer: (show: boolean) => void;
+}
+
+function formatTime(s: number): string {
+  if (!s || isNaN(s)) return "0:00";
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
+export function ExpandedPlayerUI({
+  currentTrack,
+  isPlaying,
+  currentTime,
+  duration,
+  progress,
+  shuffle,
+  repeat,
+  queue,
+  queueIndex,
+  onTogglePlay,
+  onSeek,
+  onNext,
+  onPrev,
+  onToggleShuffle,
+  onToggleRepeat,
+  onClose,
+  isFavorite,
+  onToggleFavorite,
+  onPlayFromQueue,
+  sleepTimerActive,
+  sleepTimerRemaining,
+  onStartSleepTimer,
+  onCancelSleepTimer,
+  audioContext,
+  eqFilters,
+  onMoreByArtist,
+  showQueue,
+  setShowQueue,
+  showSleepTimer,
+  setShowSleepTimer,
+}: ExpandedPlayerUIProps) {
+  const RepeatIcon = repeat === "one" ? Repeat1 : Repeat;
+  const upNextTracks = queue.slice(queueIndex + 1, queueIndex + 21);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: "100%" }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: "100%" }}
+      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      className="fixed inset-0 z-[60] flex flex-col overflow-hidden"
+    >
+      {/* Blurred background image */}
+      <div className="absolute inset-0">
+        <img
+          src={getArtworkUrl(currentTrack, "1000x1000")}
+          alt=""
+          className="w-full h-full object-cover scale-110 blur-[60px] opacity-40"
+        />
+        <div className="absolute inset-0 bg-background/80" />
+      </div>
+
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5">
+          <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronDown className="w-6 h-6" />
+          </button>
+          <span className="font-heading text-xs tracking-wider text-muted-foreground uppercase">Now Playing</span>
+          <div className="flex items-center gap-1">
+            <Equalizer audioContext={audioContext ?? null} filters={eqFilters ?? []} />
+            <button
+              onClick={() => { setShowSleepTimer(!showSleepTimer); setShowQueue(false); }}
+              className={`p-2 transition-colors ${sleepTimerActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Timer className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => { setShowQueue(!showQueue); setShowSleepTimer(false); }}
+              className={`p-2 transition-colors ${showQueue ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <ListMusic className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Sleep Timer Popup */}
+        <AnimatePresence>
+          {showSleepTimer && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-5 mb-4 p-4 glass rounded-2xl"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-foreground">Sleep Timer</span>
+                {sleepTimerActive && (
+                  <button onClick={onCancelSleepTimer} className="text-xs text-accent hover:text-accent/80">
+                    Cancel
+                  </button>
+                )}
+              </div>
+              {sleepTimerActive ? (
+                <p className="text-sm text-primary font-medium">
+                  ⏱ Pausing in {formatTime(sleepTimerRemaining || 0)}
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {SLEEP_TIMER_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.minutes}
+                      onClick={() => { onStartSleepTimer?.(opt.minutes); setShowSleepTimer(false); }}
+                      className="px-3 py-1.5 text-xs font-medium rounded-full bg-secondary text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Queue View or Player View */}
+        <AnimatePresence mode="wait">
+          {showQueue ? (
+            <motion.div
+              key="queue"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex-1 overflow-y-auto px-5 pb-6"
+            >
+              <h3 className="font-heading text-base font-semibold text-foreground mb-3">Up Next</h3>
+              {upNextTracks.length > 0 ? (
+                <div className="space-y-1">
+                  {upNextTracks.map((track, i) => (
+                    <button
+                      key={`${track.id}-${i}`}
+                      onClick={() => onPlayFromQueue?.(track, queueIndex + 1 + i)}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary/60 transition-colors text-left"
+                    >
+                      <img
+                        src={getArtworkUrl(track, "150x150")}
+                        alt={track.title}
+                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground line-clamp-1">{track.title}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{track.user.name}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground tabular-nums">{formatTime(track.duration)}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-10">No more tracks in queue</p>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="player"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex-1 flex flex-col items-center justify-center px-8 gap-8"
+            >
+              {/* Circular artwork with glow ring */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="w-56 h-56 sm:w-72 sm:h-72 rounded-full overflow-hidden artwork-ring"
+              >
+                <img
+                  src={getArtworkUrl(currentTrack, "1000x1000")}
+                  alt={currentTrack.title}
+                  className={`w-full h-full object-cover ${isPlaying ? "animate-[spin_20s_linear_infinite]" : ""}`}
+                />
+              </motion.div>
+
+              {/* Track info */}
+              <div className="text-center max-w-xs">
+                <h3 className="font-heading text-xl font-bold text-foreground line-clamp-2">
+                  {currentTrack.title}
+                </h3>
+                <p className="text-muted-foreground text-sm mt-1">{currentTrack.user.name}</p>
+              </div>
+
+              {/* Progress */}
+              <div className="w-full max-w-xs space-y-2">
+                <div className="h-1 w-full bg-muted/50 rounded-full cursor-pointer group relative" onClick={onSeek}>
+                  <div className="absolute inset-y-0 left-0 gradient-primary rounded-full transition-[width] duration-150" style={{ width: `${progress}%` }} />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-foreground rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ left: `${progress}%`, transform: `translateX(-50%) translateY(-50%)` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center gap-7">
+                <button onClick={onToggleShuffle} className={`p-2 transition-colors ${shuffle ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+                  <Shuffle className="w-5 h-5" />
+                </button>
+                <button onClick={onPrev} className="p-2 text-foreground hover:text-primary transition-colors">
+                  <SkipBack className="w-7 h-7" />
+                </button>
+                <button
+                  onClick={onTogglePlay}
+                  className="w-16 h-16 gradient-primary text-primary-foreground rounded-full flex items-center justify-center hover:opacity-90 transition-opacity glow-sm"
+                >
+                  {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-0.5" />}
+                </button>
+                <button onClick={onNext} className="p-2 text-foreground hover:text-primary transition-colors">
+                  <SkipForward className="w-7 h-7" />
+                </button>
+                <button onClick={onToggleRepeat} className={`p-2 transition-colors ${repeat !== "off" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+                  <RepeatIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Favorite + Share + More by artist + sleep indicator */}
+              <div className="flex items-center gap-4">
+                {onToggleFavorite && (
+                  <button onClick={onToggleFavorite} className="p-2">
+                    <Heart className={`w-6 h-6 transition-colors ${isFavorite ? "fill-accent text-accent" : "text-muted-foreground hover:text-foreground"}`} />
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    const url = `https://audius.co${currentTrack.permalink}`;
+                    if (navigator.share) {
+                      navigator.share({ title: currentTrack.title, text: `${currentTrack.title} by ${currentTrack.user.name}`, url }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => {});
+                    }
+                  }}
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+                {onMoreByArtist && (
+                  <button
+                    onClick={onMoreByArtist}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    More by {currentTrack.user.name}
+                  </button>
+                )}
+                {sleepTimerActive && (
+                  <span className="text-xs text-primary font-medium">⏱ {formatTime(sleepTimerRemaining || 0)}</span>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}

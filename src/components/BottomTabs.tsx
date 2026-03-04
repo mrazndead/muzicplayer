@@ -16,9 +16,9 @@ const tabs = [
   { id: "favorites" as TabId, label: "Liked", icon: Heart },
 ];
 
-export function BottomTabs({ activeTab, onTabChange, favCount, hasPlayer }: BottomTabsProps) {
+export function BottomTabs({ activeTab, onTabChange, favCount }: BottomTabsProps) {
   return (
-    <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
+    <nav className="fixed left-3 right-3 z-40 bottom-[20px] transition-all">
       <div className="glass-card flex items-center justify-around max-w-sm mx-auto py-1.5 px-2 neon-border rounded-2xl">
         {tabs.map((tab) => {
           const active = activeTab === tab.id;

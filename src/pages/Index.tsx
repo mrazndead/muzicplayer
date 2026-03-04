@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
-import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
+import { Music, Disc3, Clock, PlayCircle } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MusicVisualizer } from "@/components/MusicVisualizer";
 import { SearchBar } from "@/components/SearchBar";
@@ -165,7 +164,7 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
-  const playerPadding = player.currentTrack ? "pt-16 pb-24" : "pb-24";
+  const playerPadding = "pb-24";
 
   return (
     <div className={`min-h-screen ${playerPadding}`}>
@@ -200,13 +199,41 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-7"
             >
-              {/* Welcome text */}
-
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
               <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
 
               <MusicVisualizer isPlaying={player.isPlaying} />
+
+              {/* Mini Player moved here */}
+              <MusicPlayer
+                currentTrack={player.currentTrack}
+                isPlaying={player.isPlaying}
+                currentTime={player.currentTime}
+                duration={player.duration}
+                volume={player.volume}
+                shuffle={player.shuffle}
+                repeat={player.repeat}
+                queue={player.queue}
+                queueIndex={player.queueIndex}
+                onTogglePlay={player.togglePlay}
+                onSeek={player.seek}
+                onVolume={player.setVolume}
+                onNext={player.nextTrack}
+                onPrev={player.prevTrack}
+                onToggleShuffle={player.toggleShuffle}
+                onToggleRepeat={player.toggleRepeat}
+                isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
+                onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
+                onPlayFromQueue={handlePlayFromQueue}
+                sleepTimerActive={sleepTimer.isActive}
+                sleepTimerRemaining={sleepTimer.remainingSeconds}
+                onStartSleepTimer={sleepTimer.startTimer}
+                onCancelSleepTimer={sleepTimer.cancelTimer}
+                audioContext={player.audioContext}
+                eqFilters={player.eqFilters}
+                onMoreByArtist={handleMoreByArtist}
+              />
 
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
@@ -370,36 +397,7 @@ const Index = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         favCount={favorites.length}
-        hasPlayer={!!player.currentTrack}
-      />
-
-      <MusicPlayer
-        currentTrack={player.currentTrack}
-        isPlaying={player.isPlaying}
-        currentTime={player.currentTime}
-        duration={player.duration}
-        volume={player.volume}
-        shuffle={player.shuffle}
-        repeat={player.repeat}
-        queue={player.queue}
-        queueIndex={player.queueIndex}
-        onTogglePlay={player.togglePlay}
-        onSeek={player.seek}
-        onVolume={player.setVolume}
-        onNext={player.nextTrack}
-        onPrev={player.prevTrack}
-        onToggleShuffle={player.toggleShuffle}
-        onToggleRepeat={player.toggleRepeat}
-        isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
-        onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
-        onPlayFromQueue={handlePlayFromQueue}
-        sleepTimerActive={sleepTimer.isActive}
-        sleepTimerRemaining={sleepTimer.remainingSeconds}
-        onStartSleepTimer={sleepTimer.startTimer}
-        onCancelSleepTimer={sleepTimer.cancelTimer}
-        audioContext={player.audioContext}
-        eqFilters={player.eqFilters}
-        onMoreByArtist={handleMoreByArtist}
+        hasPlayer={false}
       />
     </div>
   );
