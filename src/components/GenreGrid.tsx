@@ -8,7 +8,7 @@ interface GenreGridProps {
 
 export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4">
+    <div className="flex flex-wrap gap-2">
       {DEFAULT_GENRES.map((genre, i) => {
         const isActive = activeGenre === genre.id;
         return (
@@ -18,7 +18,7 @@ export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => onSelectGenre(genre)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap
+            className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300
               ${isActive
                 ? "gradient-primary text-primary-foreground shadow-lg glow-sm"
                 : "glass-card text-muted-foreground hover:text-foreground"
