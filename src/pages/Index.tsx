@@ -201,23 +201,6 @@ const Index = () => {
               className="space-y-7"
             >
               {/* Welcome text */}
-              {!hasSearched && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="pt-2"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Discover</p>
-                  </div>
-                  <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-                    Enjoy your music,<br />
-                    <span className="gradient-text">enjoy your life</span>
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-2">Listen to your favorite tracks for free.</p>
-                </motion.div>
-              )}
 
               <SearchBar onSearch={handleSearch} isLoading={loading} />
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
