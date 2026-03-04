@@ -20,7 +20,7 @@ export function MoodGrid({ activeMood, onSelectMood }: MoodGridProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.03 }}
               onClick={() => onSelectMood(mood)}
-              className={`flex flex-col items-center justify-center gap-1.5 w-[calc(25%-8px)] aspect-square rounded-2xl transition-all duration-300 card-hover ${
+              className={`flex flex-col items-center justify-center gap-1.5 w-[calc(33.33%-8px)] aspect-square rounded-2xl transition-all duration-300 card-hover ${
                 isActive
                   ? "gradient-primary text-primary-foreground ring-2 ring-primary/30 glow-border"
                   : "glass-card text-foreground hover:bg-secondary/40"
