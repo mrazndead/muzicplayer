@@ -10,7 +10,7 @@ export function MoodGrid({ activeMood, onSelectMood }: MoodGridProps) {
   return (
     <div>
       <h2 className="font-heading text-sm font-semibold text-foreground mb-3 tracking-wide uppercase opacity-70">Moods</h2>
-      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+      <div className="flex flex-wrap gap-2.5">
         {DEFAULT_MOODS.map((mood, i) => {
           const isActive = activeMood === mood.id;
           return (
@@ -20,7 +20,7 @@ export function MoodGrid({ activeMood, onSelectMood }: MoodGridProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.03 }}
               onClick={() => onSelectMood(mood)}
-              className={`flex-shrink-0 flex flex-col items-center justify-center gap-1.5 w-20 h-20 rounded-2xl transition-all duration-300 card-hover ${
+              className={`flex flex-col items-center justify-center gap-1.5 w-[calc(25%-8px)] aspect-square rounded-2xl transition-all duration-300 card-hover ${
                 isActive
                   ? "gradient-primary text-primary-foreground ring-2 ring-primary/30 glow-border"
                   : "glass-card text-foreground hover:bg-secondary/40"
