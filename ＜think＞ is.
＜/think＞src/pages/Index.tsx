@@ -1,8 +1,7 @@
 import { InstallButton } from "@/components/InstallButton";
 
-// ... existing imports and code ...
+// ... existing code ...
 
-// Ensure the component is properly exported
 export default function Index() {
   // ... existing component logic ...
   return (
