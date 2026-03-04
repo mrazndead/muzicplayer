@@ -599,7 +599,7 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
       <canvas
         ref={canvasRef}
         className="w-full"
-        style={{ height: "clamp(240px, 50vw, 400px)" }}
+        style={{ height: "clamp(380px, 60vw, 500px)" }}
       />
 
       {/* Settings toggle */}
