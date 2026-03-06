@@ -406,6 +406,7 @@ const Index = () => {
         hasPlayer={!!player.currentTrack}
       />
 
+      {/* Keep MusicPlayer for expanded view only - mini player is inline */}
       <MusicPlayer
         currentTrack={player.currentTrack}
         isPlaying={player.isPlaying}
