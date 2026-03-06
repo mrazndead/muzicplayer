@@ -239,7 +239,7 @@ const Index = () => {
                   onMoreByArtist={handleMoreByArtist}
                   inline
                 />
-              )
+              )}
 
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
