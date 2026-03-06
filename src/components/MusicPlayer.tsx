@@ -36,6 +36,7 @@ interface MusicPlayerProps {
   audioContext?: AudioContext | null;
   eqFilters?: BiquadFilterNode[];
   onMoreByArtist?: () => void;
+  inline?: boolean;
 }
 
 function formatTime(s: number): string {
