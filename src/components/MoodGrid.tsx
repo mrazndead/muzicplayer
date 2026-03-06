@@ -20,14 +20,14 @@ export function MoodGrid({ activeMood, onSelectMood }: MoodGridProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.03 }}
               onClick={() => onSelectMood(mood)}
-              className={`flex flex-col items-center justify-center gap-1.5 w-[calc(25%-8px)] aspect-square rounded-2xl transition-all duration-300 card-hover ${
+              className={`flex flex-col items-center justify-center gap-1 w-[calc(25%-8px)] aspect-[4/3] rounded-xl transition-all duration-300 card-hover ${
                 isActive
                   ? "gradient-primary text-primary-foreground ring-2 ring-primary/30 glow-border"
                   : "glass-card text-foreground hover:bg-secondary/40"
               }`}
             >
-              <span className="text-2xl">{mood.emoji}</span>
-              <span className="text-[10px] font-medium leading-none">{mood.label}</span>
+              <span className="text-lg">{mood.emoji}</span>
+              <span className="text-[9px] font-medium leading-none">{mood.label}</span>
             </motion.button>
           );
         })}
