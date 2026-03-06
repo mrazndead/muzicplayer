@@ -18,7 +18,7 @@ export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02 }}
             onClick={() => onSelectGenre(genre)}
-            className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300
+            className={`px-3 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300
               ${isActive
                 ? "gradient-primary text-primary-foreground shadow-lg glow-sm"
                 : "glass-card text-muted-foreground hover:text-foreground"

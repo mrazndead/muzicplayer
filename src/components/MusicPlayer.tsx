@@ -326,7 +326,7 @@ export function MusicPlayer({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 z-50 glass-card neon-border overflow-hidden"
+            className="relative z-50 glass-card neon-border overflow-hidden"
           >
             {/* Progress bar */}
             <div className="h-0.5 w-full cursor-pointer group relative" onClick={handleSeek}>
