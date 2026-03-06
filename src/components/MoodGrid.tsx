@@ -26,8 +26,8 @@ export function MoodGrid({ activeMood, onSelectMood }: MoodGridProps) {
                   : "glass-card text-foreground hover:bg-secondary/40"
               }`}
             >
-              <span className="text-2xl">{mood.emoji}</span>
-              <span className="text-[10px] font-medium leading-none">{mood.label}</span>
+              <span className="text-lg">{mood.emoji}</span>
+              <span className="text-[9px] font-medium leading-none">{mood.label}</span>
             </motion.button>
           );
         })}
