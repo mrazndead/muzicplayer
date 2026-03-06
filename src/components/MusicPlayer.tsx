@@ -93,11 +93,11 @@ export function MusicPlayer({
   const RepeatIcon = repeat === "one" ? Repeat1 : Repeat;
   const upNextTracks = queue.slice(queueIndex + 1, queueIndex + 21);
 
-  return (
-    <AnimatePresence>
-      {currentTrack && (
-        <>
-          {/* Expanded Now Playing */}
+  if (inline) {
+    // Inline mode: only render mini player bar
+    return (
+      <AnimatePresence>
+        {currentTrack && (
           <AnimatePresence>
             {expanded && (
               <motion.div
