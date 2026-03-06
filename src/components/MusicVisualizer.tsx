@@ -596,35 +596,39 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden bg-background/80 border border-border/30">
-      <canvas
-        ref={canvasRef}
-        className="w-full"
-        style={{ height: "clamp(240px, 50vw, 400px)" }}
-      />
+      {!showSettings && (
+        <>
+          <canvas
+            ref={canvasRef}
+            className="w-full"
+            style={{ height: "clamp(240px, 50vw, 400px)" }}
+          />
 
-      {/* Settings toggle */}
-      <button
-        onClick={() => setShowSettings(!showSettings)}
-        className="absolute top-3 right-3 p-2 rounded-xl glass text-muted-foreground hover:text-foreground transition-colors z-20"
-      >
-        <Settings2 className="w-4 h-4" />
-      </button>
+          {/* Settings toggle */}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="absolute top-3 right-3 p-2 rounded-xl glass text-muted-foreground hover:text-foreground transition-colors z-20"
+          >
+            <Settings2 className="w-4 h-4" />
+          </button>
 
-      {/* Now playing label */}
-      {isPlaying && (
-        <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full glass text-[10px] uppercase tracking-widest text-primary font-medium">
-          ● Live
-        </div>
+          {/* Now playing label */}
+          {isPlaying && (
+            <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-full glass text-[10px] uppercase tracking-widest text-primary font-medium">
+              ● Live
+            </div>
+          )}
+        </>
       )}
 
-      {/* Settings panel - full overlay */}
+      {/* Settings panel - replaces canvas when open */}
       <AnimatePresence>
         {showSettings && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 p-4 bg-background/90 backdrop-blur-xl rounded-3xl z-10 flex flex-col gap-4 overflow-y-auto"
+            className="p-4 bg-background/90 backdrop-blur-xl rounded-3xl z-10 flex flex-col gap-3"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-foreground uppercase tracking-widest">Visualizer Settings</span>
@@ -635,16 +639,16 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
 
             {/* Shape picker */}
             <div>
-              <div className="flex items-center gap-1.5 mb-2">
+              <div className="flex items-center gap-1.5 mb-1.5">
                 <Shapes className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Shape</span>
               </div>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-5 gap-1">
                 {SHAPES.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setShape(s.id)}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+                    className={`px-1.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
                       shape === s.id
                         ? "gradient-primary text-primary-foreground"
                         : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -658,16 +662,16 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
 
             {/* Color picker */}
             <div>
-              <div className="flex items-center gap-1.5 mb-2">
+              <div className="flex items-center gap-1.5 mb-1.5">
                 <Palette className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Colors</span>
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-1">
                 {COLOR_THEMES.map((ct) => (
                   <button
                     key={ct.id}
                     onClick={() => setThemeId(ct.id)}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+                    className={`flex items-center gap-1 px-1.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
                       themeId === ct.id
                         ? "ring-2 ring-primary bg-secondary"
                         : "bg-secondary/60 hover:bg-secondary"
@@ -677,7 +681,7 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
                       {ct.colors.map((c, i) => (
                         <div
                           key={i}
-                          className="w-3 h-3 rounded-full border border-background"
+                          className="w-2.5 h-2.5 rounded-full border border-background"
                           style={{ backgroundColor: c }}
                         />
                       ))}
