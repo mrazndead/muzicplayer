@@ -73,6 +73,7 @@ export function MusicPlayer({
   audioContext,
   eqFilters,
   onMoreByArtist,
+  inline,
 }: MusicPlayerProps) {
   const [showVolume, setShowVolume] = useState(false);
   const [expanded, setExpanded] = useState(false);
