@@ -592,14 +592,14 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animRef.current);
     };
-  }, [isPlaying, shape, theme, getGradientColor]);
+  }, [isPlaying, shape, theme, getGradientColor, showSettings]);
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden bg-background/80 border border-border/30">
       <canvas
         ref={canvasRef}
-        className={`w-full ${showSettings ? "hidden" : ""}`}
-        style={{ height: "clamp(240px, 50vw, 400px)" }}
+        className={`w-full transition-opacity duration-200 ${showSettings ? "absolute inset-0 h-full opacity-0 pointer-events-none" : "opacity-100"}`}
+        style={{ height: showSettings ? "100%" : "clamp(240px, 50vw, 400px)" }}
       />
 
       {!showSettings && (
