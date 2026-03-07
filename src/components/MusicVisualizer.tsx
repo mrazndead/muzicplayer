@@ -592,7 +592,7 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animRef.current);
     };
-  }, [isPlaying, shape, theme, getGradientColor]);
+  }, [isPlaying, shape, theme, getGradientColor, showSettings]);
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden bg-background/80 border border-border/30">
