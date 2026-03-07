@@ -184,6 +184,7 @@ const Index = () => {
               Pulse
             </h1>
           </div>
+          <DailyQuote />
           <div className="ml-auto flex items-center gap-1.5">
             <ThemeSwitcher />
           </div>
