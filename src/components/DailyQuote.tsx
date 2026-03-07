@@ -43,7 +43,7 @@ export const DailyQuote = () => {
   const quote = getDailyQuote();
 
   return (
-    <p className="text-[10px] sm:text-xs text-muted-foreground/70 italic truncate max-w-[200px] sm:max-w-xs hidden min-[480px]:block">
+    <p className="text-[10px] sm:text-xs text-muted-foreground/70 italic line-clamp-1 flex-1 min-w-0">
       "{quote.text}" — <span className="text-muted-foreground/50">{quote.author}</span>
     </p>
   );
