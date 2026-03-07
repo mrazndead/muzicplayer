@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
+import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { MusicVisualizer } from "@/components/MusicVisualizer";
