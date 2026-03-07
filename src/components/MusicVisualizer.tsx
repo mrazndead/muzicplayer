@@ -596,14 +596,14 @@ export function MusicVisualizer({ isPlaying }: MusicVisualizerProps) {
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden bg-background/80 border border-border/30">
+      <canvas
+        ref={canvasRef}
+        className={`w-full ${showSettings ? "hidden" : ""}`}
+        style={{ height: "clamp(240px, 50vw, 400px)" }}
+      />
+
       {!showSettings && (
         <>
-          <canvas
-            ref={canvasRef}
-            className="w-full"
-            style={{ height: "clamp(240px, 50vw, 400px)" }}
-          />
-
           {/* Settings toggle */}
           <button
             onClick={() => setShowSettings(true)}
