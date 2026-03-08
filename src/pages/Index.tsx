@@ -17,7 +17,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
-import { searchTracks, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { searchTracks, searchTracksMulti, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 const TRACKS_PER_PAGE = 50;
 
