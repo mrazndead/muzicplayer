@@ -34,6 +34,26 @@ function shareTrack(track: AudiusTrack) {
 }
 
 export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore }: TrackListProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoadingMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [onLoadMore, hasMore, isLoadingMore]);
+
   if (!tracks.length) return null;
 
   return (
