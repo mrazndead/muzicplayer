@@ -383,7 +383,7 @@ const Index = () => {
 
       {/* Persistent mini player bar */}
       {player.currentTrack && (
-        <div className="fixed left-0 right-0 bottom-[70px] z-50 px-3 mb-[20px]">
+        <div className="fixed left-0 right-0 bottom-[72px] z-50 px-3">
           <div className="max-w-screen-xl mx-auto">
             <MusicPlayer
               currentTrack={player.currentTrack}
