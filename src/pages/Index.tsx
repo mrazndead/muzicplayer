@@ -223,6 +223,39 @@ const Index = () => {
 
               <MusicVisualizer isPlaying={player.isPlaying} />
 
+              {/* Mini player inline under visualizer */}
+              {player.currentTrack && (
+                <MusicPlayer
+                  currentTrack={player.currentTrack}
+                  isPlaying={player.isPlaying}
+                  currentTime={player.currentTime}
+                  duration={player.duration}
+                  volume={player.volume}
+                  shuffle={player.shuffle}
+                  repeat={player.repeat}
+                  queue={player.queue}
+                  queueIndex={player.queueIndex}
+                  onTogglePlay={player.togglePlay}
+                  onSeek={player.seek}
+                  onVolume={player.setVolume}
+                  onNext={player.nextTrack}
+                  onPrev={player.prevTrack}
+                  onToggleShuffle={player.toggleShuffle}
+                  onToggleRepeat={player.toggleRepeat}
+                  isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
+                  onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
+                  onPlayFromQueue={handlePlayFromQueue}
+                  sleepTimerActive={sleepTimer.isActive}
+                  sleepTimerRemaining={sleepTimer.remainingSeconds}
+                  onStartSleepTimer={sleepTimer.startTimer}
+                  onCancelSleepTimer={sleepTimer.cancelTimer}
+                  audioContext={player.audioContext}
+                  eqFilters={player.eqFilters}
+                  onMoreByArtist={handleMoreByArtist}
+                  inline
+                />
+              )}
+
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
                 <TrendingCarousel
