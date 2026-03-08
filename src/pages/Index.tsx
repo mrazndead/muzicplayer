@@ -112,11 +112,24 @@ const Index = () => {
     fetchTracks(query, `Results for "${query}"`);
   }, [fetchTracks]);
 
-  const handleGenreSelect = useCallback((genre: typeof DEFAULT_GENRES[number]) => {
+  const handleGenreSelect = useCallback(async (genre: typeof DEFAULT_GENRES[number]) => {
     setActiveMood(null);
-    const query = genre.queries[Math.floor(Math.random() * genre.queries.length)];
-    fetchTracks(query, `${genre.emoji} ${genre.label}`, genre.id);
-  }, [fetchTracks]);
+    setActiveGenre(genre.id);
+    setLoading(true);
+    setSearchLabel(`${genre.emoji} ${genre.label}`);
+    setHasSearched(true);
+    setActiveTab("home");
+    setCurrentQuery(genre.queries[0]);
+    setHasMore(false);
+    try {
+      const results = await searchTracksMulti(genre.queries, 15);
+      setTracks(results);
+    } catch (err) {
+      console.error("Failed to fetch genre tracks:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const handleMoodSelect = useCallback((mood: typeof DEFAULT_MOODS[number]) => {
     setActiveMood(mood.id);
