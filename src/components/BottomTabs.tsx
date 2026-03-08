@@ -1,5 +1,6 @@
 import { Home, Shuffle, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 export type TabId = "home" | "favorites";
 
@@ -12,6 +13,14 @@ interface BottomTabsProps {
 }
 
 export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, hasPlayer }: BottomTabsProps) {
+  const [randomPressed, setRandomPressed] = useState(false);
+
+  const handleRandomClick = () => {
+    setRandomPressed(true);
+    onRandomPlay();
+    setTimeout(() => setRandomPressed(false), 600);
+  };
+
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
       <div className="glass-card flex items-center justify-around max-w-sm mx-auto py-1.5 px-2 neon-border rounded-2xl">
@@ -33,13 +42,24 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
         </button>
 
         {/* Random */}
-        <button
-          onClick={onRandomPlay}
-          className="flex flex-col items-center gap-0.5 py-2 px-6 transition-all duration-300 relative rounded-xl text-white/60 hover:text-white/80 active:scale-95"
+        <motion.button
+          onClick={handleRandomClick}
+          animate={randomPressed ? { scale: [1, 1.2, 1], rotate: [0, 180, 360] } : {}}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className={`flex flex-col items-center gap-0.5 py-2 px-6 transition-all duration-300 relative rounded-xl
+            ${randomPressed ? "text-primary" : "text-white/60 hover:text-white/80"}`}
         >
-          <Shuffle className="w-5 h-5 relative z-10 stroke-[1.5] text-white/70" />
+          {randomPressed && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0.5 }}
+              animate={{ scale: 2, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 gradient-primary rounded-full"
+            />
+          )}
+          <Shuffle className={`w-5 h-5 relative z-10 stroke-[1.5] transition-colors ${randomPressed ? "text-primary" : "text-white/70"}`} />
           <span className="text-[10px] font-medium relative z-10 text-white/80">Random</span>
-        </button>
+        </motion.button>
 
         {/* Liked */}
         <button
