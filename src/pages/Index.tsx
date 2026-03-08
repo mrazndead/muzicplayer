@@ -179,6 +179,21 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
+  const handleRandomPlay = useCallback(async () => {
+    // Pick a random genre and play a random track from it
+    const randomGenre = DEFAULT_GENRES[Math.floor(Math.random() * DEFAULT_GENRES.length)];
+    const randomQuery = randomGenre.queries[Math.floor(Math.random() * randomGenre.queries.length)];
+    try {
+      const results = await searchTracks(randomQuery, 20);
+      if (results.length > 0) {
+        const randomTrack = results[Math.floor(Math.random() * results.length)];
+        player.playTrack(randomTrack, results, results.indexOf(randomTrack));
+      }
+    } catch (err) {
+      console.error("Failed to play random track:", err);
+    }
+  }, [player]);
+
   const playerPadding = "pb-24";
 
   return (
