@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Heart, Headphones, Share2 } from "lucide-react";
 import { AudiusTrack, getArtworkUrl, formatPlayCount } from "@/lib/audius";
