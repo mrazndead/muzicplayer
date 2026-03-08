@@ -179,6 +179,21 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
+  const handleRandomPlay = useCallback(async () => {
+    // Pick a random genre and play a random track from it
+    const randomGenre = DEFAULT_GENRES[Math.floor(Math.random() * DEFAULT_GENRES.length)];
+    const randomQuery = randomGenre.queries[Math.floor(Math.random() * randomGenre.queries.length)];
+    try {
+      const results = await searchTracks(randomQuery, 20);
+      if (results.length > 0) {
+        const randomTrack = results[Math.floor(Math.random() * results.length)];
+        player.playTrack(randomTrack, results, results.indexOf(randomTrack));
+      }
+    } catch (err) {
+      console.error("Failed to play random track:", err);
+    }
+  }, [player]);
+
   const playerPadding = "pb-24";
 
   return (
@@ -330,41 +345,6 @@ const Index = () => {
             </motion.div>
           )}
 
-          {/* SEARCH TAB */}
-          {activeTab === "search" && (
-            <motion.div
-              key="search"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <h2 className="font-heading text-2xl font-bold gradient-text">Discover</h2>
-              <SearchBar onSearch={handleSearch} isLoading={loading} />
-              <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
-
-              {loading && (
-                <div className="flex items-center justify-center py-16">
-                  <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
-                </div>
-              )}
-
-              {!loading && hasSearched && (
-                <TrackList
-                  tracks={tracks}
-                  currentTrackId={player.currentTrack?.id}
-                  isPlaying={player.isPlaying}
-                  onPlay={handlePlayTrack}
-                  title={searchLabel}
-                  isFavorite={isFavorite}
-                  onToggleFavorite={toggleFavorite}
-                  onLoadMore={loadMoreTracks}
-                  isLoadingMore={loadingMore}
-                  hasMore={hasMore}
-                />
-              )}
-            </motion.div>
-          )}
 
           {/* FAVORITES TAB */}
           {activeTab === "favorites" && (
@@ -418,6 +398,7 @@ const Index = () => {
       <BottomTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onRandomPlay={handleRandomPlay}
         favCount={favorites.length}
         hasPlayer={!!player.currentTrack}
       />
