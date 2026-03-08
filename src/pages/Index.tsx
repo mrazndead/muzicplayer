@@ -223,6 +223,39 @@ const Index = () => {
 
               <MusicVisualizer isPlaying={player.isPlaying} />
 
+              {/* Mini player inline under visualizer */}
+              {player.currentTrack && (
+                <MusicPlayer
+                  currentTrack={player.currentTrack}
+                  isPlaying={player.isPlaying}
+                  currentTime={player.currentTime}
+                  duration={player.duration}
+                  volume={player.volume}
+                  shuffle={player.shuffle}
+                  repeat={player.repeat}
+                  queue={player.queue}
+                  queueIndex={player.queueIndex}
+                  onTogglePlay={player.togglePlay}
+                  onSeek={player.seek}
+                  onVolume={player.setVolume}
+                  onNext={player.nextTrack}
+                  onPrev={player.prevTrack}
+                  onToggleShuffle={player.toggleShuffle}
+                  onToggleRepeat={player.toggleRepeat}
+                  isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
+                  onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
+                  onPlayFromQueue={handlePlayFromQueue}
+                  sleepTimerActive={sleepTimer.isActive}
+                  sleepTimerRemaining={sleepTimer.remainingSeconds}
+                  onStartSleepTimer={sleepTimer.startTimer}
+                  onCancelSleepTimer={sleepTimer.cancelTimer}
+                  audioContext={player.audioContext}
+                  eqFilters={player.eqFilters}
+                  onMoreByArtist={handleMoreByArtist}
+                  inline
+                />
+              )}
+
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
                 <TrendingCarousel
@@ -381,42 +414,6 @@ const Index = () => {
         </AnimatePresence>
       </main>
 
-      {/* Persistent mini player bar */}
-      {player.currentTrack && (
-        <div className="fixed left-0 right-0 bottom-[80px] z-50 px-3">
-          <div className="max-w-screen-xl mx-auto">
-            <MusicPlayer
-              currentTrack={player.currentTrack}
-              isPlaying={player.isPlaying}
-              currentTime={player.currentTime}
-              duration={player.duration}
-              volume={player.volume}
-              shuffle={player.shuffle}
-              repeat={player.repeat}
-              queue={player.queue}
-              queueIndex={player.queueIndex}
-              onTogglePlay={player.togglePlay}
-              onSeek={player.seek}
-              onVolume={player.setVolume}
-              onNext={player.nextTrack}
-              onPrev={player.prevTrack}
-              onToggleShuffle={player.toggleShuffle}
-              onToggleRepeat={player.toggleRepeat}
-              isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
-              onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
-              onPlayFromQueue={handlePlayFromQueue}
-              sleepTimerActive={sleepTimer.isActive}
-              sleepTimerRemaining={sleepTimer.remainingSeconds}
-              onStartSleepTimer={sleepTimer.startTimer}
-              onCancelSleepTimer={sleepTimer.cancelTimer}
-              audioContext={player.audioContext}
-              eqFilters={player.eqFilters}
-              onMoreByArtist={handleMoreByArtist}
-              inline
-            />
-          </div>
-        </div>
-      )}
 
       <BottomTabs
         activeTab={activeTab}
