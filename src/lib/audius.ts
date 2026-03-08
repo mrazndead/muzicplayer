@@ -78,6 +78,35 @@ export async function searchTracks(query: string, limit = 20, offset = 0): Promi
   return json.data || [];
 }
 
+// Multi-query search: runs several queries in parallel, deduplicates, and returns combined results
+export async function searchTracksMulti(queries: string[], limitPerQuery = 15): Promise<AudiusTrack[]> {
+  // Pick 3 random queries for variety without hammering the API
+  const shuffled = [...queries].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 3);
+
+  const results = await Promise.allSettled(
+    selected.map(q => searchTracks(q, limitPerQuery))
+  );
+
+  const seen = new Set<string>();
+  const combined: AudiusTrack[] = [];
+
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      for (const track of result.value) {
+        if (!seen.has(track.id)) {
+          seen.add(track.id);
+          combined.push(track);
+        }
+      }
+    }
+  }
+
+  // Sort by play_count descending for quality results
+  combined.sort((a, b) => (b.play_count || 0) - (a.play_count || 0));
+  return combined;
+}
+
 export async function getTrendingTracks(genre?: string, limit = 20): Promise<AudiusTrack[]> {
   const host = await getHost();
   let url = `${host}/v1/tracks/trending?limit=${limit}&app_name=${APP_NAME}`;
