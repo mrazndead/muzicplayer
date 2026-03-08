@@ -154,23 +154,15 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
         })}
       </div>
 
-      {/* Load More */}
+      {/* Infinite scroll sentinel */}
       {onLoadMore && hasMore && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={onLoadMore}
-            disabled={isLoadingMore}
-            className="px-8 py-2.5 rounded-full glass-card text-foreground text-sm font-medium hover:bg-secondary/40 transition-colors disabled:opacity-50 neon-border"
-          >
-            {isLoadingMore ? (
-              <span className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                Loading...
-              </span>
-            ) : (
-              "Load More"
-            )}
-          </button>
+        <div ref={sentinelRef} className="flex justify-center py-6">
+          {isLoadingMore && (
+            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              Loading more...
+            </span>
+          )}
         </div>
       )}
     </div>
