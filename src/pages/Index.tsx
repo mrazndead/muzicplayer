@@ -398,6 +398,7 @@ const Index = () => {
       <BottomTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onRandomPlay={handleRandomPlay}
         favCount={favorites.length}
         hasPlayer={!!player.currentTrack}
       />
