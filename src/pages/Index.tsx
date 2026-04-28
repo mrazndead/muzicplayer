@@ -402,6 +402,27 @@ const Index = () => {
               )}
             </motion.div>
           )}
+
+          {/* LIBRARY TAB */}
+          {activeTab === "library" && (
+            <motion.div
+              key="library"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <LocalLibrary
+                tracks={localLib.tracks}
+                loading={localLib.loading}
+                currentTrackId={player.currentTrack?.id}
+                isPlaying={player.isPlaying}
+                onAddFiles={(files) => localLib.addFiles(files)}
+                onPlay={handlePlayLocal}
+                onRemove={localLib.removeTrack}
+              />
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
