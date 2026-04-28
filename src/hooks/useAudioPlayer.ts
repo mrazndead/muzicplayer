@@ -126,7 +126,7 @@ export function useAudioPlayer() {
   const playAudioForTrack = useCallback(async (track: AudiusTrack) => {
     const audio = audioRef.current;
     if (!audio) return;
-    const url = await getStreamUrl(track.id);
+    const url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
     audio.src = url;
     audio.play().catch(console.error);
     updateMediaSession(track);
