@@ -136,8 +136,23 @@ export function useAudioPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     const url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
+    // Blob URLs are same-origin and don't need (and may be tripped up by) crossOrigin.
+    // Remote streams need crossOrigin="anonymous" so the AudioContext EQ can read samples.
+    const isBlob = url.startsWith("blob:");
+    if (isBlob) {
+      if (audio.crossOrigin !== null) audio.removeAttribute("crossorigin");
+    } else {
+      if (audio.crossOrigin !== "anonymous") audio.crossOrigin = "anonymous";
+    }
     audio.src = url;
-    audio.play().catch(console.error);
+    try {
+      audio.load();
+    } catch {}
+    try {
+      await audio.play();
+    } catch (err) {
+      console.error("audio.play() failed:", err);
+    }
     updateMediaSession(track);
   }, [updateMediaSession]);
 
