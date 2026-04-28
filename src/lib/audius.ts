@@ -66,6 +66,10 @@ export interface AudiusTrack {
   play_count: number;
   permalink: string;
   description?: string;
+  /** Optional pre-resolved stream URL. When set, the player uses this directly (e.g. local files via blob URL). */
+  streamUrl?: string;
+  /** True when this is a user-uploaded local file. */
+  isLocal?: boolean;
 }
 
 export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
