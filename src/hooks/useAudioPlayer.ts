@@ -60,30 +60,39 @@ export function useAudioPlayer() {
     audio.addEventListener("play", () => {
       // Lazily create AudioContext + EQ filters on first play
       if (!audioContextRef.current) {
-        const ctx = new AudioContext();
-        audioContextRef.current = ctx;
-        const source = ctx.createMediaElementSource(audio);
-        sourceRef.current = source;
+        try {
+          const ctx = new AudioContext();
+          audioContextRef.current = ctx;
+          const source = ctx.createMediaElementSource(audio);
+          sourceRef.current = source;
 
-        const EQ_FREQS = [60, 230, 910, 3600, 14000];
-        const filters = EQ_FREQS.map((freq, i) => {
-          const f = ctx.createBiquadFilter();
-          f.type = i === 0 ? "lowshelf" : i === EQ_FREQS.length - 1 ? "highshelf" : "peaking";
-          f.frequency.value = freq;
-          f.gain.value = 0;
-          f.Q.value = 1;
-          return f;
-        });
-        // Chain: source -> filters -> destination
-        let prev: AudioNode = source;
-        filters.forEach((f) => { prev.connect(f); prev = f; });
-        prev.connect(ctx.destination);
-        filtersRef.current = filters;
+          const EQ_FREQS = [60, 230, 910, 3600, 14000];
+          const filters = EQ_FREQS.map((freq, i) => {
+            const f = ctx.createBiquadFilter();
+            f.type = i === 0 ? "lowshelf" : i === EQ_FREQS.length - 1 ? "highshelf" : "peaking";
+            f.frequency.value = freq;
+            f.gain.value = 0;
+            f.Q.value = 1;
+            return f;
+          });
+          // Chain: source -> filters -> destination
+          let prev: AudioNode = source;
+          filters.forEach((f) => { prev.connect(f); prev = f; });
+          prev.connect(ctx.destination);
+          filtersRef.current = filters;
+        } catch (err) {
+          console.warn("AudioContext/EQ unavailable, falling back to plain playback:", err);
+        }
       }
-      if (audioContextRef.current.state === "suspended") {
-        audioContextRef.current.resume();
+      if (audioContextRef.current && audioContextRef.current.state === "suspended") {
+        audioContextRef.current.resume().catch(() => {});
       }
       setState((s) => ({ ...s, isPlaying: true }));
+    });
+    audio.addEventListener("error", () => {
+      const err = audio.error;
+      console.error("Audio playback error:", err?.code, err?.message);
+      setState((s) => ({ ...s, isPlaying: false }));
     });
 
     return () => {
@@ -127,8 +136,23 @@ export function useAudioPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     const url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
+    // Blob URLs are same-origin and don't need (and may be tripped up by) crossOrigin.
+    // Remote streams need crossOrigin="anonymous" so the AudioContext EQ can read samples.
+    const isBlob = url.startsWith("blob:");
+    if (isBlob) {
+      if (audio.crossOrigin !== null) audio.removeAttribute("crossorigin");
+    } else {
+      if (audio.crossOrigin !== "anonymous") audio.crossOrigin = "anonymous";
+    }
     audio.src = url;
-    audio.play().catch(console.error);
+    try {
+      audio.load();
+    } catch {}
+    try {
+      await audio.play();
+    } catch (err) {
+      console.error("audio.play() failed:", err);
+    }
     updateMediaSession(track);
   }, [updateMediaSession]);
 
