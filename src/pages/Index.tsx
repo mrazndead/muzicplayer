@@ -172,6 +172,14 @@ const Index = () => {
     }
   }, [player, recentlyPlayed]);
 
+  const handlePlayLocal = useCallback((track: AudiusTrack, index: number) => {
+    if (track.id === player.currentTrack?.id) {
+      player.togglePlay();
+    } else {
+      player.playTrack(track, localLib.tracks, index);
+    }
+  }, [player, localLib.tracks]);
+
   const handlePlayFromQueue = useCallback((track: AudiusTrack, index: number) => {
     player.playTrack(track, player.queue, index);
   }, [player]);
