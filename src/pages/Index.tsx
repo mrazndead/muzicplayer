@@ -27,6 +27,7 @@ const Index = () => {
   const player = useAudioPlayer();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { recentlyPlayed, addToRecentlyPlayed } = useRecentlyPlayed();
+  const localLib = useLocalTracks();
   const [tracks, setTracks] = useState<AudiusTrack[]>([]);
   const [trendingTracks, setTrendingTracks] = useState<AudiusTrack[]>([]);
   const [loading, setLoading] = useState(false);
