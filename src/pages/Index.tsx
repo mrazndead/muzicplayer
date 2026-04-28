@@ -12,11 +12,13 @@ import { MusicPlayer } from "@/components/MusicPlayer";
 import { TrendingCarousel } from "@/components/TrendingCarousel";
 import { MoodGrid } from "@/components/MoodGrid";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
+import { LocalLibrary } from "@/components/LocalLibrary";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
+import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { searchTracks, searchTracksMulti, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 const TRACKS_PER_PAGE = 50;
