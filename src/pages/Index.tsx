@@ -12,11 +12,13 @@ import { MusicPlayer } from "@/components/MusicPlayer";
 import { TrendingCarousel } from "@/components/TrendingCarousel";
 import { MoodGrid } from "@/components/MoodGrid";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
+import { LocalLibrary } from "@/components/LocalLibrary";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
+import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { searchTracks, searchTracksMulti, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 const TRACKS_PER_PAGE = 50;
@@ -25,6 +27,7 @@ const Index = () => {
   const player = useAudioPlayer();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { recentlyPlayed, addToRecentlyPlayed } = useRecentlyPlayed();
+  const localLib = useLocalTracks();
   const [tracks, setTracks] = useState<AudiusTrack[]>([]);
   const [trendingTracks, setTrendingTracks] = useState<AudiusTrack[]>([]);
   const [loading, setLoading] = useState(false);
@@ -168,6 +171,14 @@ const Index = () => {
       player.playTrack(track, recentlyPlayed, index);
     }
   }, [player, recentlyPlayed]);
+
+  const handlePlayLocal = useCallback((track: AudiusTrack, index: number) => {
+    if (track.id === player.currentTrack?.id) {
+      player.togglePlay();
+    } else {
+      player.playTrack(track, localLib.tracks, index);
+    }
+  }, [player, localLib.tracks]);
 
   const handlePlayFromQueue = useCallback((track: AudiusTrack, index: number) => {
     player.playTrack(track, player.queue, index);
@@ -389,6 +400,27 @@ const Index = () => {
                   <p className="text-muted-foreground/50 text-xs mt-1">Tap the ❤️ on any track to save it</p>
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* LIBRARY TAB */}
+          {activeTab === "library" && (
+            <motion.div
+              key="library"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <LocalLibrary
+                tracks={localLib.tracks}
+                loading={localLib.loading}
+                currentTrackId={player.currentTrack?.id}
+                isPlaying={player.isPlaying}
+                onAddFiles={(files) => localLib.addFiles(files)}
+                onPlay={handlePlayLocal}
+                onRemove={localLib.removeTrack}
+              />
             </motion.div>
           )}
         </AnimatePresence>
