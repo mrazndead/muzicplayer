@@ -312,7 +312,7 @@ const Index = () => {
                         >
                           <div className={`relative w-32 h-32 rounded-2xl overflow-hidden mb-2 card-hover ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
                             <img
-                              src={track.artwork?.["480x480"] || track.artwork?.["150x150"] || "/placeholder.svg"}
+                              src={getArtworkUrl(track, "480x480")}
                               alt={track.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               loading="lazy"
