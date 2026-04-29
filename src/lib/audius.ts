@@ -1,3 +1,5 @@
+import localTrackCover from "@/assets/local-track-cover.jpg";
+
 const APP_NAME = "lovable_pulse";
 
 let cachedHosts: string[] = [];
