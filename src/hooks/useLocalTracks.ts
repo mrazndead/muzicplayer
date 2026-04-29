@@ -124,20 +124,19 @@ export function useLocalTracks() {
     }
   }, [urlMap]);
 
-  // Request persistent storage so browser doesn't evict IndexedDB on restart
   useEffect(() => {
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persisted().then((already) => {
-        if (!already) {
-          navigator.storage.persist().then((granted) => {
-            console.log("[LocalTracks] Persistent storage:", granted ? "granted" : "denied");
-          }).catch(() => {});
-        }
-      }).catch(() => {});
+    // Request persistent storage so the browser doesn't evict IndexedDB on restart
+    if (navigator.storage?.persist) {
+      navigator.storage.persisted()
+        .then((already) => {
+          if (!already) {
+            navigator.storage.persist().then((granted) => {
+              console.log("[LocalTracks] Persistent storage:", granted ? "granted" : "denied");
+            }).catch(() => {});
+          }
+        })
+        .catch(() => {});
     }
-  }, []);
-
-  useEffect(() => {
     refresh();
     return () => {
       // Revoke all blob URLs on unmount
