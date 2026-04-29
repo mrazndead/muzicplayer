@@ -1,4 +1,19 @@
-import localTrackCover from "@/assets/local-track-cover.jpg";
+import localCover1 from "@/assets/local-track-cover.jpg";
+import localCover2 from "@/assets/local-cover-2.jpg";
+import localCover3 from "@/assets/local-cover-3.jpg";
+import localCover4 from "@/assets/local-cover-4.jpg";
+import localCover5 from "@/assets/local-cover-5.jpg";
+import localCover6 from "@/assets/local-cover-6.jpg";
+import localCover7 from "@/assets/local-cover-7.jpg";
+import localCover8 from "@/assets/local-cover-8.jpg";
+
+const LOCAL_COVERS = [localCover1, localCover2, localCover3, localCover4, localCover5, localCover6, localCover7, localCover8];
+
+function pickLocalCover(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return LOCAL_COVERS[h % LOCAL_COVERS.length];
+}
 
 const APP_NAME = "lovable_pulse";
 
@@ -128,7 +143,7 @@ export async function getStreamUrl(trackId: string): Promise<string> {
 }
 
 export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
-  if (track.isLocal) return localTrackCover;
+  if (track.isLocal) return pickLocalCover(track.id);
   return track.artwork?.[size] || track.artwork?.["150x150"] || "/placeholder.svg";
 }
 
