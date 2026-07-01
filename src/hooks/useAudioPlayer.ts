@@ -89,15 +89,32 @@ export function useAudioPlayer() {
       }
       setState((s) => ({ ...s, isPlaying: true }));
     });
-    audio.addEventListener("error", () => {
+    audio.addEventListener("error", async () => {
       const err = audio.error;
       console.error("Audio playback error:", err?.code, err?.message);
-      setState((s) => ({ ...s, isPlaying: false }));
-      // Auto-skip broken remote tracks so playback keeps flowing.
       const track = stateRef.current.currentTrack;
-      if (track && !track.isLocal) {
-        setTimeout(() => handleTrackEndRef.current?.(), 400);
+      if (!track || track.isLocal) {
+        setState((s) => ({ ...s, isPlaying: false }));
+        return;
       }
+      // Retry once with a rotated Audius host before giving up.
+      const retried = (audio as any).__pulseRetried === track.id;
+      if (!retried) {
+        (audio as any).__pulseRetried = track.id;
+        try {
+          const { rotateStreamHost, getStreamUrl } = await import("@/lib/audius");
+          rotateStreamHost();
+          const url = await getStreamUrl(track.id);
+          audio.src = url;
+          audio.load();
+          await audio.play();
+          return;
+        } catch (e) {
+          console.warn("Retry with rotated host failed:", e);
+        }
+      }
+      setState((s) => ({ ...s, isPlaying: false }));
+      setTimeout(() => handleTrackEndRef.current?.(), 400);
     });
 
     return () => {
