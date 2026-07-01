@@ -289,8 +289,8 @@ const Index = () => {
                   onVolume={player.setVolume}
                   onNext={player.nextTrack}
                   onPrev={player.prevTrack}
-                  onToggleShuffle={player.toggleShuffle}
-                  onToggleRepeat={player.toggleRepeat}
+                  onToggleShuffle={handleToggleShuffle}
+                  onToggleRepeat={handleToggleRepeat}
                   isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
                   onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
                   onPlayFromQueue={handlePlayFromQueue}
