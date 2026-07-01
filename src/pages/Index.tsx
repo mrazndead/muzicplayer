@@ -294,11 +294,13 @@ const Index = () => {
 
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
-                <TrendingCarousel
-                  tracks={trendingTracks}
-                  onPlay={handlePlayTrending}
-                  currentTrackId={player.currentTrack?.id}
-                />
+                <Suspense fallback={<LazyFallback />}>
+                  <TrendingCarousel
+                    tracks={trendingTracks}
+                    onPlay={handlePlayTrending}
+                    currentTrackId={player.currentTrack?.id}
+                  />
+                </Suspense>
               )}
 
               {/* Recently Played */}
