@@ -255,7 +255,9 @@ const Index = () => {
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
               <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
 
-              <MusicVisualizer isPlaying={player.isPlaying} />
+              <Suspense fallback={<LazyFallback />}>
+                <MusicVisualizer isPlaying={player.isPlaying} />
+              </Suspense>
 
               {/* Mini player inline under visualizer */}
               {player.currentTrack && (
