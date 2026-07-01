@@ -44,6 +44,11 @@ function rotateHost() {
   }
 }
 
+/** Public helper — rotates to the next Audius discovery host (used to recover from stream errors). */
+export function rotateStreamHost() {
+  rotateHost();
+}
+
 async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
