@@ -93,6 +93,11 @@ export function useAudioPlayer() {
       const err = audio.error;
       console.error("Audio playback error:", err?.code, err?.message);
       setState((s) => ({ ...s, isPlaying: false }));
+      // Auto-skip broken remote tracks so playback keeps flowing.
+      const track = stateRef.current.currentTrack;
+      if (track && !track.isLocal) {
+        setTimeout(() => handleTrackEndRef.current?.(), 400);
+      }
     });
 
     return () => {
