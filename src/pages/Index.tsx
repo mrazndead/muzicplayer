@@ -213,6 +213,19 @@ const Index = () => {
     }
   }, [player]);
 
+  const handleToggleRepeat = useCallback(async () => {
+    player.toggleRepeat();
+    const next = player.repeat === "off" ? "Repeat all" : player.repeat === "all" ? "Repeat one" : "Repeat off";
+    const { toast } = await import("sonner");
+    toast(next, { duration: 1200 });
+  }, [player]);
+
+  const handleToggleShuffle = useCallback(async () => {
+    player.toggleShuffle();
+    const { toast } = await import("sonner");
+    toast(player.shuffle ? "Shuffle off" : "Shuffle on", { duration: 1200 });
+  }, [player]);
+
   const playerPadding = "pb-24";
 
   return (
