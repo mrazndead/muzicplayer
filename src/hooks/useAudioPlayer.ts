@@ -93,6 +93,11 @@ export function useAudioPlayer() {
       const err = audio.error;
       console.error("Audio playback error:", err?.code, err?.message);
       setState((s) => ({ ...s, isPlaying: false }));
+      // Auto-skip broken remote tracks so playback keeps flowing.
+      const track = stateRef.current.currentTrack;
+      if (track && !track.isLocal) {
+        setTimeout(() => handleTrackEndRef.current?.(), 400);
+      }
     });
 
     return () => {
@@ -103,11 +108,11 @@ export function useAudioPlayer() {
 
   const updateMediaSession = useCallback((track: AudiusTrack) => {
     if (!("mediaSession" in navigator)) return;
-    const artwork = track.artwork;
-    const artworkSources: MediaImage[] = [];
-    if (artwork?.["150x150"]) artworkSources.push({ src: artwork["150x150"], sizes: "150x150", type: "image/jpeg" });
-    if (artwork?.["480x480"]) artworkSources.push({ src: artwork["480x480"], sizes: "480x480", type: "image/jpeg" });
-    if (artwork?.["1000x1000"]) artworkSources.push({ src: artwork["1000x1000"], sizes: "1000x1000", type: "image/jpeg" });
+    const artworkSources: MediaImage[] = [
+      { src: getArtworkUrl(track, "150x150"), sizes: "150x150", type: "image/jpeg" },
+      { src: getArtworkUrl(track, "480x480"), sizes: "480x480", type: "image/jpeg" },
+      { src: getArtworkUrl(track, "1000x1000"), sizes: "1000x1000", type: "image/jpeg" },
+    ];
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.title,

@@ -1,18 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
 import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { MusicVisualizer } from "@/components/MusicVisualizer";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
 import { MusicPlayer } from "@/components/MusicPlayer";
-import { TrendingCarousel } from "@/components/TrendingCarousel";
 import { MoodGrid } from "@/components/MoodGrid";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
-import { LocalLibrary } from "@/components/LocalLibrary";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
@@ -20,6 +17,17 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { searchTracks, searchTracksMulti, getTrendingTracks, getArtworkUrl, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+
+// Lazy-load heavy visual / rarely-used components to speed up first paint.
+const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
+const TrendingCarousel = lazy(() => import("@/components/TrendingCarousel").then(m => ({ default: m.TrendingCarousel })));
+const LocalLibrary = lazy(() => import("@/components/LocalLibrary").then(m => ({ default: m.LocalLibrary })));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-10">
+    <div className="w-8 h-8 rounded-full gradient-primary animate-pulse opacity-60" />
+  </div>
+);
 
 const TRACKS_PER_PAGE = 50;
 
@@ -205,6 +213,19 @@ const Index = () => {
     }
   }, [player]);
 
+  const handleToggleRepeat = useCallback(async () => {
+    player.toggleRepeat();
+    const next = player.repeat === "off" ? "Repeat all" : player.repeat === "all" ? "Repeat one" : "Repeat off";
+    const { toast } = await import("sonner");
+    toast(next, { duration: 1200 });
+  }, [player]);
+
+  const handleToggleShuffle = useCallback(async () => {
+    player.toggleShuffle();
+    const { toast } = await import("sonner");
+    toast(player.shuffle ? "Shuffle off" : "Shuffle on", { duration: 1200 });
+  }, [player]);
+
   const playerPadding = "pb-24";
 
   return (
@@ -247,7 +268,9 @@ const Index = () => {
               <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
               <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
 
-              <MusicVisualizer isPlaying={player.isPlaying} />
+              <Suspense fallback={<LazyFallback />}>
+                <MusicVisualizer isPlaying={player.isPlaying} />
+              </Suspense>
 
               {/* Mini player inline under visualizer */}
               {player.currentTrack && (
@@ -266,8 +289,8 @@ const Index = () => {
                   onVolume={player.setVolume}
                   onNext={player.nextTrack}
                   onPrev={player.prevTrack}
-                  onToggleShuffle={player.toggleShuffle}
-                  onToggleRepeat={player.toggleRepeat}
+                  onToggleShuffle={handleToggleShuffle}
+                  onToggleRepeat={handleToggleRepeat}
                   isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
                   onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
                   onPlayFromQueue={handlePlayFromQueue}
@@ -284,11 +307,13 @@ const Index = () => {
 
               {/* Trending */}
               {!hasSearched && trendingTracks.length > 0 && (
-                <TrendingCarousel
-                  tracks={trendingTracks}
-                  onPlay={handlePlayTrending}
-                  currentTrackId={player.currentTrack?.id}
-                />
+                <Suspense fallback={<LazyFallback />}>
+                  <TrendingCarousel
+                    tracks={trendingTracks}
+                    onPlay={handlePlayTrending}
+                    currentTrackId={player.currentTrack?.id}
+                  />
+                </Suspense>
               )}
 
               {/* Recently Played */}
@@ -412,15 +437,17 @@ const Index = () => {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <LocalLibrary
-                tracks={localLib.tracks}
-                loading={localLib.loading}
-                currentTrackId={player.currentTrack?.id}
-                isPlaying={player.isPlaying}
-                onAddFiles={(files) => localLib.addFiles(files)}
-                onPlay={handlePlayLocal}
-                onRemove={localLib.removeTrack}
-              />
+              <Suspense fallback={<LazyFallback />}>
+                <LocalLibrary
+                  tracks={localLib.tracks}
+                  loading={localLib.loading}
+                  currentTrackId={player.currentTrack?.id}
+                  isPlaying={player.isPlaying}
+                  onAddFiles={(files) => localLib.addFiles(files)}
+                  onPlay={handlePlayLocal}
+                  onRemove={localLib.removeTrack}
+                />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>
