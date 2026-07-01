@@ -1,18 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
 import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { MusicVisualizer } from "@/components/MusicVisualizer";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
 import { MusicPlayer } from "@/components/MusicPlayer";
-import { TrendingCarousel } from "@/components/TrendingCarousel";
 import { MoodGrid } from "@/components/MoodGrid";
 import { BottomTabs, TabId } from "@/components/BottomTabs";
-import { LocalLibrary } from "@/components/LocalLibrary";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
@@ -20,6 +17,17 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { searchTracks, searchTracksMulti, getTrendingTracks, getArtworkUrl, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+
+// Lazy-load heavy visual / rarely-used components to speed up first paint.
+const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
+const TrendingCarousel = lazy(() => import("@/components/TrendingCarousel").then(m => ({ default: m.TrendingCarousel })));
+const LocalLibrary = lazy(() => import("@/components/LocalLibrary").then(m => ({ default: m.LocalLibrary })));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-10">
+    <div className="w-8 h-8 rounded-full gradient-primary animate-pulse opacity-60" />
+  </div>
+);
 
 const TRACKS_PER_PAGE = 50;
 
