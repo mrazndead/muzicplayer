@@ -229,20 +229,26 @@ const Index = () => {
   const playerPadding = "pb-24";
 
   return (
-    <div className={`min-h-screen ${playerPadding}`}>
+    <div className={`min-h-screen ${playerPadding} relative`}>
       {/* Ambient background */}
       <div className="app-bg" />
+      {/* Decorative neon glows */}
+      <div className="pointer-events-none fixed -top-24 -right-24 w-72 h-72 rounded-full bg-fuchsia-600/10 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed top-1/3 -left-24 w-80 h-80 rounded-full bg-violet-600/10 blur-[120px] -z-10" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 glass-heavy border-b border-border/20">
+      <header className="sticky top-0 z-40 glass-heavy border-b border-white/5">
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl gradient-primary flex items-center justify-center glow-sm">
               <Disc3 className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <h1 className="font-heading text-xl font-bold gradient-text tracking-tight">
-              Pulse
-            </h1>
+            <div className="flex flex-col leading-none">
+              <h1 className="font-heading text-xl font-extrabold gradient-text tracking-tight uppercase">
+                Pulse
+              </h1>
+              <span className="text-[8px] text-muted-foreground uppercase tracking-[0.24em] font-semibold mt-0.5">Resonate with reality</span>
+            </div>
           </div>
           <DailyQuote />
           <div className="ml-auto flex items-center gap-1.5">
@@ -250,6 +256,7 @@ const Index = () => {
           </div>
         </div>
       </header>
+
 
       <main className="max-w-screen-xl mx-auto px-4 py-5 space-y-6">
         <AnimatePresence mode="wait">
