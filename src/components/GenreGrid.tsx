@@ -16,17 +16,17 @@ export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
     return (
       <motion.button
         key={genre.id}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: i * 0.02 }}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.015 }}
         onClick={() => onSelectGenre(genre)}
-        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300 whitespace-nowrap
+        className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200
           ${isActive
             ? "gradient-primary text-primary-foreground shadow-lg glow-sm"
-            : "glass-card text-muted-foreground hover:text-foreground"
+            : "bg-white/[0.03] border border-white/[0.06] text-muted-foreground hover:text-foreground hover:border-white/10 hover:bg-white/[0.05]"
           }`}
       >
-        <span className="mr-1">{genre.emoji}</span>
+        <span className="mr-1 opacity-90">{genre.emoji}</span>
         {genre.label}
       </motion.button>
     );
@@ -47,4 +47,3 @@ export function GenreGrid({ activeGenre, onSelectGenre }: GenreGridProps) {
     </div>
   );
 }
-

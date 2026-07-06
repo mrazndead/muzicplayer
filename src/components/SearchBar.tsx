@@ -20,14 +20,14 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full max-w-xl mx-auto">
-      <div className="relative glass-card overflow-hidden focus-within:ring-1 focus-within:ring-primary/40 transition-all">
+      <div className="relative rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/30 transition-all">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Search tracks, artists, genres..."
-          className="w-full bg-transparent py-3.5 pl-11 pr-11 text-foreground placeholder:text-muted-foreground outline-none font-body text-sm"
+          placeholder="Search tracks, artists, genres…"
+          className="w-full bg-transparent py-3 pl-11 pr-11 text-foreground placeholder:text-muted-foreground/70 outline-none font-body text-sm"
         />
         {value && (
           <button
@@ -45,5 +45,6 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         </div>
       )}
     </form>
+
   );
 }
