@@ -50,13 +50,13 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
 
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
-      <div className="glass-card flex items-center justify-around max-w-sm mx-auto py-1.5 px-2 neon-border rounded-2xl">
+      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full bg-zinc-950/80 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         {tabBtn("home", Home, "Home")}
 
         {/* Random */}
         <motion.button
           onClick={handleRandomClick}
-          animate={randomPressed ? { scale: [1, 1.2, 1], rotate: [0, 180, 360] } : {}}
+          animate={randomPressed ? { scale: [1, 1.15, 1], rotate: [0, 180, 360] } : {}}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-xl
             ${randomPressed ? "text-primary" : "text-white/60 hover:text-white/80"}`}
@@ -79,3 +79,4 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
     </nav>
   );
 }
+
