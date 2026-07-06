@@ -24,19 +24,19 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
   const tabBtn = (id: TabId, Icon: typeof Home, label: string, badge?: number) => (
     <button
       onClick={() => onTabChange(id)}
-      className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-xl
+      className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
         ${activeTab === id ? "text-white" : "text-white/60 hover:text-white/80"}`}
     >
       {activeTab === id && (
         <motion.div
           layoutId="tab-bg"
-          className="absolute inset-0 gradient-primary opacity-15 rounded-xl"
+          className="absolute inset-0 gradient-primary opacity-20 rounded-full"
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />
       )}
       <Icon
         className={`w-5 h-5 relative z-10 stroke-[1.5] ${
-          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.6)]" : "text-white/70"
+          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-white/70"
         }`}
       />
       <span className="text-[10px] font-medium relative z-10 text-white/80">{label}</span>
@@ -47,6 +47,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
       )}
     </button>
   );
+
 
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
