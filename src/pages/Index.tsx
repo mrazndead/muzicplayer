@@ -247,7 +247,6 @@ const Index = () => {
               <h1 className="font-heading text-xl font-extrabold gradient-text tracking-tight uppercase">
                 Pulse
               </h1>
-              <span className="text-[8px] text-muted-foreground uppercase tracking-[0.24em] font-semibold mt-0.5">Resonate with reality</span>
             </div>
           </div>
           <DailyQuote />
