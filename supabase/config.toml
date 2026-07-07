@@ -1,1 +1,4 @@
 project_id = "soexpkmyqhkfszweklbm"
+
+[functions.daily-quote]
+verify_jwt = false
