@@ -97,9 +97,10 @@ export function useAudioPlayer() {
         setState((s) => ({ ...s, isPlaying: false }));
         return;
       }
-      // Retry once with a rotated Audius host before giving up.
+      // Retry with a rotated Audius discovery host only for Audius-sourced tracks.
+      const isAudius = (track.source ?? "audius") === "audius";
       const retried = (audio as any).__pulseRetried === track.id;
-      if (!retried) {
+      if (isAudius && !retried) {
         (audio as any).__pulseRetried = track.id;
         try {
           const { rotateStreamHost, getStreamUrl } = await import("@/lib/audius");

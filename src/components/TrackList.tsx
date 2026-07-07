@@ -25,13 +25,22 @@ function formatDuration(seconds: number): string {
 }
 
 function shareTrack(track: AudiusTrack) {
-  const url = `https://audius.co${track.permalink}`;
+  const url = track.permalink?.startsWith("http")
+    ? track.permalink
+    : `https://audius.co${track.permalink}`;
   if (navigator.share) {
     navigator.share({ title: track.title, text: `${track.title} by ${track.user.name}`, url }).catch(() => {});
   } else {
     navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => {});
   }
 }
+
+const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
+  audius: { label: "AUDIUS", className: "bg-fuchsia-500/15 text-fuchsia-300 ring-fuchsia-400/20" },
+  jamendo: { label: "JAMENDO", className: "bg-emerald-500/15 text-emerald-300 ring-emerald-400/20" },
+  archive: { label: "ARCHIVE", className: "bg-amber-500/15 text-amber-300 ring-amber-400/20" },
+  local: { label: "LOCAL", className: "bg-sky-500/15 text-sky-300 ring-sky-400/20" },
+};
 
 export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore }: TrackListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -115,6 +124,16 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   <p className="text-xs text-muted-foreground line-clamp-1">
                     {track.user.name}
                   </p>
+                  {(() => {
+                    const src = track.source ?? (track.isLocal ? "local" : "audius");
+                    const meta = SOURCE_LABELS[src];
+                    if (!meta || src === "audius") return null;
+                    return (
+                      <span className={`text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded ring-1 ${meta.className} flex-shrink-0`}>
+                        {meta.label}
+                      </span>
+                    );
+                  })()}
                   {track.play_count > 0 && (
                     <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 flex-shrink-0">
                       <Headphones className="w-2.5 h-2.5" />

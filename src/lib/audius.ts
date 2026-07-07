@@ -77,6 +77,8 @@ async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
   return fetch(url); // fallback
 }
 
+export type TrackSource = "audius" | "jamendo" | "archive" | "local";
+
 export interface AudiusTrack {
   id: string;
   title: string;
@@ -92,46 +94,70 @@ export interface AudiusTrack {
   streamUrl?: string;
   /** True when this is a user-uploaded local file. */
   isLocal?: boolean;
+  /** Where this track was fetched from. Defaults to "audius" for backwards-compat. */
+  source?: TrackSource;
 }
 
-export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
+async function searchAudiusOnly(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
   const host = await getHost();
   const sortOptions = ["relevant", "popular", "recent"] as const;
   const sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
   const url = `${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&sort_method=${sort}&app_name=${APP_NAME}`;
   const res = await fetchWithRetry(url);
   const json = await res.json();
-  return json.data || [];
+  const tracks: AudiusTrack[] = json.data || [];
+  return tracks.map((t) => ({ ...t, source: "audius" as const }));
 }
 
-// Multi-query search: runs several queries in parallel, deduplicates, and returns combined results
-export async function searchTracksMulti(queries: string[], limitPerQuery = 15): Promise<AudiusTrack[]> {
-  // Pick 3 random queries for variety without hammering the API
-  const shuffled = [...queries].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, 3);
-
-  const results = await Promise.allSettled(
-    selected.map(q => searchTracks(q, limitPerQuery))
-  );
-
+function dedupeAndRank(tracks: AudiusTrack[]): AudiusTrack[] {
   const seen = new Set<string>();
   const combined: AudiusTrack[] = [];
-
-  for (const result of results) {
-    if (result.status === "fulfilled") {
-      for (const track of result.value) {
-        if (!seen.has(track.id)) {
-          seen.add(track.id);
-          combined.push(track);
-        }
-      }
-    }
+  for (const t of tracks) {
+    const key = t.id || `${t.title}|${t.user?.name}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    combined.push(t);
   }
-
-  // Sort by play_count descending for quality results
   combined.sort((a, b) => (b.play_count || 0) - (a.play_count || 0));
   return combined;
 }
+
+/**
+ * Federated search across Audius, Jamendo, and Internet Archive.
+ * When offset > 0, pages Audius only (the other sources return finite result sets).
+ */
+export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
+  if (offset > 0) return searchAudiusOnly(query, limit, offset);
+
+  // Dynamic imports keep the Audius-only bundle path unchanged and avoid circular loads.
+  const [{ searchJamendo }, { searchArchive }] = await Promise.all([
+    import("@/lib/sources/jamendo"),
+    import("@/lib/sources/archive"),
+  ]);
+
+  const results = await Promise.allSettled([
+    searchAudiusOnly(query, limit, 0),
+    searchJamendo(query, Math.min(30, Math.max(15, Math.floor(limit / 2)))),
+    searchArchive(query, 10),
+  ]);
+
+  const merged: AudiusTrack[] = [];
+  for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
+  return dedupeAndRank(merged);
+}
+
+// Multi-query federated search: fans out several queries across all sources.
+export async function searchTracksMulti(queries: string[], limitPerQuery = 15): Promise<AudiusTrack[]> {
+  const shuffled = [...queries].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 3);
+
+  const results = await Promise.allSettled(selected.map((q) => searchTracks(q, limitPerQuery, 0)));
+
+  const merged: AudiusTrack[] = [];
+  for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
+  return dedupeAndRank(merged);
+}
+
 
 export async function getTrendingTracks(genre?: string, limit = 20): Promise<AudiusTrack[]> {
   const host = await getHost();
