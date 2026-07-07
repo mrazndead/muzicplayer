@@ -124,6 +124,16 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   <p className="text-xs text-muted-foreground line-clamp-1">
                     {track.user.name}
                   </p>
+                  {(() => {
+                    const src = track.source ?? (track.isLocal ? "local" : "audius");
+                    const meta = SOURCE_LABELS[src];
+                    if (!meta || src === "audius") return null;
+                    return (
+                      <span className={`text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded ring-1 ${meta.className} flex-shrink-0`}>
+                        {meta.label}
+                      </span>
+                    );
+                  })()}
                   {track.play_count > 0 && (
                     <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 flex-shrink-0">
                       <Headphones className="w-2.5 h-2.5" />
