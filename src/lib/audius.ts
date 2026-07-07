@@ -149,7 +149,8 @@ export async function getStreamUrl(trackId: string): Promise<string> {
 
 export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
   if (track.isLocal) return pickLocalCover(track.id);
-  return track.artwork?.[size] || track.artwork?.["150x150"] || "/placeholder.svg";
+  const art = track.artwork?.[size] || track.artwork?.["480x480"] || track.artwork?.["150x150"] || track.artwork?.["1000x1000"];
+  return art || pickLocalCover(track.id);
 }
 
 export function formatPlayCount(count: number): string {
