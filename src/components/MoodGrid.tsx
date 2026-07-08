@@ -19,7 +19,6 @@ export function MoodGrid({ activeMood, onSelectMood }: {
 }) {
   return (
     <div>
-      <h2 className="text-[10px] font-bold text-muted-foreground mb-3 px-1 tracking-[0.18em] uppercase">Moods</h2>
       <div className="grid grid-cols-4 gap-2.5">
         {DEFAULT_MOODS.map((mood, i) => {
           const isActive = activeMood === mood.id;

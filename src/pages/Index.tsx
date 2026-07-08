@@ -232,9 +232,9 @@ const Index = () => {
     <div className={`min-h-screen ${playerPadding} relative`}>
       {/* Ambient background */}
       <div className="app-bg" />
-      {/* Decorative neon glows */}
-      <div className="pointer-events-none fixed -top-24 -right-24 w-72 h-72 rounded-full bg-fuchsia-600/10 blur-[100px] -z-10" />
-      <div className="pointer-events-none fixed top-1/3 -left-24 w-80 h-80 rounded-full bg-violet-600/10 blur-[120px] -z-10" />
+      {/* Decorative indigo glows */}
+      <div className="pointer-events-none fixed -top-24 -right-24 w-72 h-72 rounded-full bg-indigo-600/15 blur-[100px] -z-10" />
+      <div className="pointer-events-none fixed top-1/3 -left-24 w-80 h-80 rounded-full bg-indigo-500/10 blur-[120px] -z-10" />
 
       {/* Header */}
       <header className="sticky top-0 z-40 glass-heavy border-b border-white/5">
@@ -244,7 +244,7 @@ const Index = () => {
               <Disc3 className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
             <div className="flex flex-col leading-none">
-              <h1 className="font-heading text-xl font-extrabold gradient-text tracking-tight uppercase">
+              <h1 className="font-heading text-2xl tracking-[0.05em] gradient-text uppercase">
                 Pulse
               </h1>
             </div>
@@ -266,19 +266,11 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-7"
+              className="space-y-8"
             >
-              {/* Welcome text */}
-
               <SearchBar onSearch={handleSearch} isLoading={loading} />
-              <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
-              <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
 
-              <Suspense fallback={<LazyFallback />}>
-                <MusicVisualizer isPlaying={player.isPlaying} />
-              </Suspense>
-
-              {/* Mini player inline under visualizer */}
+              {/* Mini player inline */}
               {player.currentTrack && (
                 <MusicPlayer
                   currentTrack={player.currentTrack}
@@ -311,23 +303,43 @@ const Index = () => {
                 />
               )}
 
-              {/* Trending */}
+              {/* Featured / Trending hero — primary discovery */}
               {!hasSearched && trendingTracks.length > 0 && (
-                <Suspense fallback={<LazyFallback />}>
-                  <TrendingCarousel
-                    tracks={trendingTracks}
-                    onPlay={handlePlayTrending}
-                    currentTrackId={player.currentTrack?.id}
-                  />
-                </Suspense>
+                <section className="space-y-3">
+                  <h2 className="font-heading text-2xl tracking-[0.08em] uppercase text-foreground">Featured</h2>
+                  <Suspense fallback={<LazyFallback />}>
+                    <TrendingCarousel
+                      tracks={trendingTracks}
+                      onPlay={handlePlayTrending}
+                      currentTrackId={player.currentTrack?.id}
+                    />
+                  </Suspense>
+                </section>
               )}
+
+              {/* Moods */}
+              {!hasSearched && (
+                <section className="space-y-3">
+                  <h2 className="font-heading text-2xl tracking-[0.08em] uppercase text-foreground">Moods</h2>
+                  <MoodGrid activeMood={activeMood} onSelectMood={handleMoodSelect} />
+                </section>
+              )}
+
+              {/* Genres — condensed chip strip */}
+              {!hasSearched && (
+                <section className="space-y-3">
+                  <h2 className="font-heading text-2xl tracking-[0.08em] uppercase text-foreground">Genres</h2>
+                  <GenreGrid activeGenre={activeGenre} onSelectGenre={handleGenreSelect} />
+                </section>
+              )}
+
 
               {/* Recently Played */}
               {!hasSearched && recentlyPlayed.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Clock className="w-4 h-4 text-primary" />
-                    <h2 className="font-heading text-sm font-semibold text-foreground tracking-wide uppercase opacity-70">Recently Played</h2>
+                    <h2 className="font-heading text-2xl tracking-[0.08em] uppercase text-foreground">Recently Played</h2>
                   </div>
                   <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
                     {recentlyPlayed.slice(0, 10).map((track, i) => {
@@ -399,7 +411,7 @@ const Index = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-heading text-2xl font-bold gradient-text">Liked Tracks</h2>
+                  <h2 className="font-heading text-3xl tracking-[0.05em] uppercase gradient-text">Liked Tracks</h2>
                   <p className="text-muted-foreground text-xs mt-1 uppercase tracking-wider">
                     {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
                   </p>

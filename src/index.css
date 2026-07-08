@@ -1,64 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 270 50% 5%;
-    --foreground: 0 0% 96%;
+    /* Midnight Indigo palette */
+    --background: 240 60% 6%;           /* #0a0a1a */
+    --foreground: 220 30% 96%;
 
-    --card: 270 40% 10%;
-    --card-foreground: 0 0% 96%;
+    --card: 240 45% 14%;                 /* #141432 */
+    --card-foreground: 220 30% 96%;
 
-    --popover: 270 40% 10%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 240 45% 14%;
+    --popover-foreground: 220 30% 96%;
 
-    --primary: 280 85% 60%;
+    --primary: 243 75% 59%;              /* #4f46e5 indigo */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 35% 13%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 240 52% 24%;            /* #1e1e5a */
+    --secondary-foreground: 220 30% 96%;
 
-    --muted: 270 28% 16%;
-    --muted-foreground: 270 15% 50%;
+    --muted: 240 40% 18%;
+    --muted-foreground: 232 25% 62%;
 
-    --accent: 315 80% 55%;
+    --accent: 243 75% 59%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 270 30% 14%;
-    --input: 270 30% 14%;
-    --ring: 280 85% 60%;
+    --border: 240 45% 20%;
+    --input: 240 45% 16%;
+    --ring: 243 75% 59%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
-    --sidebar-background: 270 48% 6%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 280 85% 60%;
+    --sidebar-background: 240 60% 6%;
+    --sidebar-foreground: 220 30% 96%;
+    --sidebar-primary: 243 75% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 35% 13%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 270 30% 14%;
-    --sidebar-ring: 280 85% 60%;
+    --sidebar-accent: 240 45% 14%;
+    --sidebar-accent-foreground: 220 30% 96%;
+    --sidebar-border: 240 45% 20%;
+    --sidebar-ring: 243 75% 59%;
 
     /* Custom tokens */
-    --glow-primary: 280 85% 60%;
-    --glow-accent: 315 80% 55%;
-    --glass-bg: 270 40% 10% / 0.6;
-    --glass-border: 270 30% 25% / 0.3;
-    --glass-heavy-bg: 270 45% 7% / 0.85;
-    --bg-glow: 280 85% 60%;
+    --glow-primary: 243 75% 59%;
+    --glow-accent: 243 90% 70%;
+    --glass-bg: 240 45% 14% / 0.65;
+    --glass-border: 243 60% 40% / 0.25;
+    --glass-heavy-bg: 240 55% 8% / 0.88;
+    --bg-glow: 243 75% 59%;
 
-    --gradient-start: 280 85% 60%;
-    --gradient-mid: 300 80% 50%;
-    --gradient-end: 315 80% 55%;
+    --gradient-start: 243 75% 59%;
+    --gradient-mid: 245 65% 45%;
+    --gradient-end: 240 52% 24%;
 
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Bebas Neue', sans-serif;
+    --font-body: 'Barlow', sans-serif;
   }
 }
 
