@@ -339,7 +339,7 @@ const Index = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Clock className="w-4 h-4 text-primary" />
-                    <h2 className="font-heading text-sm font-semibold text-foreground tracking-wide uppercase opacity-70">Recently Played</h2>
+                    <h2 className="font-heading text-2xl tracking-[0.08em] uppercase text-foreground">Recently Played</h2>
                   </div>
                   <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
                     {recentlyPlayed.slice(0, 10).map((track, i) => {
@@ -411,7 +411,7 @@ const Index = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-heading text-2xl font-bold gradient-text">Liked Tracks</h2>
+                  <h2 className="font-heading text-3xl tracking-[0.05em] uppercase gradient-text">Liked Tracks</h2>
                   <p className="text-muted-foreground text-xs mt-1 uppercase tracking-wider">
                     {favorites.length} {favorites.length === 1 ? "track" : "tracks"}
                   </p>
