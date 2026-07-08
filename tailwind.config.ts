@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Outfit', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
+        heading: ['Bebas Neue', 'sans-serif'],
+        body: ['Barlow', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
