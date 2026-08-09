@@ -235,6 +235,12 @@ export function useAudioPlayer() {
     }
   }, []);
 
+  /** Unconditional pause — used by the sleep timer so it can never resume playback. */
+  const pause = useCallback(() => {
+    audioRef.current?.pause();
+  }, []);
+
+
   const seek = useCallback((time: number) => {
     const audio = audioRef.current;
     if (!audio) return;
