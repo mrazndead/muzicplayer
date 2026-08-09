@@ -104,42 +104,62 @@ const Index = () => {
   }, []);
 
   const loadMoreTracks = useCallback(async () => {
-    if (loadingMore || !currentQuery) return;
+    if (loadingMore) return;
+    const activeGenreDef = genreRef.current;
+    if (!activeGenreDef && !currentQuery) return;
     setLoadingMore(true);
     try {
-      const results = await searchTracks(currentQuery, TRACKS_PER_PAGE, tracks.length);
-      const existingIds = new Set(tracks.map(t => t.id));
-      const newTracks = results.filter(t => !existingIds.has(t.id));
-      setTracks(prev => [...prev, ...newTracks]);
-      setHasMore(results.length >= TRACKS_PER_PAGE);
+      pageRef.current += 1;
+      const results = activeGenreDef
+        ? await searchGenre(activeGenreDef, pageRef.current)
+        : await searchTracks(currentQuery, TRACKS_PER_PAGE, pageRef.current * TRACKS_PER_PAGE);
+      let added = 0;
+      setTracks(prev => {
+        const existing = new Set(prev.map(t => t.id));
+        const newTracks = results.filter(t => !existing.has(t.id));
+        added = newTracks.length;
+        return [...prev, ...newTracks];
+      });
+      setHasMore(results.length > 0 && (activeGenreDef ? pageRef.current < 8 : added > 0));
     } catch (err) {
       console.error("Failed to load more:", err);
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, currentQuery, tracks]);
+  }, [loadingMore, currentQuery]);
 
   const handleSearch = useCallback((query: string) => {
+    genreRef.current = null;
+    pageRef.current = 0;
     fetchTracks(query, `Results for "${query}"`);
   }, [fetchTracks]);
 
   const handleGenreSelect = useCallback(async (genre: typeof DEFAULT_GENRES[number]) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    genreRef.current = genre;
+    pageRef.current = 0;
     setActiveMood(null);
     setActiveGenre(genre.id);
     setLoading(true);
     setSearchLabel(`${genre.emoji} ${genre.label}`);
     setHasSearched(true);
     setActiveTab("home");
-    setCurrentQuery(genre.queries[0]);
-    setHasMore(false);
+    setCurrentQuery("");
+    setHasMore(true);
     try {
-      const results = await searchTracksMulti(genre.queries, 15);
-      setTracks(results);
+      const results = await searchGenre(genre, 0);
+      if (!controller.signal.aborted) {
+        setTracks(results);
+        setHasMore(results.length > 0);
+      }
     } catch (err) {
-      console.error("Failed to fetch genre tracks:", err);
+      if (!controller.signal.aborted) console.error("Failed to fetch genre tracks:", err);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
+
   }, []);
 
   const handleMoodSelect = useCallback((mood: typeof DEFAULT_MOODS[number]) => {
