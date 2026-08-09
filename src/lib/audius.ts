@@ -122,29 +122,53 @@ function dedupeAndRank(tracks: AudiusTrack[]): AudiusTrack[] {
   return combined;
 }
 
+/** Resolves to [] if a source takes too long, so one slow API never stalls the UI. */
+function withTimeout<T>(p: Promise<T[]>, ms: number): Promise<T[]> {
+  return Promise.race([p, new Promise<T[]>((res) => setTimeout(() => res([]), ms))]);
+}
+
+export interface SearchOptions {
+  /** Internet Archive is comprehensive but slow (per-item metadata); skip it for latency-sensitive fetches. */
+  includeArchive?: boolean;
+  /** Per-source timeout in ms. */
+  timeoutMs?: number;
+}
+
 /**
  * Federated search across Audius, Jamendo, and Internet Archive.
  * When offset > 0, pages Audius only (the other sources return finite result sets).
  */
-export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
+export async function searchTracks(
+  query: string,
+  limit = 20,
+  offset = 0,
+  opts: SearchOptions = {},
+): Promise<AudiusTrack[]> {
   if (offset > 0) return searchAudiusOnly(query, limit, offset);
+  const { includeArchive = true, timeoutMs = 8000 } = opts;
 
   // Dynamic imports keep the Audius-only bundle path unchanged and avoid circular loads.
-  const [{ searchJamendo }, { searchArchive }] = await Promise.all([
-    import("@/lib/sources/jamendo"),
-    import("@/lib/sources/archive"),
-  ]);
+  const { searchJamendo } = await import("@/lib/sources/jamendo");
 
-  const results = await Promise.allSettled([
-    searchAudiusOnly(query, limit, 0),
-    searchJamendo(query, Math.min(30, Math.max(15, Math.floor(limit / 2)))),
-    searchArchive(query, 10),
-  ]);
+  const jobs: Promise<AudiusTrack[]>[] = [
+    withTimeout(searchAudiusOnly(query, limit, 0), timeoutMs),
+    withTimeout(searchJamendo(query, Math.min(30, Math.max(15, Math.floor(limit / 2)))), timeoutMs),
+  ];
+  if (includeArchive) {
+    jobs.push(
+      withTimeout(
+        import("@/lib/sources/archive").then(({ searchArchive }) => searchArchive(query, 10)),
+        timeoutMs,
+      ),
+    );
+  }
 
+  const results = await Promise.allSettled(jobs);
   const merged: AudiusTrack[] = [];
   for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
   return dedupeAndRank(merged);
 }
+
 
 // Multi-query federated search: fans out several queries across all sources.
 export async function searchTracksMulti(queries: string[], limitPerQuery = 15): Promise<AudiusTrack[]> {
@@ -158,6 +182,79 @@ export async function searchTracksMulti(queries: string[], limitPerQuery = 15): 
   return dedupeAndRank(merged);
 }
 
+/** Keywords used to verify a track really belongs to a genre (keeps results on-topic). */
+export const GENRE_MATCH: Record<string, string[]> = {
+  "soft-rock": ["soft rock", "rock", "ballad", "acoustic", "folk rock", "yacht"],
+  jazz: ["jazz", "bebop", "bop", "swing", "saxophone", "sax", "big band", "lounge"],
+  vietnamese: ["viet", "vpop", "v-pop", "saigon", "hanoi", "nhac", "việt"],
+  korean: ["korean", "kpop", "k-pop", "korea", "hangul", "seoul"],
+  trance: ["trance", "psy", "goa", "uplifting"],
+  house: ["house", "deep house", "tech house", "disco house"],
+  lofi: ["lofi", "lo-fi", "lo fi", "chillhop", "chill beat"],
+  rnb: ["r&b", "rnb", "r and b", "soul", "slow jam", "neo soul"],
+  classical: ["classical", "orchestra", "symphony", "sonata", "concerto", "baroque", "quartet", "piano", "violin", "cello", "opus", "mozart", "bach", "beethoven", "chopin"],
+  hiphop: ["hip hop", "hip-hop", "hiphop", "rap", "trap", "boom bap", "drill", "freestyle"],
+  ambient: ["ambient", "drone", "soundscape", "atmospheric", "ethereal", "meditation"],
+  reggae: ["reggae", "dub", "dancehall", "ska", "roots", "rocksteady"],
+  pop: ["pop", "synthpop", "synth pop", "electropop", "hyperpop"],
+  edm: ["edm", "electronic", "electro", "dubstep", "drum and bass", "dnb", "bass", "hardstyle", "breakbeat", "dance"],
+  latin: ["latin", "reggaeton", "salsa", "bachata", "cumbia", "samba", "tango", "bossa", "merengue", "dembow", "espanol", "español"],
+  country: ["country", "bluegrass", "americana", "honky", "western", "banjo"],
+  opera: ["opera", "aria", "soprano", "tenor", "operetta", "bel canto", "operatic"],
+  funk: ["funk", "funky", "disco", "boogie", "groove"],
+  japanese: ["japanese", "jpop", "j-pop", "japan", "anime", "city pop", "vocaloid", "tokyo"],
+  french: ["french", "france", "francais", "français", "french touch", "chanson", "paris"],
+  italian: ["italian", "italy", "italo", "italiano", "mediterranean"],
+  "malt-shop": ["oldies", "50s", "1950", "rock and roll", "rock 'n' roll", "rockabilly", "jukebox", "vintage", "retro", "doo wop"],
+  "doo-wop": ["doo wop", "doowop", "doo-wop", "harmony", "acappella", "a cappella", "vocal group", "oldies", "50s"],
+  motown: ["motown", "soul", "detroit", "tamla", "northern soul", "60s"],
+};
+
+function genreHaystack(t: AudiusTrack): string {
+  return `${t.genre ?? ""} ${t.mood ?? ""} ${t.title ?? ""} ${t.user?.name ?? ""} ${t.description ?? ""}`.toLowerCase();
+}
+
+function matchesGenre(t: AudiusTrack, keywords: string[]): boolean {
+  const hay = genreHaystack(t);
+  return keywords.some((k) => hay.includes(k));
+}
+
+export interface GenreDef {
+  id: string;
+  label: string;
+  queries: string[];
+  emoji: string;
+}
+
+/**
+ * Genre-accurate, high-volume fetch. Fans out a rotating slice of the genre's
+ * sub-queries across all sources, then ranks on-genre matches first so results
+ * stay in the requested genre while still returning plenty of tracks.
+ * `page` rotates through the query list so "load more" keeps surfacing new songs.
+ */
+export async function searchGenre(genre: GenreDef, page = 0, perQuery = 25): Promise<AudiusTrack[]> {
+  const qs = genre.queries;
+  const fan = 4;
+  const start = (page * fan) % qs.length;
+  const selected = Array.from({ length: fan }, (_, i) => qs[(start + i) % qs.length]);
+
+  // First page stays fast (Audius + Jamendo); deeper pages pull in the Archive too.
+  const results = await Promise.allSettled(
+    selected.map((q) => searchTracks(q, perQuery, 0, { includeArchive: page > 0, timeoutMs: 6000 })),
+  );
+
+  const merged: AudiusTrack[] = [];
+  for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
+
+  const keywords = GENRE_MATCH[genre.id] ?? [genre.label.toLowerCase()];
+  const all = dedupeAndRank(merged);
+  const onGenre = all.filter((t) => matchesGenre(t, keywords));
+  const offGenre = all.filter((t) => !matchesGenre(t, keywords));
+
+  // Keep it comprehensive: if strict matching is thin, top up with the rest.
+  const topUp = onGenre.length >= 40 ? [] : offGenre.slice(0, 40 - onGenre.length);
+  return [...onGenre, ...topUp];
+}
 
 export async function getTrendingTracks(genre?: string, limit = 20): Promise<AudiusTrack[]> {
   const host = await getHost();
@@ -165,8 +262,10 @@ export async function getTrendingTracks(genre?: string, limit = 20): Promise<Aud
   if (genre) url += `&genre=${encodeURIComponent(genre)}`;
   const res = await fetchWithRetry(url);
   const json = await res.json();
-  return json.data || [];
+  const tracks: AudiusTrack[] = json.data || [];
+  return tracks.map((t) => ({ ...t, source: "audius" as const }));
 }
+
 
 export async function getStreamUrl(trackId: string): Promise<string> {
   const host = await getHost();
