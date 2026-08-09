@@ -49,6 +49,9 @@ const Index = () => {
   const [hasMore, setHasMore] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
   const trendingLoaded = useRef(false);
+  const genreRef = useRef<typeof DEFAULT_GENRES[number] | null>(null);
+  const pageRef = useRef(0);
+
 
   // Sleep timer pauses playback
   const sleepTimer = useSleepTimer(player.togglePlay);
