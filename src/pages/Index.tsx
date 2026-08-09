@@ -329,6 +329,15 @@ const Index = () => {
                 />
               )}
 
+              {/* Visualizer — reacts to whatever is playing */}
+              {player.currentTrack && (
+                <Suspense fallback={<LazyFallback />}>
+                  <MusicVisualizer isPlaying={player.isPlaying} />
+                </Suspense>
+              )}
+
+
+
               {/* Featured / Trending hero — primary discovery */}
               {!hasSearched && trendingTracks.length > 0 && (
                 <section className="space-y-3">
