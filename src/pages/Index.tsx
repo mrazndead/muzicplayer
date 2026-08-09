@@ -86,7 +86,10 @@ const Index = () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    genreRef.current = null;
+    pageRef.current = 0;
     setLoading(true);
+
     setSearchLabel(label);
     setActiveGenre(genreId || null);
     setHasSearched(true);
