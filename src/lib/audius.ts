@@ -234,11 +234,15 @@ export interface GenreDef {
  */
 export async function searchGenre(genre: GenreDef, page = 0, perQuery = 25): Promise<AudiusTrack[]> {
   const qs = genre.queries;
-  const fan = 6;
+  const fan = 4;
   const start = (page * fan) % qs.length;
   const selected = Array.from({ length: fan }, (_, i) => qs[(start + i) % qs.length]);
 
-  const results = await Promise.allSettled(selected.map((q) => searchTracks(q, perQuery, 0)));
+  // First page stays fast (Audius + Jamendo); deeper pages pull in the Archive too.
+  const results = await Promise.allSettled(
+    selected.map((q) => searchTracks(q, perQuery, 0, { includeArchive: page > 0, timeoutMs: 6000 })),
+  );
+
   const merged: AudiusTrack[] = [];
   for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
 
