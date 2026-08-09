@@ -122,29 +122,53 @@ function dedupeAndRank(tracks: AudiusTrack[]): AudiusTrack[] {
   return combined;
 }
 
+/** Resolves to [] if a source takes too long, so one slow API never stalls the UI. */
+function withTimeout<T>(p: Promise<T[]>, ms: number): Promise<T[]> {
+  return Promise.race([p, new Promise<T[]>((res) => setTimeout(() => res([]), ms))]);
+}
+
+export interface SearchOptions {
+  /** Internet Archive is comprehensive but slow (per-item metadata); skip it for latency-sensitive fetches. */
+  includeArchive?: boolean;
+  /** Per-source timeout in ms. */
+  timeoutMs?: number;
+}
+
 /**
  * Federated search across Audius, Jamendo, and Internet Archive.
  * When offset > 0, pages Audius only (the other sources return finite result sets).
  */
-export async function searchTracks(query: string, limit = 20, offset = 0): Promise<AudiusTrack[]> {
+export async function searchTracks(
+  query: string,
+  limit = 20,
+  offset = 0,
+  opts: SearchOptions = {},
+): Promise<AudiusTrack[]> {
   if (offset > 0) return searchAudiusOnly(query, limit, offset);
+  const { includeArchive = true, timeoutMs = 8000 } = opts;
 
   // Dynamic imports keep the Audius-only bundle path unchanged and avoid circular loads.
-  const [{ searchJamendo }, { searchArchive }] = await Promise.all([
-    import("@/lib/sources/jamendo"),
-    import("@/lib/sources/archive"),
-  ]);
+  const { searchJamendo } = await import("@/lib/sources/jamendo");
 
-  const results = await Promise.allSettled([
-    searchAudiusOnly(query, limit, 0),
-    searchJamendo(query, Math.min(30, Math.max(15, Math.floor(limit / 2)))),
-    searchArchive(query, 10),
-  ]);
+  const jobs: Promise<AudiusTrack[]>[] = [
+    withTimeout(searchAudiusOnly(query, limit, 0), timeoutMs),
+    withTimeout(searchJamendo(query, Math.min(30, Math.max(15, Math.floor(limit / 2)))), timeoutMs),
+  ];
+  if (includeArchive) {
+    jobs.push(
+      withTimeout(
+        import("@/lib/sources/archive").then(({ searchArchive }) => searchArchive(query, 10)),
+        timeoutMs,
+      ),
+    );
+  }
 
+  const results = await Promise.allSettled(jobs);
   const merged: AudiusTrack[] = [];
   for (const r of results) if (r.status === "fulfilled") merged.push(...r.value);
   return dedupeAndRank(merged);
 }
+
 
 // Multi-query federated search: fans out several queries across all sources.
 export async function searchTracksMulti(queries: string[], limitPerQuery = 15): Promise<AudiusTrack[]> {
