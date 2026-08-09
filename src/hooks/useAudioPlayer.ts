@@ -304,6 +304,7 @@ export function useAudioPlayer() {
     ...state,
     playTrack,
     togglePlay,
+    pause,
     seek,
     setVolume,
     nextTrack,

@@ -54,7 +54,7 @@ const Index = () => {
 
 
   // Sleep timer pauses playback
-  const sleepTimer = useSleepTimer(player.togglePlay);
+  const sleepTimer = useSleepTimer(player.pause);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
