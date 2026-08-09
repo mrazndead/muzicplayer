@@ -16,7 +16,7 @@ import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
-import { searchTracks, searchTracksMulti, searchGenre, getTrendingTracks, getArtworkUrl, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { searchTracks, searchGenre, getTrendingTracks, getArtworkUrl, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 // Lazy-load heavy visual / rarely-used components to speed up first paint.
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
