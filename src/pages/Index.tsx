@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, Disc3, Clock, PlayCircle, Sparkles } from "lucide-react";
+import { Music, Disc3, Clock, PlayCircle, ArrowLeft } from "lucide-react";
 import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -16,7 +16,8 @@ import { useRecentlyPlayed } from "@/hooks/useRecentlyPlayed";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
-import { searchTracks, searchGenre, getTrendingTracks, getArtworkUrl, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { Artwork } from "@/components/Artwork";
+import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 
 // Lazy-load heavy visual / rarely-used components to speed up first paint.
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
@@ -174,6 +175,21 @@ const Index = () => {
     fetchTracks(mood.query, `${mood.emoji} ${mood.label}`);
   }, [fetchTracks]);
 
+  /** Return to the discovery view (Featured / Moods / Genres) from a result list. */
+  const handleClearResults = useCallback(() => {
+    abortRef.current?.abort();
+    genreRef.current = null;
+    pageRef.current = 0;
+    setHasSearched(false);
+    setTracks([]);
+    setActiveGenre(null);
+    setActiveMood(null);
+    setSearchLabel("");
+    setCurrentQuery("");
+    setLoading(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const handlePlayTrack = useCallback((track: AudiusTrack, index: number) => {
     if (track.id === player.currentTrack?.id) {
       player.togglePlay();
@@ -224,20 +240,31 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
+  const randomBusy = useRef(false);
   const handleRandomPlay = useCallback(async () => {
+    if (randomBusy.current) return;
+    randomBusy.current = true;
     // Pick a random genre and play a random track from it
     const randomGenre = DEFAULT_GENRES[Math.floor(Math.random() * DEFAULT_GENRES.length)];
     const randomQuery = randomGenre.queries[Math.floor(Math.random() * randomGenre.queries.length)];
+    const { toast } = await import("sonner");
     try {
       const results = await searchTracks(randomQuery, 20);
       if (results.length > 0) {
-        const randomTrack = results[Math.floor(Math.random() * results.length)];
-        player.playTrack(randomTrack, results, results.indexOf(randomTrack));
+        const idx = Math.floor(Math.random() * results.length);
+        player.playTrack(results[idx], results, idx);
+        toast(`${randomGenre.emoji} ${randomGenre.label}`, { duration: 1400 });
+      } else {
+        toast("Nothing found — try again", { duration: 1400 });
       }
     } catch (err) {
       console.error("Failed to play random track:", err);
+      toast("Couldn't load a random track", { duration: 1600 });
+    } finally {
+      randomBusy.current = false;
     }
   }, [player]);
+
 
   const handleToggleRepeat = useCallback(async () => {
     player.toggleRepeat();
@@ -252,7 +279,8 @@ const Index = () => {
     toast(player.shuffle ? "Shuffle off" : "Shuffle on", { duration: 1200 });
   }, [player]);
 
-  const playerPadding = "pb-24";
+  // Extra bottom room so the floating nav never covers the last track row.
+  const playerPadding = player.currentTrack ? "pb-44" : "pb-32";
 
   return (
     <div className={`min-h-screen ${playerPadding} relative`}>
@@ -325,6 +353,7 @@ const Index = () => {
                   audioContext={player.audioContext}
                   eqFilters={player.eqFilters}
                   onMoreByArtist={handleMoreByArtist}
+                  buffering={player.buffering}
                   inline
                 />
               )}
@@ -389,12 +418,12 @@ const Index = () => {
                           className="flex-shrink-0 w-32 group text-left"
                         >
                           <div className={`relative w-32 h-32 rounded-2xl overflow-hidden mb-2 card-hover ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
-                            <img
-                              src={getArtworkUrl(track, "480x480")}
-                              alt={track.title}
+                            <Artwork
+                              track={track}
+                              size="480x480"
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              loading="lazy"
                             />
+
                           </div>
                           <p className="text-xs font-medium text-foreground line-clamp-1">{track.title}</p>
                           <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{track.user.name}</p>
@@ -409,6 +438,16 @@ const Index = () => {
                 <div className="flex items-center justify-center py-20">
                   <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
                 </div>
+              )}
+
+              {hasSearched && (
+                <button
+                  onClick={handleClearResults}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back to discover
+                </button>
               )}
 
               {!loading && hasSearched && (
@@ -515,35 +554,6 @@ const Index = () => {
         hasPlayer={!!player.currentTrack}
       />
 
-      {/* Keep MusicPlayer for expanded view only - mini player is inline */}
-      <MusicPlayer
-        currentTrack={player.currentTrack}
-        isPlaying={player.isPlaying}
-        currentTime={player.currentTime}
-        duration={player.duration}
-        volume={player.volume}
-        shuffle={player.shuffle}
-        repeat={player.repeat}
-        queue={player.queue}
-        queueIndex={player.queueIndex}
-        onTogglePlay={player.togglePlay}
-        onSeek={player.seek}
-        onVolume={player.setVolume}
-        onNext={player.nextTrack}
-        onPrev={player.prevTrack}
-        onToggleShuffle={player.toggleShuffle}
-        onToggleRepeat={player.toggleRepeat}
-        isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
-        onToggleFavorite={player.currentTrack ? () => toggleFavorite(player.currentTrack!) : undefined}
-        onPlayFromQueue={handlePlayFromQueue}
-        sleepTimerActive={sleepTimer.isActive}
-        sleepTimerRemaining={sleepTimer.remainingSeconds}
-        onStartSleepTimer={sleepTimer.startTimer}
-        onCancelSleepTimer={sleepTimer.cancelTimer}
-        audioContext={player.audioContext}
-        eqFilters={player.eqFilters}
-        onMoreByArtist={handleMoreByArtist}
-      />
     </div>
   );
 };

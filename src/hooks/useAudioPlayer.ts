@@ -4,6 +4,7 @@ import { AudiusTrack, getStreamUrl, getArtworkUrl } from "@/lib/audius";
 export interface PlayerState {
   currentTrack: AudiusTrack | null;
   isPlaying: boolean;
+  buffering: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -18,6 +19,7 @@ export function useAudioPlayer() {
   const [state, setState] = useState<PlayerState>({
     currentTrack: null,
     isPlaying: false,
+    buffering: false,
     currentTime: 0,
     duration: 0,
     volume: 0.7,
@@ -26,6 +28,7 @@ export function useAudioPlayer() {
     shuffle: false,
     repeat: "off",
   });
+
 
   // Store state ref for use in callbacks
   const stateRef = useRef(state);
@@ -42,6 +45,7 @@ export function useAudioPlayer() {
   useEffect(() => {
     const audio = new Audio();
     audio.volume = 0.7;
+    audio.preload = "auto";
     audio.crossOrigin = "anonymous";
     audioRef.current = audio;
 
@@ -51,13 +55,25 @@ export function useAudioPlayer() {
     audio.addEventListener("loadedmetadata", () => {
       setState((s) => ({ ...s, duration: audio.duration }));
     });
+    audio.addEventListener("waiting", () => {
+      setState((s) => (s.buffering ? s : { ...s, buffering: true }));
+    });
+    audio.addEventListener("playing", () => {
+      setState((s) => ({ ...s, buffering: false, isPlaying: true }));
+    });
+    audio.addEventListener("canplay", () => {
+      setState((s) => (s.buffering ? { ...s, buffering: false } : s));
+    });
     audio.addEventListener("ended", () => {
       handleTrackEndRef.current();
     });
     audio.addEventListener("pause", () => {
       setState((s) => ({ ...s, isPlaying: false }));
+      if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
     });
     audio.addEventListener("play", () => {
+      if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+
       // Lazily create AudioContext + EQ filters on first play
       if (!audioContextRef.current) {
         try {
@@ -94,14 +110,18 @@ export function useAudioPlayer() {
       console.error("Audio playback error:", err?.code, err?.message);
       const track = stateRef.current.currentTrack;
       if (!track || track.isLocal) {
-        setState((s) => ({ ...s, isPlaying: false }));
+        setState((s) => ({ ...s, isPlaying: false, buffering: false }));
         return;
       }
-      // Retry with a rotated Audius discovery host only for Audius-sourced tracks.
+      // Retry with rotated Audius discovery hosts (up to 2 attempts) before giving up.
       const isAudius = (track.source ?? "audius") === "audius";
-      const retried = (audio as any).__pulseRetried === track.id;
-      if (isAudius && !retried) {
-        (audio as any).__pulseRetried = track.id;
+      const store = audio as unknown as { __pulseRetryId?: string; __pulseRetryCount?: number };
+      if (store.__pulseRetryId !== track.id) {
+        store.__pulseRetryId = track.id;
+        store.__pulseRetryCount = 0;
+      }
+      if (isAudius && (store.__pulseRetryCount ?? 0) < 2) {
+        store.__pulseRetryCount = (store.__pulseRetryCount ?? 0) + 1;
         try {
           const { rotateStreamHost, getStreamUrl } = await import("@/lib/audius");
           rotateStreamHost();
@@ -114,9 +134,11 @@ export function useAudioPlayer() {
           console.warn("Retry with rotated host failed:", e);
         }
       }
-      setState((s) => ({ ...s, isPlaying: false }));
+      setState((s) => ({ ...s, isPlaying: false, buffering: false }));
+      // Auto-skip broken tracks so the queue keeps flowing.
       setTimeout(() => handleTrackEndRef.current?.(), 400);
     });
+
 
     return () => {
       audio.pause();
@@ -158,7 +180,15 @@ export function useAudioPlayer() {
   const playAudioForTrack = useCallback(async (track: AudiusTrack) => {
     const audio = audioRef.current;
     if (!audio) return;
-    const url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
+    setState((s) => ({ ...s, buffering: true }));
+    let url: string;
+    try {
+      url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
+    } catch (err) {
+      console.error("Could not resolve stream URL:", err);
+      setState((s) => ({ ...s, buffering: false, isPlaying: false }));
+      return;
+    }
     // Blob URLs are same-origin and don't need (and may be tripped up by) crossOrigin.
     // Remote streams need crossOrigin="anonymous" so the AudioContext EQ can read samples.
     const isBlob = url.startsWith("blob:");
@@ -179,6 +209,28 @@ export function useAudioPlayer() {
     updateMediaSession(track);
   }, [updateMediaSession]);
 
+  /** Next index respecting shuffle (never immediately repeats the same track) and repeat mode. */
+  const pickNextIndex = useCallback((s: PlayerState, wrap: boolean): number => {
+    if (s.queue.length === 0) return -1;
+    if (s.shuffle) {
+      if (s.queue.length === 1) return 0;
+      let idx = Math.floor(Math.random() * s.queue.length);
+      if (idx === s.queueIndex) idx = (idx + 1) % s.queue.length;
+      return idx;
+    }
+    const next = s.queueIndex + 1;
+    if (next < s.queue.length) return next;
+    return wrap ? 0 : -1;
+  }, []);
+
+  const goToIndex = useCallback((idx: number) => {
+    const s = stateRef.current;
+    const track = s.queue[idx];
+    if (!track) return;
+    playAudioForTrack(track);
+    setState((prev) => ({ ...prev, currentTrack: track, queueIndex: idx, currentTime: 0 }));
+  }, [playAudioForTrack]);
+
   const handleTrackEnd = useCallback(() => {
     const s = stateRef.current;
     if (s.repeat === "one") {
@@ -190,25 +242,14 @@ export function useAudioPlayer() {
       return;
     }
 
-    let nextIdx: number;
-    if (s.shuffle) {
-      nextIdx = Math.floor(Math.random() * s.queue.length);
+    const nextIdx = pickNextIndex(s, s.repeat === "all");
+    if (nextIdx >= 0) {
+      goToIndex(nextIdx);
     } else {
-      nextIdx = s.queueIndex + 1;
+      setState((prev) => ({ ...prev, isPlaying: false, buffering: false }));
     }
+  }, [pickNextIndex, goToIndex]);
 
-    if (nextIdx < s.queue.length) {
-      const track = s.queue[nextIdx];
-      playAudioForTrack(track);
-      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: nextIdx, currentTime: 0 }));
-    } else if (s.repeat === "all" && s.queue.length > 0) {
-      const track = s.queue[0];
-      playAudioForTrack(track);
-      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: 0, currentTime: 0 }));
-    } else {
-      setState((prev) => ({ ...prev, isPlaying: false }));
-    }
-  }, [playAudioForTrack]);
 
   // Keep refs in sync so listeners always call the latest version
   handleTrackEndRef.current = handleTrackEnd;
@@ -255,19 +296,10 @@ export function useAudioPlayer() {
   }, []);
 
   const nextTrack = useCallback(() => {
-    const s = stateRef.current;
-    let nextIdx: number;
-    if (s.shuffle) {
-      nextIdx = Math.floor(Math.random() * s.queue.length);
-    } else {
-      nextIdx = s.queueIndex + 1;
-    }
-    if (nextIdx < s.queue.length) {
-      const track = s.queue[nextIdx];
-      playAudioForTrack(track);
-      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: nextIdx, currentTime: 0 }));
-    }
-  }, [playAudioForTrack]);
+    // Manual skip always wraps so the button never feels dead at the end of a queue.
+    const nextIdx = pickNextIndex(stateRef.current, true);
+    if (nextIdx >= 0) goToIndex(nextIdx);
+  }, [pickNextIndex, goToIndex]);
 
   const prevTrack = useCallback(() => {
     const s = stateRef.current;
@@ -277,13 +309,11 @@ export function useAudioPlayer() {
       if (audio) audio.currentTime = 0;
       return;
     }
-    const prevIdx = s.queueIndex - 1;
-    if (prevIdx >= 0) {
-      const track = s.queue[prevIdx];
-      playAudioForTrack(track);
-      setState((prev) => ({ ...prev, currentTrack: track, queueIndex: prevIdx, currentTime: 0 }));
-    }
-  }, [playAudioForTrack]);
+    if (s.queue.length === 0) return;
+    const prevIdx = s.queueIndex - 1 >= 0 ? s.queueIndex - 1 : s.queue.length - 1;
+    goToIndex(prevIdx);
+  }, [goToIndex]);
+
 
   // Sync refs for MediaSession handlers
   nextTrackRef.current = nextTrack;

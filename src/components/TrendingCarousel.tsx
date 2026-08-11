@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { AudiusTrack, getArtworkUrl } from "@/lib/audius";
+import { AudiusTrack } from "@/lib/audius";
+import { Artwork } from "./Artwork";
 import { Play, TrendingUp } from "lucide-react";
 
 interface TrendingCarouselProps {
@@ -26,9 +27,10 @@ export function TrendingCarousel({ tracks, onPlay, currentTrackId }: TrendingCar
         onClick={() => onPlay(heroTrack, 0)}
         className="w-full relative h-56 sm:h-64 rounded-3xl overflow-hidden group text-left neon-border"
       >
-        <img
-          src={getArtworkUrl(heroTrack, "1000x1000")}
-          alt={heroTrack.title}
+        <Artwork
+          track={heroTrack}
+          size="1000x1000"
+          eager
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
@@ -67,11 +69,10 @@ export function TrendingCarousel({ tracks, onPlay, currentTrackId }: TrendingCar
               >
                 <div className={`relative w-36 h-36 sm:w-40 sm:h-40 rounded-2xl overflow-hidden mb-2.5 card-hover
                   ${isCurrent ? "ring-2 ring-primary glow-border" : ""}`}>
-                  <img
-                    src={getArtworkUrl(track, "480x480")}
-                    alt={track.title}
+                  <Artwork
+                    track={track}
+                    size="480x480"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full gradient-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 glow-sm">
