@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Heart, Headphones, Share2 } from "lucide-react";
-import { AudiusTrack, getArtworkUrl, formatPlayCount } from "@/lib/audius";
+import { AudiusTrack, getShareUrl, formatPlayCount } from "@/lib/audius";
+import { Artwork } from "./Artwork";
 import { EqualizerBars } from "./EqualizerBars";
 import { toast } from "sonner";
 
@@ -25,9 +26,7 @@ function formatDuration(seconds: number): string {
 }
 
 function shareTrack(track: AudiusTrack) {
-  const url = track.permalink?.startsWith("http")
-    ? track.permalink
-    : `https://audius.co${track.permalink}`;
+  const url = getShareUrl(track);
   if (navigator.share) {
     navigator.share({ title: track.title, text: `${track.title} by ${track.user.name}`, url }).catch(() => {});
   } else {
@@ -98,14 +97,10 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
 
               <button
                 onClick={() => onPlay(track, i)}
+                aria-label={`Play ${track.title}`}
                 className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-muted"
               >
-                <img
-                  src={getArtworkUrl(track, "150x150")}
-                  alt={track.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <Artwork track={track} size="150x150" className="w-full h-full object-cover" />
                 <div className={`absolute inset-0 bg-background/50 flex items-center justify-center transition-opacity
                   ${isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                   {isCurrent && isPlaying ? (
@@ -146,7 +141,8 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
               {/* Share */}
               <button
                 onClick={(e) => { e.stopPropagation(); shareTrack(track); }}
-                className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                aria-label="Share track"
+                className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
               >
                 <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>

@@ -9,11 +9,20 @@ import localCover8 from "@/assets/local-cover-8.jpg";
 
 const LOCAL_COVERS = [localCover1, localCover2, localCover3, localCover4, localCover5, localCover6, localCover7, localCover8];
 
-function pickLocalCover(id: string): string {
+export function pickLocalCover(id: string): string {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
   return LOCAL_COVERS[h % LOCAL_COVERS.length];
 }
+
+/** Correct share/permalink URL for any source (Audius, Jamendo, Archive, local). */
+export function getShareUrl(track: { id: string; permalink?: string; source?: string; isLocal?: boolean }): string {
+  const p = track.permalink ?? "";
+  if (/^https?:\/\//.test(p)) return p;
+  if (p && (track.source ?? "audius") === "audius" && !track.isLocal) return `https://audius.co${p}`;
+  return p || window.location.origin;
+}
+
 
 const APP_NAME = "lovable_pulse";
 
