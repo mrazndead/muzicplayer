@@ -293,16 +293,20 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 glass-heavy border-b border-white/5">
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl gradient-primary flex items-center justify-center glow-sm">
+          <button
+            onClick={handleClearResults}
+            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 rounded-2xl"
+            aria-label="Go home"
+          >
+            <div className="w-9 h-9 rounded-2xl gradient-primary flex items-center justify-center glow-sm group-active:scale-95 transition-transform">
               <Disc3 className="w-4.5 h-4.5 text-primary-foreground" />
             </div>
-            <div className="flex flex-col leading-none">
+            <div className="flex flex-col leading-none text-left">
               <h1 className="font-heading text-2xl tracking-[0.05em] gradient-text uppercase">
                 Pulse
               </h1>
             </div>
-          </div>
+          </button>
           <DailyQuote />
           <div className="ml-auto flex items-center gap-1.5">
             <ThemeSwitcher />
