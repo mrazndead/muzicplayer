@@ -4,6 +4,7 @@ import { Music, Disc3, Clock, PlayCircle, ArrowLeft } from "lucide-react";
 import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { SkinSwitcher } from "@/components/SkinSwitcher";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -309,6 +310,7 @@ const Index = () => {
           </button>
           <DailyQuote />
           <div className="ml-auto flex items-center gap-1.5">
+            <SkinSwitcher />
             <ThemeSwitcher />
           </div>
         </div>
