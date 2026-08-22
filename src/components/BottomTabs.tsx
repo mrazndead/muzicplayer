@@ -25,7 +25,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
     <button
       onClick={() => onTabChange(id)}
       className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
-        ${activeTab === id ? "text-white" : "text-white/60 hover:text-white/80"}`}
+        ${activeTab === id ? "text-white" : "text-muted-foreground hover:text-foreground"}`}
     >
       {activeTab === id && (
         <motion.div
@@ -36,7 +36,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
       )}
       <Icon
         className={`w-5 h-5 relative z-10 stroke-[1.5] ${
-          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-white/70"
+          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-muted-foreground"
         }`}
       />
       <span className="text-[10px] font-medium relative z-10 text-white/80">{label}</span>
@@ -60,7 +60,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
           animate={randomPressed ? { scale: [1, 1.15, 1], rotate: [0, 180, 360] } : {}}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-xl
-            ${randomPressed ? "text-primary" : "text-white/60 hover:text-white/80"}`}
+            ${randomPressed ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
         >
           {randomPressed && (
             <motion.div
@@ -70,8 +70,8 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
               className="absolute inset-0 gradient-primary rounded-full"
             />
           )}
-          <Shuffle className={`w-5 h-5 relative z-10 stroke-[1.5] transition-colors ${randomPressed ? "text-primary" : "text-white/70"}`} />
-          <span className="text-[10px] font-medium relative z-10 text-white/80">Random</span>
+          <Shuffle className={`w-5 h-5 relative z-10 stroke-[1.5] transition-colors ${randomPressed ? "text-primary" : "text-muted-foreground"}`} />
+          <span className="text-[10px] font-medium relative z-10 text-muted-foreground">Random</span>
         </motion.button>
 
         {tabBtn("library", Library, "Library")}
