@@ -25,7 +25,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
     <button
       onClick={() => onTabChange(id)}
       className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
-        ${activeTab === id ? "text-white" : "text-muted-foreground hover:text-foreground"}`}
+        ${activeTab === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
     >
       {activeTab === id && (
         <motion.div
@@ -36,10 +36,10 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
       )}
       <Icon
         className={`w-5 h-5 relative z-10 stroke-[1.5] ${
-          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-muted-foreground"
+          activeTab === id ? "text-foreground drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-muted-foreground"
         }`}
       />
-      <span className="text-[10px] font-medium relative z-10 text-white/80">{label}</span>
+      <span className="text-[10px] font-medium relative z-10 text-foreground/80">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span className="absolute top-0.5 right-1 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center z-10">
           {badge > 9 ? "9+" : badge}
