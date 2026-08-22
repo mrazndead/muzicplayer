@@ -341,8 +341,11 @@ html[data-skin="vinyl"] h3 {
   letter-spacing: 0.01em !important;
   text-transform: none !important;
 }
-html[data-skin="vinyl"] img { border-radius: 50% !important; }
-html[data-skin="vinyl"] button img { border-radius: 50% !important; }
+html[data-skin="vinyl"] .aspect-square img,
+html[data-skin="vinyl"] .aspect-square > div img {
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.35) !important;
+}
 
 /* ---------- TERMINAL: monospace CRT console ---------- */
 html[data-skin="terminal"] {
