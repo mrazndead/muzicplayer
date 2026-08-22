@@ -223,3 +223,247 @@
     pointer-events: none;
   }
 }
+
+/* ============================================================
+   INTERFACE SKINS — each one is a distinct graphical identity.
+   Vars use !important because the color-theme provider writes
+   inline custom properties on :root.
+   ============================================================ */
+
+/* ---------- CASSETTE: retro tape deck, neo-brutalist ---------- */
+html[data-skin="cassette"] {
+  --background: 36 33% 92% !important;
+  --foreground: 24 20% 12% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 24 20% 12% !important;
+  --popover: 0 0% 100% !important;
+  --popover-foreground: 24 20% 12% !important;
+  --primary: 12 76% 53% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 36 30% 84% !important;
+  --secondary-foreground: 24 20% 12% !important;
+  --muted: 36 25% 86% !important;
+  --muted-foreground: 24 12% 38% !important;
+  --accent: 190 60% 40% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --border: 24 20% 12% !important;
+  --input: 0 0% 100% !important;
+  --ring: 12 76% 53% !important;
+  --radius: 0.25rem !important;
+  --glow-primary: 12 76% 53% !important;
+  --glow-accent: 190 60% 40% !important;
+  --gradient-start: 12 76% 53% !important;
+  --gradient-end: 36 80% 55% !important;
+  --glass-bg: 0 0% 100% / 1 !important;
+  --glass-heavy-bg: 36 33% 92% / 1 !important;
+  --glass-border: 24 20% 12% / 1 !important;
+  --bg-glow: 12 76% 53% !important;
+  --font-heading: 'Space Grotesk', sans-serif !important;
+  --font-body: 'DM Sans', sans-serif !important;
+}
+html[data-skin="cassette"] .glass,
+html[data-skin="cassette"] .glass-card,
+html[data-skin="cassette"] .glass-heavy {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid hsl(var(--foreground)) !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 4px 4px 0 hsl(var(--foreground)) !important;
+}
+html[data-skin="cassette"] .glow-text,
+html[data-skin="cassette"] .glow-border,
+html[data-skin="cassette"] .glow-sm,
+html[data-skin="cassette"] .artwork-ring {
+  text-shadow: none !important;
+  box-shadow: 3px 3px 0 hsl(var(--foreground)) !important;
+}
+html[data-skin="cassette"] .app-bg::before,
+html[data-skin="cassette"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="cassette"] .app-bg {
+  background:
+    repeating-linear-gradient(45deg, hsl(var(--foreground) / 0.045) 0 2px, transparent 2px 9px),
+    hsl(var(--background)) !important;
+}
+html[data-skin="cassette"] h1,
+html[data-skin="cassette"] h2,
+html[data-skin="cassette"] h3 { letter-spacing: -0.02em !important; font-weight: 700; }
+html[data-skin="cassette"] .gradient-text {
+  -webkit-text-fill-color: hsl(var(--primary)) !important;
+  background: none !important;
+}
+html[data-skin="cassette"] img { border-radius: 0.25rem !important; }
+
+/* ---------- VINYL: warm 70s lounge, gold + serif ---------- */
+html[data-skin="vinyl"] {
+  --background: 30 45% 7% !important;
+  --foreground: 38 45% 92% !important;
+  --card: 28 42% 12% !important;
+  --card-foreground: 38 45% 92% !important;
+  --popover: 28 42% 12% !important;
+  --popover-foreground: 38 45% 92% !important;
+  --primary: 40 68% 55% !important;
+  --primary-foreground: 30 45% 8% !important;
+  --secondary: 20 45% 18% !important;
+  --secondary-foreground: 38 45% 92% !important;
+  --muted: 26 30% 18% !important;
+  --muted-foreground: 36 22% 65% !important;
+  --accent: 8 60% 45% !important;
+  --accent-foreground: 38 45% 95% !important;
+  --border: 34 35% 26% !important;
+  --input: 28 35% 15% !important;
+  --ring: 40 68% 55% !important;
+  --radius: 999px !important;
+  --glow-primary: 40 68% 55% !important;
+  --glow-accent: 8 60% 45% !important;
+  --gradient-start: 40 68% 55% !important;
+  --gradient-end: 8 60% 45% !important;
+  --glass-bg: 28 42% 12% / 0.92 !important;
+  --glass-heavy-bg: 30 45% 8% / 0.96 !important;
+  --glass-border: 40 50% 45% / 0.35 !important;
+  --bg-glow: 40 68% 55% !important;
+  --font-heading: 'Playfair Display', Georgia, serif !important;
+  --font-body: 'DM Sans', sans-serif !important;
+}
+html[data-skin="vinyl"] .glass,
+html[data-skin="vinyl"] .glass-card {
+  border-radius: 1.75rem !important;
+  box-shadow: inset 0 1px 0 hsl(var(--primary) / 0.15), 0 18px 40px hsl(0 0% 0% / 0.45) !important;
+}
+html[data-skin="vinyl"] .app-bg {
+  background:
+    repeating-radial-gradient(circle at 70% 30%, hsl(var(--primary) / 0.05) 0 1px, transparent 1px 7px),
+    radial-gradient(ellipse at 50% 0%, hsl(30 55% 14%) 0%, hsl(var(--background)) 60%) !important;
+}
+html[data-skin="vinyl"] h1,
+html[data-skin="vinyl"] h2,
+html[data-skin="vinyl"] h3 {
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important;
+}
+html[data-skin="vinyl"] img { border-radius: 50% !important; }
+html[data-skin="vinyl"] button img { border-radius: 50% !important; }
+
+/* ---------- TERMINAL: monospace CRT console ---------- */
+html[data-skin="terminal"] {
+  --background: 0 0% 2% !important;
+  --foreground: 140 90% 72% !important;
+  --card: 140 30% 5% !important;
+  --card-foreground: 140 90% 78% !important;
+  --popover: 140 30% 5% !important;
+  --popover-foreground: 140 90% 78% !important;
+  --primary: 145 100% 62% !important;
+  --primary-foreground: 0 0% 4% !important;
+  --secondary: 140 25% 10% !important;
+  --secondary-foreground: 140 80% 75% !important;
+  --muted: 140 20% 9% !important;
+  --muted-foreground: 140 35% 52% !important;
+  --accent: 60 100% 60% !important;
+  --accent-foreground: 0 0% 4% !important;
+  --border: 145 60% 26% !important;
+  --input: 140 25% 8% !important;
+  --ring: 145 100% 62% !important;
+  --radius: 0rem !important;
+  --glow-primary: 145 100% 62% !important;
+  --glow-accent: 60 100% 60% !important;
+  --gradient-start: 145 100% 62% !important;
+  --gradient-end: 170 100% 45% !important;
+  --glass-bg: 140 30% 5% / 0.85 !important;
+  --glass-heavy-bg: 0 0% 2% / 0.96 !important;
+  --glass-border: 145 80% 45% / 0.45 !important;
+  --bg-glow: 145 100% 62% !important;
+  --font-heading: 'JetBrains Mono', monospace !important;
+  --font-body: 'JetBrains Mono', monospace !important;
+}
+html[data-skin="terminal"] * { border-radius: 0 !important; }
+html[data-skin="terminal"] .glass,
+html[data-skin="terminal"] .glass-card,
+html[data-skin="terminal"] .glass-heavy {
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  border: 1px solid hsl(var(--primary) / 0.45) !important;
+}
+html[data-skin="terminal"] .app-bg::before,
+html[data-skin="terminal"] .app-bg::after { opacity: 0.35 !important; }
+html[data-skin="terminal"] .app-bg {
+  background:
+    repeating-linear-gradient(0deg, hsl(145 100% 62% / 0.05) 0 1px, transparent 1px 3px),
+    hsl(var(--background)) !important;
+}
+html[data-skin="terminal"] h1,
+html[data-skin="terminal"] h2,
+html[data-skin="terminal"] h3 {
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  font-weight: 700 !important;
+}
+html[data-skin="terminal"] h2::before { content: "> "; opacity: 0.7; }
+html[data-skin="terminal"] img { filter: saturate(0.35) contrast(1.15) brightness(0.95); }
+html[data-skin="terminal"] .gradient-text {
+  -webkit-text-fill-color: hsl(var(--primary)) !important;
+  background: none !important;
+  text-shadow: 0 0 12px hsl(var(--primary) / 0.7);
+}
+
+/* ---------- ZEN: quiet editorial daylight ---------- */
+html[data-skin="zen"] {
+  --background: 40 20% 98% !important;
+  --foreground: 200 12% 14% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 200 12% 14% !important;
+  --popover: 0 0% 100% !important;
+  --popover-foreground: 200 12% 14% !important;
+  --primary: 165 40% 30% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 40 16% 94% !important;
+  --secondary-foreground: 200 12% 14% !important;
+  --muted: 40 14% 95% !important;
+  --muted-foreground: 200 8% 46% !important;
+  --accent: 25 45% 55% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --border: 40 12% 88% !important;
+  --input: 0 0% 100% !important;
+  --ring: 165 40% 30% !important;
+  --radius: 0.75rem !important;
+  --glow-primary: 165 40% 30% !important;
+  --glow-accent: 25 45% 55% !important;
+  --gradient-start: 165 40% 30% !important;
+  --gradient-end: 25 45% 55% !important;
+  --glass-bg: 0 0% 100% / 0.9 !important;
+  --glass-heavy-bg: 40 20% 98% / 0.94 !important;
+  --glass-border: 40 12% 86% / 1 !important;
+  --bg-glow: 165 40% 30% !important;
+  --font-heading: 'Playfair Display', Georgia, serif !important;
+  --font-body: 'DM Sans', sans-serif !important;
+}
+html[data-skin="zen"] .glass,
+html[data-skin="zen"] .glass-card,
+html[data-skin="zen"] .glass-heavy {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 1px 2px hsl(200 12% 14% / 0.04) !important;
+  border-radius: 0.75rem !important;
+}
+html[data-skin="zen"] .glow-text,
+html[data-skin="zen"] .glow-border,
+html[data-skin="zen"] .glow-sm,
+html[data-skin="zen"] .artwork-ring {
+  text-shadow: none !important;
+  box-shadow: 0 6px 20px hsl(200 12% 14% / 0.08) !important;
+}
+html[data-skin="zen"] .app-bg::before,
+html[data-skin="zen"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="zen"] .app-bg { background: hsl(var(--background)) !important; }
+html[data-skin="zen"] h1,
+html[data-skin="zen"] h2,
+html[data-skin="zen"] h3 {
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  font-weight: 600 !important;
+}
+html[data-skin="zen"] .gradient-text {
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  background: none !important;
+}
+html[data-skin="zen"] .gradient-mesh { background: hsl(var(--secondary)) !important; }
