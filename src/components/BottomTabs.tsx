@@ -25,7 +25,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
     <button
       onClick={() => onTabChange(id)}
       className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
-        ${activeTab === id ? "text-white" : "text-white/60 hover:text-white/80"}`}
+        ${activeTab === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
     >
       {activeTab === id && (
         <motion.div
@@ -36,10 +36,10 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
       )}
       <Icon
         className={`w-5 h-5 relative z-10 stroke-[1.5] ${
-          activeTab === id ? "text-white drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-white/70"
+          activeTab === id ? "text-foreground drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" : "text-muted-foreground"
         }`}
       />
-      <span className="text-[10px] font-medium relative z-10 text-white/80">{label}</span>
+      <span className="text-[10px] font-medium relative z-10 text-foreground/80">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span className="absolute top-0.5 right-1 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center z-10">
           {badge > 9 ? "9+" : badge}
@@ -51,7 +51,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
 
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
-      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full bg-zinc-950/80 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full glass-heavy border border-border shadow-2xl">
         {tabBtn("home", Home, "Home")}
 
         {/* Random */}
@@ -60,7 +60,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
           animate={randomPressed ? { scale: [1, 1.15, 1], rotate: [0, 180, 360] } : {}}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-xl
-            ${randomPressed ? "text-primary" : "text-white/60 hover:text-white/80"}`}
+            ${randomPressed ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
         >
           {randomPressed && (
             <motion.div
@@ -70,8 +70,8 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
               className="absolute inset-0 gradient-primary rounded-full"
             />
           )}
-          <Shuffle className={`w-5 h-5 relative z-10 stroke-[1.5] transition-colors ${randomPressed ? "text-primary" : "text-white/70"}`} />
-          <span className="text-[10px] font-medium relative z-10 text-white/80">Random</span>
+          <Shuffle className={`w-5 h-5 relative z-10 stroke-[1.5] transition-colors ${randomPressed ? "text-primary" : "text-muted-foreground"}`} />
+          <span className="text-[10px] font-medium relative z-10 text-muted-foreground">Random</span>
         </motion.button>
 
         {tabBtn("library", Library, "Library")}

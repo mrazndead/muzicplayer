@@ -26,6 +26,7 @@ export function Artwork({ track, size = "480x480", className, alt, eager }: Artw
   return (
     <img
       src={src}
+      data-artwork=""
       alt={alt ?? track.title}
       className={className}
       loading={eager ? "eager" : "lazy"}
