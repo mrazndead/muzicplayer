@@ -51,7 +51,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
 
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
-      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full bg-zinc-950/80 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full glass-heavy border border-border shadow-2xl">
         {tabBtn("home", Home, "Home")}
 
         {/* Random */}
