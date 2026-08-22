@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Bebas Neue', 'sans-serif'],
-        body: ['Barlow', 'sans-serif'],
+        heading: ['var(--font-heading)'],
+        body: ['var(--font-body)'],
       },
       colors: {
         border: "hsl(var(--border))",
