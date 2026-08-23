@@ -31,6 +31,7 @@ export function TrendingCarousel({ tracks, onPlay, currentTrackId }: TrendingCar
           track={heroTrack}
           size="1000x1000"
           eager
+          shape="wide"
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
