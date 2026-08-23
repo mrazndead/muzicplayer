@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useUiSkin } from "@/contexts/UiSkinContext";
 
 export type AppThemeId = "purple" | "ocean" | "ember" | "mint" | "rose" | "midnight" | "golden";
 
@@ -253,7 +254,29 @@ const AppThemeContext = createContext<AppThemeContextType>({
   setThemeId: () => {},
 });
 
+/**
+ * Vars that carry the palette's *identity* (accents, glows, gradients).
+ * These are applied with `!important` so they win over skin CSS, letting
+ * every color palette work inside every interface skin.
+ */
+const ACCENT_VARS = [
+  "--primary",
+  "--primary-foreground",
+  "--accent",
+  "--accent-foreground",
+  "--ring",
+  "--glow-primary",
+  "--glow-accent",
+  "--gradient-start",
+  "--gradient-end",
+  "--bg-glow",
+  "--sidebar-primary",
+  "--sidebar-primary-foreground",
+  "--sidebar-ring",
+] as const;
+
 export function AppThemeProvider({ children }: { children: ReactNode }) {
+  const { skinId } = useUiSkin();
   const [themeId, setThemeId] = useState<AppThemeId>(() => {
     return (localStorage.getItem("app-theme") as AppThemeId) || "purple";
   });
@@ -262,10 +285,25 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("app-theme", themeId);
     const theme = APP_THEMES.find((t) => t.id === themeId) || APP_THEMES[0];
     const root = document.documentElement;
-    Object.entries(theme.vars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-  }, [themeId]);
+
+    // Reset previously written inline vars so switching skins/themes is clean.
+    Object.keys(theme.vars).forEach((key) => root.style.removeProperty(key));
+
+    if (skinId === "pulse") {
+      // Default skin owns the full palette (surfaces + accents).
+      Object.entries(theme.vars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+    } else {
+      // Other skins keep their own surfaces/typography; only the palette's
+      // accent identity is injected, forced above the skin's !important rules.
+      ACCENT_VARS.forEach((key) => {
+        const value = theme.vars[key];
+        if (value) root.style.setProperty(key, value, "important");
+      });
+    }
+  }, [themeId, skinId]);
+
 
   return (
     <AppThemeContext.Provider value={{ themeId, setThemeId }}>
