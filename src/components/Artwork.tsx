@@ -9,13 +9,15 @@ interface ArtworkProps {
   className?: string;
   alt?: string;
   eager?: boolean;
+  /** "square" thumbnails may be styled as vinyl records; "wide" ones never are. */
+  shape?: "square" | "wide";
 }
 
 /**
  * Artwork with a guaranteed visual: if a remote cover 404s or is blocked,
  * it silently swaps to a deterministic local cover instead of a broken image.
  */
-export function Artwork({ track, size = "480x480", className, alt, eager }: ArtworkProps) {
+export function Artwork({ track, size = "480x480", className, alt, eager, shape = "square" }: ArtworkProps) {
   const primary = getArtworkUrl(track, size);
   const [src, setSrc] = useState(primary);
 
@@ -26,7 +28,7 @@ export function Artwork({ track, size = "480x480", className, alt, eager }: Artw
   return (
     <img
       src={src}
-      data-artwork=""
+      data-artwork={shape}
       alt={alt ?? track.title}
       className={className}
       loading={eager ? "eager" : "lazy"}
