@@ -19,6 +19,9 @@ import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { Artwork } from "@/components/Artwork";
 import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { TrackSkeleton } from "@/components/TrackSkeleton";
+import { toast } from "sonner";
+
 
 // Lazy-load heavy visual / rarely-used components to speed up first paint.
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
