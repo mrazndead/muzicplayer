@@ -19,6 +19,9 @@ import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { Artwork } from "@/components/Artwork";
 import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { TrackSkeleton } from "@/components/TrackSkeleton";
+import { toast } from "sonner";
+
 
 // Lazy-load heavy visual / rarely-used components to speed up first paint.
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
@@ -105,11 +108,17 @@ const Index = () => {
         setHasMore(results.length >= TRACKS_PER_PAGE);
       }
     } catch (err) {
-      if (!controller.signal.aborted) console.error("Failed to fetch tracks:", err);
+      if (!controller.signal.aborted) {
+        console.error("Failed to fetch tracks:", err);
+        setTracks([]);
+        setHasMore(false);
+        toast.error("Search failed", { description: "Check your connection and try again." });
+      }
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
   }, []);
+
 
   const loadMoreTracks = useCallback(async () => {
     if (loadingMore) return;
@@ -441,10 +450,12 @@ const Index = () => {
               )}
 
               {loading && (
-                <div className="flex items-center justify-center py-20">
-                  <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
+                <div className="space-y-4">
+                  <div className="h-3 w-32 rounded bg-muted/50 animate-pulse" />
+                  <TrackSkeleton count={8} />
                 </div>
               )}
+
 
               {hasSearched && (
                 <button
