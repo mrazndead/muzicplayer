@@ -450,10 +450,12 @@ const Index = () => {
               )}
 
               {loading && (
-                <div className="flex items-center justify-center py-20">
-                  <div className="w-12 h-12 rounded-full gradient-primary animate-pulse glow-sm" />
+                <div className="space-y-4">
+                  <div className="h-3 w-32 rounded bg-muted/50 animate-pulse" />
+                  <TrackSkeleton count={8} />
                 </div>
               )}
+
 
               {hasSearched && (
                 <button
