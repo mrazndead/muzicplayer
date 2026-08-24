@@ -105,11 +105,17 @@ const Index = () => {
         setHasMore(results.length >= TRACKS_PER_PAGE);
       }
     } catch (err) {
-      if (!controller.signal.aborted) console.error("Failed to fetch tracks:", err);
+      if (!controller.signal.aborted) {
+        console.error("Failed to fetch tracks:", err);
+        setTracks([]);
+        setHasMore(false);
+        toast.error("Search failed", { description: "Check your connection and try again." });
+      }
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
   }, []);
+
 
   const loadMoreTracks = useCallback(async () => {
     if (loadingMore) return;
