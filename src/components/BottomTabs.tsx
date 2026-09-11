@@ -24,7 +24,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
   const tabBtn = (id: TabId, Icon: typeof Home, label: string, badge?: number) => (
     <button
       onClick={() => onTabChange(id)}
-      className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
+      className={`flex flex-col items-center gap-0.5 py-2 px-3 transition-all duration-300 relative rounded-full
         ${activeTab === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
     >
       {activeTab === id && (
