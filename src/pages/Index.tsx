@@ -560,6 +560,21 @@ const Index = () => {
               </Suspense>
             </motion.div>
           )}
+
+          {/* YOUTUBE TAB */}
+          {activeTab === "youtube" && (
+            <motion.div
+              key="youtube"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <Suspense fallback={<LazyFallback />}>
+                <YouTubeTab onBeforePlay={player.pause} />
+              </Suspense>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
