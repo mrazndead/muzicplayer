@@ -1,8 +1,8 @@
-import { Home, Shuffle, Heart, Library } from "lucide-react";
+import { Home, Shuffle, Heart, Library, Youtube } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export type TabId = "home" | "favorites" | "library";
+export type TabId = "home" | "favorites" | "library" | "youtube";
 
 interface BottomTabsProps {
   activeTab: TabId;
@@ -24,7 +24,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
   const tabBtn = (id: TabId, Icon: typeof Home, label: string, badge?: number) => (
     <button
       onClick={() => onTabChange(id)}
-      className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-full
+      className={`flex flex-col items-center gap-0.5 py-2 px-3 transition-all duration-300 relative rounded-full
         ${activeTab === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
     >
       {activeTab === id && (
@@ -51,7 +51,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
 
   return (
     <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
-      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-2 rounded-full glass-heavy border border-border shadow-2xl">
+      <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-1 rounded-full glass-heavy border border-border shadow-2xl">
         {tabBtn("home", Home, "Home")}
 
         {/* Random */}
@@ -59,7 +59,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
           onClick={handleRandomClick}
           animate={randomPressed ? { scale: [1, 1.15, 1], rotate: [0, 180, 360] } : {}}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`flex flex-col items-center gap-0.5 py-2 px-4 transition-all duration-300 relative rounded-xl
+          className={`flex flex-col items-center gap-0.5 py-2 px-3 transition-all duration-300 relative rounded-xl
             ${randomPressed ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
         >
           {randomPressed && (
@@ -74,6 +74,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
           <span className="text-[10px] font-medium relative z-10 text-muted-foreground">Random</span>
         </motion.button>
 
+        {tabBtn("youtube", Youtube, "YouTube")}
         {tabBtn("library", Library, "Library")}
         {tabBtn("favorites", Heart, "Liked", favCount)}
       </div>
