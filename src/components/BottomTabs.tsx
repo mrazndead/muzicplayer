@@ -1,8 +1,8 @@
-import { Home, Shuffle, Heart, Library } from "lucide-react";
+import { Home, Shuffle, Heart, Library, Youtube } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export type TabId = "home" | "favorites" | "library";
+export type TabId = "home" | "favorites" | "library" | "youtube";
 
 interface BottomTabsProps {
   activeTab: TabId;
