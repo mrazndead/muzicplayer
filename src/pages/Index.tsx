@@ -27,6 +27,7 @@ import { toast } from "sonner";
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
 const TrendingCarousel = lazy(() => import("@/components/TrendingCarousel").then(m => ({ default: m.TrendingCarousel })));
 const LocalLibrary = lazy(() => import("@/components/LocalLibrary").then(m => ({ default: m.LocalLibrary })));
+const YouTubeTab = lazy(() => import("@/components/YouTubeTab").then(m => ({ default: m.YouTubeTab })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-10">
