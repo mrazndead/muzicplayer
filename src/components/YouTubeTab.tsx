@@ -21,9 +21,11 @@ function fmt(sec: number) {
 interface YouTubeTabProps {
   /** Called right before YouTube audio starts, so the main player can stop. */
   onBeforePlay?: () => void;
+  /** Reports YouTube audio play/pause state to the parent. */
+  onPlayingChange?: (playing: boolean) => void;
 }
 
-export function YouTubeTab({ onBeforePlay }: YouTubeTabProps) {
+export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<YtResult[]>([]);
   const [loading, setLoading] = useState(false);
