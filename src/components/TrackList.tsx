@@ -176,6 +176,27 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                 <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
 
+              {/* Download (freely licensed sources only) */}
+              {canDownload(track) && (
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setDownloadingId(track.id);
+                    await downloadTrack(track);
+                    setDownloadingId(null);
+                  }}
+                  disabled={downloadingId === track.id}
+                  aria-label={`Download ${track.title} as MP3`}
+                  className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 disabled:opacity-100"
+                >
+                  {downloadingId === track.id ? (
+                    <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
+                  )}
+                </button>
+              )}
+
               {onToggleFavorite && (
                 <button
                   onClick={(e) => {
