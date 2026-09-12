@@ -72,6 +72,7 @@ const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
 
 export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore }: TrackListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
