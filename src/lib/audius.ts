@@ -101,6 +101,8 @@ export interface AudiusTrack {
   description?: string;
   /** Optional pre-resolved stream URL. When set, the player uses this directly (e.g. local files via blob URL). */
   streamUrl?: string;
+  /** Direct, freely downloadable audio file URL (licensed sources only). */
+  downloadUrl?: string;
   /** True when this is a user-uploaded local file. */
   isLocal?: boolean;
   /** Where this track was fetched from. Defaults to "audius" for backwards-compat. */
