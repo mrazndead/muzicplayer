@@ -72,6 +72,10 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
     setPlaying(true);
   };
 
+  useEffect(() => {
+    onPlayingChange?.(playing && !!current);
+  }, [playing, current, onPlayingChange]);
+
   // Keep media session-ish title updated
   useEffect(() => {
     if (current && "mediaSession" in navigator) {
