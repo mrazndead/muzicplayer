@@ -34,6 +34,35 @@ function shareTrack(track: AudiusTrack) {
   }
 }
 
+function safeFileName(track: AudiusTrack) {
+  return `${track.user.name} - ${track.title}`.replace(/[^\w\s.-]/g, "").trim().slice(0, 120) || "track";
+}
+
+async function downloadTrack(track: AudiusTrack) {
+  const url = await getDownloadUrl(track);
+  if (!url) {
+    toast.error("This track can't be downloaded");
+    return;
+  }
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(String(res.status));
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = `${safeFileName(track)}.mp3`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+    toast.success("Saved as MP3");
+  } catch {
+    // Fall back to opening the file directly (e.g. when CORS blocks the fetch).
+    window.open(url, "_blank", "noopener");
+  }
+}
+
 const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
   audius: { label: "AUDIUS", className: "bg-fuchsia-500/15 text-fuchsia-300 ring-fuchsia-400/20" },
   jamendo: { label: "JAMENDO", className: "bg-emerald-500/15 text-emerald-300 ring-emerald-400/20" },
