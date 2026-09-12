@@ -69,6 +69,10 @@ Deno.serve(async (req) => {
           play_count: 0,
           permalink: String(t.shareurl ?? ""),
           streamUrl: String(t.audio),
+          downloadUrl:
+            t.audiodownload_allowed && typeof t.audiodownload === "string" && t.audiodownload
+              ? String(t.audiodownload)
+              : String(t.audio),
           source: "jamendo",
         };
       });
