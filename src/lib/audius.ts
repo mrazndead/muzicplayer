@@ -283,6 +283,24 @@ export async function getStreamUrl(trackId: string): Promise<string> {
   return `${host}/v1/tracks/${trackId}/stream?app_name=${APP_NAME}`;
 }
 
+/**
+ * Resolves a downloadable MP3 URL for tracks from freely licensed sources.
+ * Returns null when the source doesn't permit downloads.
+ */
+export async function getDownloadUrl(track: AudiusTrack): Promise<string | null> {
+  if (track.isLocal) return track.streamUrl ?? null;
+  if (track.downloadUrl) return track.downloadUrl;
+  const src = track.source ?? "audius";
+  if (src === "archive" || src === "jamendo") return track.streamUrl ?? null;
+  if (src === "audius") return getStreamUrl(track.id);
+  return null;
+}
+
+export function canDownload(track: AudiusTrack): boolean {
+  const src = track.source ?? (track.isLocal ? "local" : "audius");
+  return src === "audius" || src === "jamendo" || src === "archive";
+}
+
 export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
   if (track.isLocal) return pickLocalCover(track.id);
   const art = track.artwork?.[size] || track.artwork?.["480x480"] || track.artwork?.["150x150"] || track.artwork?.["1000x1000"];
