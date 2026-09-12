@@ -318,7 +318,13 @@ const Index = () => {
               </h1>
             </div>
           </button>
-          <DailyQuote />
+          {activeTab === "youtube" ? (
+            <div className="flex-1 min-w-0 flex justify-center">
+              <EqualizerBars isPlaying={ytPlaying} barCount={14} className="h-5" />
+            </div>
+          ) : (
+            <DailyQuote />
+          )}
           <div className="ml-auto flex items-center gap-1.5">
             <SkinSwitcher />
             <ThemeSwitcher />
