@@ -17,6 +17,8 @@ const INVIDIOUS_HOSTS = [
   "https://yewtu.be",
 ];
 
+const TARGET = 60;
+
 interface Result {
   id: string;
   title: string;
@@ -81,28 +83,55 @@ Deno.serve(async (req) => {
       });
     }
 
+    const seen = new Set<string>();
+    const merged: Result[] = [];
+    const add = (list: Result[]) => {
+      for (const r of list) {
+        if (seen.has(r.id)) continue;
+        seen.add(r.id);
+        merged.push(r);
+      }
+    };
+
+    // Piped: songs + videos filters, plus a page-2 continuation when available.
     for (const host of PIPED_HOSTS) {
-      const data = await tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=music_songs`);
-      const results = fromPiped((data as any)?.items ?? data);
-      if (results.length) {
-        return new Response(JSON.stringify({ results: results.slice(0, 30), source: "piped" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (merged.length >= TARGET) break;
+      const pages = await Promise.all([
+        tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=music_songs`),
+        tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=videos`),
+      ]);
+      let nextpage: string | null = null;
+      for (const data of pages) {
+        add(fromPiped((data as any)?.items ?? data));
+        const np = (data as any)?.nextpage;
+        if (!nextpage && typeof np === "string") nextpage = np;
+      }
+      if (merged.length < TARGET && nextpage) {
+        const more = await tryFetch(
+          `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=videos`,
+        );
+        add(fromPiped((more as any)?.items ?? more));
       }
     }
 
+    // Invidious: extra pages to top up the list.
     for (const host of INVIDIOUS_HOSTS) {
-      const data = await tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
-      const results = fromInvidious(data);
-      if (results.length) {
-        return new Response(JSON.stringify({ results: results.slice(0, 30), source: "invidious" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (merged.length >= TARGET) break;
+      const pages = await Promise.all([
+        tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=1`),
+        tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=2`),
+      ]);
+      for (const data of pages) add(fromInvidious(data));
     }
 
-    return new Response(JSON.stringify({ results: [], error: "All search providers unavailable" }), {
-      status: 200,
+    if (!merged.length) {
+      return new Response(JSON.stringify({ results: [], error: "All search providers unavailable" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ results: merged.slice(0, TARGET) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
