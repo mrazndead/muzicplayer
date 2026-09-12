@@ -101,6 +101,8 @@ export interface AudiusTrack {
   description?: string;
   /** Optional pre-resolved stream URL. When set, the player uses this directly (e.g. local files via blob URL). */
   streamUrl?: string;
+  /** Direct, freely downloadable audio file URL (licensed sources only). */
+  downloadUrl?: string;
   /** True when this is a user-uploaded local file. */
   isLocal?: boolean;
   /** Where this track was fetched from. Defaults to "audius" for backwards-compat. */
@@ -279,6 +281,24 @@ export async function getTrendingTracks(genre?: string, limit = 20): Promise<Aud
 export async function getStreamUrl(trackId: string): Promise<string> {
   const host = await getHost();
   return `${host}/v1/tracks/${trackId}/stream?app_name=${APP_NAME}`;
+}
+
+/**
+ * Resolves a downloadable MP3 URL for tracks from freely licensed sources.
+ * Returns null when the source doesn't permit downloads.
+ */
+export async function getDownloadUrl(track: AudiusTrack): Promise<string | null> {
+  if (track.isLocal) return track.streamUrl ?? null;
+  if (track.downloadUrl) return track.downloadUrl;
+  const src = track.source ?? "audius";
+  if (src === "archive" || src === "jamendo") return track.streamUrl ?? null;
+  if (src === "audius") return getStreamUrl(track.id);
+  return null;
+}
+
+export function canDownload(track: AudiusTrack): boolean {
+  const src = track.source ?? (track.isLocal ? "local" : "audius");
+  return src === "audius" || src === "jamendo" || src === "archive";
 }
 
 export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {

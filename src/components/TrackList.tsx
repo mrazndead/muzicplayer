@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Heart, Headphones, Share2 } from "lucide-react";
-import { AudiusTrack, getShareUrl, formatPlayCount } from "@/lib/audius";
+import { Play, Pause, Heart, Headphones, Share2, Download, Loader2 } from "lucide-react";
+import { AudiusTrack, getShareUrl, formatPlayCount, getDownloadUrl, canDownload } from "@/lib/audius";
 import { Artwork } from "./Artwork";
 import { EqualizerBars } from "./EqualizerBars";
 import { toast } from "sonner";
@@ -34,6 +34,35 @@ function shareTrack(track: AudiusTrack) {
   }
 }
 
+function safeFileName(track: AudiusTrack) {
+  return `${track.user.name} - ${track.title}`.replace(/[^\w\s.-]/g, "").trim().slice(0, 120) || "track";
+}
+
+async function downloadTrack(track: AudiusTrack) {
+  const url = await getDownloadUrl(track);
+  if (!url) {
+    toast.error("This track can't be downloaded");
+    return;
+  }
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(String(res.status));
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = `${safeFileName(track)}.mp3`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+    toast.success("Saved as MP3");
+  } catch {
+    // Fall back to opening the file directly (e.g. when CORS blocks the fetch).
+    window.open(url, "_blank", "noopener");
+  }
+}
+
 const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
   audius: { label: "AUDIUS", className: "bg-fuchsia-500/15 text-fuchsia-300 ring-fuchsia-400/20" },
   jamendo: { label: "JAMENDO", className: "bg-emerald-500/15 text-emerald-300 ring-emerald-400/20" },
@@ -43,6 +72,7 @@ const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
 
 export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore }: TrackListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -146,6 +176,27 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
               >
                 <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
+
+              {/* Download (freely licensed sources only) */}
+              {canDownload(track) && (
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setDownloadingId(track.id);
+                    await downloadTrack(track);
+                    setDownloadingId(null);
+                  }}
+                  disabled={downloadingId === track.id}
+                  aria-label={`Download ${track.title} as MP3`}
+                  className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 disabled:opacity-100"
+                >
+                  {downloadingId === track.id ? (
+                    <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
+                  )}
+                </button>
+              )}
 
               {onToggleFavorite && (
                 <button
