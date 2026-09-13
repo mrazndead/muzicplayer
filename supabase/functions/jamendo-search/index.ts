@@ -61,11 +61,7 @@ Deno.serve(async (req) => {
             ? { "150x150": image, "480x480": image, "1000x1000": image }
             : undefined,
           duration: Number(t.duration ?? 0),
-          genre: String(
-            (Array.isArray((t as any)?.musicinfo?.tags?.genres) &&
-              (t as any).musicinfo.tags.genres[0]) ||
-              "Jamendo",
-          ),
+          genre: String(pickGenre(t) || "Jamendo"),
           play_count: 0,
           permalink: String(t.shareurl ?? ""),
           streamUrl: String(t.audio),
