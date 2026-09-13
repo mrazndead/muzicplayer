@@ -186,33 +186,47 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
         {results.map((r) => {
           const isCurrent = current?.id === r.id;
           return (
-            <button
+            <div
               key={r.id}
-              onClick={() => playItem(r)}
-              className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-colors ${
+              className={`w-full flex items-center gap-2 p-2 rounded-xl transition-colors ${
                 isCurrent ? "bg-primary/10 border border-primary/30" : "hover:bg-white/[0.04] border border-transparent"
               }`}
             >
-              <img
-                src={r.thumbnail || `https://i.ytimg.com/vi/${r.id}/mqdefault.jpg`}
-                alt=""
-                loading="lazy"
-                className="w-16 h-11 rounded-lg object-cover flex-shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <p className={`text-sm truncate ${isCurrent ? "text-primary" : "text-foreground"}`}>{r.title}</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {r.channel} · {fmt(r.duration)}
-                </p>
-              </div>
-              {isCurrent && playing ? (
-                <Pause className="w-4 h-4 text-primary flex-shrink-0" />
-              ) : (
-                <Play className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              )}
-            </button>
+              <button
+                onClick={() => playItem(r)}
+                aria-label={isCurrent && playing ? `Pause ${r.title}` : `Play ${r.title}`}
+                className="min-w-0 flex-1 flex items-center gap-3 text-left"
+              >
+                <img
+                  src={r.thumbnail || `https://i.ytimg.com/vi/${r.id}/mqdefault.jpg`}
+                  alt=""
+                  loading="lazy"
+                  className="w-16 h-11 rounded-lg object-cover flex-shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-sm truncate ${isCurrent ? "text-primary" : "text-foreground"}`}>{r.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {r.channel} · {fmt(r.duration)}
+                  </p>
+                </div>
+                {isCurrent && playing ? (
+                  <Pause className="w-4 h-4 text-primary flex-shrink-0" />
+                ) : (
+                  <Play className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                )}
+              </button>
+              <button
+                onClick={() => openConverter(r)}
+                aria-label={`Convert ${r.title} to MP3`}
+                title="Convert to MP3"
+                className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              >
+                <FileDown className="w-4 h-4" />
+              </button>
+            </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
