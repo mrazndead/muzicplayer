@@ -5,6 +5,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/** Reads musicinfo.tags.genres[0] out of a loosely-typed Jamendo track. */
+function pickGenre(track: Record<string, unknown>): string {
+  const info = track.musicinfo;
+  if (!info || typeof info !== "object") return "";
+  const tags = (info as Record<string, unknown>).tags;
+  if (!tags || typeof tags !== "object") return "";
+  const genres = (tags as Record<string, unknown>).genres;
+  return Array.isArray(genres) && typeof genres[0] === "string" ? genres[0] : "";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -61,11 +71,7 @@ Deno.serve(async (req) => {
             ? { "150x150": image, "480x480": image, "1000x1000": image }
             : undefined,
           duration: Number(t.duration ?? 0),
-          genre: String(
-            (Array.isArray((t as any)?.musicinfo?.tags?.genres) &&
-              (t as any).musicinfo.tags.genres[0]) ||
-              "Jamendo",
-          ),
+          genre: String(pickGenre(t) || "Jamendo"),
           play_count: 0,
           permalink: String(t.shareurl ?? ""),
           streamUrl: String(t.audio),
