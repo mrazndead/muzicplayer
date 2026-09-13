@@ -20,6 +20,7 @@ import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { Artwork } from "@/components/Artwork";
 import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 import { TrackSkeleton } from "@/components/TrackSkeleton";
+import { EqualizerBars } from "@/components/EqualizerBars";
 import { toast } from "sonner";
 
 
@@ -51,6 +52,7 @@ const Index = () => {
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [ytPlaying, setYtPlaying] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<string>("");
   const [hasMore, setHasMore] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
@@ -577,7 +579,7 @@ const Index = () => {
               className="space-y-6"
             >
               <Suspense fallback={<LazyFallback />}>
-                <YouTubeTab onBeforePlay={player.pause} />
+                <YouTubeTab onBeforePlay={player.pause} onPlayingChange={setYtPlaying} />
               </Suspense>
             </motion.div>
           )}
