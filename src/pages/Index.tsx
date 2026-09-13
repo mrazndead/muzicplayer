@@ -20,6 +20,7 @@ import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { Artwork } from "@/components/Artwork";
 import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 import { TrackSkeleton } from "@/components/TrackSkeleton";
+import { EqualizerBars } from "@/components/EqualizerBars";
 import { toast } from "sonner";
 
 
