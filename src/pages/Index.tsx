@@ -52,6 +52,7 @@ const Index = () => {
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [ytPlaying, setYtPlaying] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<string>("");
   const [hasMore, setHasMore] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
