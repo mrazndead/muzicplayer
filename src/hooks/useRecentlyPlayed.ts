@@ -17,7 +17,9 @@ export function useRecentlyPlayed() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recentlyPlayed));
-    } catch {}
+    } catch {
+      /* storage full or unavailable — history is non-critical */
+    }
   }, [recentlyPlayed]);
 
   const addToRecentlyPlayed = useCallback((track: AudiusTrack) => {
