@@ -227,7 +227,6 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
           );
         })}
       </div>
-      </div>
     </div>
   );
 }
