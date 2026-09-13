@@ -18,6 +18,13 @@ function fmt(sec: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/** Hands the video off to cnvmp3.com, where the conversion + download happens. */
+function openConverter(item: YtResult) {
+  const url = `https://www.youtube.com/watch?v=${item.id}`;
+  window.open(`https://cnvmp3.com/v55?url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
+  toast.success("Opened the MP3 converter", { description: "Finish the download in the new tab." });
+}
+
 interface YouTubeTabProps {
   /** Called right before YouTube audio starts, so the main player can stop. */
   onBeforePlay?: () => void;
