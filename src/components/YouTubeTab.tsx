@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Search, Play, Pause, Youtube, Loader2, X } from "lucide-react";
+import { Search, Play, Pause, Youtube, Loader2, X, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
