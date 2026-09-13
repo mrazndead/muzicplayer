@@ -200,7 +200,9 @@ export function useAudioPlayer() {
     audio.src = url;
     try {
       audio.load();
-    } catch {}
+    } catch {
+      /* some browsers throw if load() races a pending source change */
+    }
     try {
       await audio.play();
     } catch (err) {
