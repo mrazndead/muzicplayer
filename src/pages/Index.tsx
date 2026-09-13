@@ -579,7 +579,7 @@ const Index = () => {
               className="space-y-6"
             >
               <Suspense fallback={<LazyFallback />}>
-                <YouTubeTab onBeforePlay={player.pause} />
+                <YouTubeTab onBeforePlay={player.pause} onPlayingChange={setYtPlaying} />
               </Suspense>
             </motion.div>
           )}
