@@ -113,15 +113,15 @@ Deno.serve(async (req) => {
       ]);
       let nextpage: string | null = null;
       for (const data of pages) {
-        add(fromPiped((data as any)?.items ?? data));
-        const np = (data as any)?.nextpage;
+        add(fromPiped(asRecord(data).items ?? data));
+        const np = asRecord(data).nextpage;
         if (!nextpage && typeof np === "string") nextpage = np;
       }
       if (merged.length < TARGET && nextpage) {
         const more = await tryFetch(
           `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=videos`,
         );
-        add(fromPiped((more as any)?.items ?? more));
+        add(fromPiped(asRecord(more).items ?? more));
       }
     }
 
