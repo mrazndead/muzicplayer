@@ -27,16 +27,23 @@ interface Result {
   thumbnail: string;
 }
 
+type Raw = Record<string, unknown>;
+
+const asRecord = (v: unknown): Raw => (v && typeof v === "object" ? v as Raw : {});
+const str = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
+const num = (v: unknown) => (typeof v === "number" ? v : 0);
+
 function fromPiped(items: unknown): Result[] {
   if (!Array.isArray(items)) return [];
   return items
-    .filter((i: any) => i && typeof i.url === "string" && i.url.includes("watch?v="))
-    .map((i: any) => ({
-      id: String(i.url).split("watch?v=")[1].split("&")[0],
-      title: i.title ?? "Unknown",
-      channel: i.uploaderName ?? "Unknown",
-      duration: typeof i.duration === "number" ? i.duration : 0,
-      thumbnail: i.thumbnail ?? "",
+    .map(asRecord)
+    .filter((i) => str(i.url).includes("watch?v="))
+    .map((i) => ({
+      id: str(i.url).split("watch?v=")[1].split("&")[0],
+      title: str(i.title, "Unknown"),
+      channel: str(i.uploaderName, "Unknown"),
+      duration: num(i.duration),
+      thumbnail: str(i.thumbnail),
     }))
     .filter((r) => r.id && r.duration > 0);
 }
@@ -44,16 +51,20 @@ function fromPiped(items: unknown): Result[] {
 function fromInvidious(items: unknown): Result[] {
   if (!Array.isArray(items)) return [];
   return items
-    .filter((i: any) => i && i.type === "video" && i.videoId)
-    .map((i: any) => ({
-      id: i.videoId,
-      title: i.title ?? "Unknown",
-      channel: i.author ?? "Unknown",
-      duration: typeof i.lengthSeconds === "number" ? i.lengthSeconds : 0,
-      thumbnail: Array.isArray(i.videoThumbnails) && i.videoThumbnails.length
-        ? i.videoThumbnails[Math.min(2, i.videoThumbnails.length - 1)].url
-        : `https://i.ytimg.com/vi/${i.videoId}/mqdefault.jpg`,
-    }))
+    .map(asRecord)
+    .filter((i) => i.type === "video" && str(i.videoId))
+    .map((i) => {
+      const thumbs = Array.isArray(i.videoThumbnails) ? i.videoThumbnails : [];
+      const pick = thumbs.length ? asRecord(thumbs[Math.min(2, thumbs.length - 1)]) : {};
+      const videoId = str(i.videoId);
+      return {
+        id: videoId,
+        title: str(i.title, "Unknown"),
+        channel: str(i.author, "Unknown"),
+        duration: num(i.lengthSeconds),
+        thumbnail: str(pick.url) || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
+      };
+    })
     .filter((r) => r.id && r.duration > 0);
 }
 
