@@ -71,7 +71,18 @@ Deno.serve(async (req) => {
       audioBitrate: "128",
     });
     const url = fresh && typeof fresh.url === "string" ? fresh.url : "";
-    if (!url) return json({ error: "Conversion service is busy. Try again in a moment." }, 502);
+    if (!url) {
+      const errObj = fresh && typeof fresh.error === "object" && fresh.error
+        ? (fresh.error as Record<string, unknown>)
+        : null;
+      const code = errObj && typeof errObj.code === "string" ? errObj.code : "";
+      const message = code.includes("login") || code.includes("content")
+        ? "This video is restricted and can't be converted."
+        : code.includes("live")
+        ? "Live streams can't be converted."
+        : "Conversion service is busy. Try again in a moment.";
+      return json({ error: message, code }, 502);
+    }
 
     const filename = typeof fresh?.filename === "string" && fresh.filename
       ? safeName(fresh.filename.replace(/\.mp3$/i, ""))
