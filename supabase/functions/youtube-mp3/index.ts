@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         : code.includes("live")
         ? "Live streams can't be converted."
         : "Conversion service is busy. Try again in a moment.";
-      return json({ error: message, code }, 502);
+      return json({ error: message, code });
     }
 
     const filename = typeof fresh?.filename === "string" && fresh.filename
