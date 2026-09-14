@@ -53,7 +53,10 @@ async function convertToMp3(item: YtResult) {
     toast.success("Saved as MP3", { id: t, description: filename });
   } catch (e) {
     console.error("MP3 conversion failed:", e);
-    toast.error("Couldn't convert this one", { id: t, description: "Try again in a moment." });
+    toast.error("Couldn't convert this one", {
+      id: t,
+      description: e instanceof Error ? e.message : "Try again in a moment.",
+    });
   }
 }
 
