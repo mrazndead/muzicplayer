@@ -18,11 +18,57 @@ function fmt(sec: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Hands the video off to cnvmp3.com, where the conversion + download happens. */
-function openConverter(item: YtResult) {
-  const url = `https://www.youtube.com/watch?v=${item.id}`;
-  window.open(`https://cnvmp3.com/v55?url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
-  toast.success("Opened the MP3 converter", { description: "Finish the download in the new tab." });
+/** Converts in the background and saves the MP3 straight to the device. */
+async function convertToMp3(item: YtResult) {
+  const t = toast.loading("Converting to MP3…", { description: item.title });
+  try {
+    const { data, error } = await supabase.functions.invoke("youtube-mp3", {
+      body: { videoId: item.id, title: item.title },
+    });
+    if (error) throw error;
+    if (!data?.url) throw new Error(data?.error || "Conversion failed");
+
+    const filename: string = data.filename || `${item.title}.mp3`;
+    let href = data.url as string;
+    let revoke: string | null = null;
+    try {
+      const res = await fetch(data.url as string);
+      if (!res.ok) throw new Error("download failed");
+      const blob = await res.blob();
+      href = URL.createObjectURL(blob);
+      revoke = href;
+    } catch {
+      /* CORS or network hiccup — fall back to the direct link */
+    }
+
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    if (revoke) setTimeout(() => URL.revokeObjectURL(revoke), 60000);
+
+    toast.success("Saved as MP3", { id: t, description: filename });
+  } catch (e) {
+    console.error("MP3 conversion failed:", e);
+    // Fallback: copy the link and open the converter so it's one paste away.
+    const watch = `https://www.youtube.com/watch?v=${item.id}`;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(watch);
+      copied = true;
+    } catch {
+      /* clipboard blocked — the user can still copy from the opened tab */
+    }
+    window.open("https://cnvmp3.com/v55", "_blank", "noopener,noreferrer");
+    toast.info("Finish it on the converter tab", {
+      id: t,
+      description: copied ? "Link copied — just paste and press convert." : watch,
+      duration: 8000,
+    });
+  }
 }
 
 interface YouTubeTabProps {
@@ -38,6 +84,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState<YtResult | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [converting, setConverting] = useState<string | null>(null);
+
+  const handleConvert = useCallback(async (item: YtResult) => {
+    if (converting) return;
+    setConverting(item.id);
+    try {
+      await convertToMp3(item);
+    } finally {
+      setConverting(null);
+    }
+  }, [converting]);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const post = useCallback((func: string) => {
@@ -155,12 +212,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
             )}
           </button>
           <button
-            onClick={() => openConverter(current)}
-            aria-label="Convert to MP3"
-            title="Convert to MP3"
-            className="w-11 h-11 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            onClick={() => handleConvert(current)}
+            disabled={converting === current.id}
+            aria-label="Download as MP3"
+            title="Download as MP3"
+            className="w-11 h-11 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-60"
           >
-            <FileDown className="w-5 h-5" />
+            {converting === current.id ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <FileDown className="w-5 h-5" />
+            )}
           </button>
           <div className="sr-only" aria-hidden>
             <iframe
@@ -224,12 +286,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
                 )}
               </button>
               <button
-                onClick={() => openConverter(r)}
-                aria-label={`Convert ${r.title} to MP3`}
-                title="Convert to MP3"
-                className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                onClick={() => handleConvert(r)}
+                disabled={converting === r.id}
+                aria-label={`Download ${r.title} as MP3`}
+                title="Download as MP3"
+                className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-60"
               >
-                <FileDown className="w-4 h-4" />
+                {converting === r.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileDown className="w-4 h-4" />
+                )}
               </button>
             </div>
           );
