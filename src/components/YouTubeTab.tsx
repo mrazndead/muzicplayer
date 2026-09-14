@@ -18,11 +18,43 @@ function fmt(sec: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Hands the video off to cnvmp3.com, where the conversion + download happens. */
-function openConverter(item: YtResult) {
-  const url = `https://www.youtube.com/watch?v=${item.id}`;
-  window.open(`https://cnvmp3.com/v55?url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
-  toast.success("Opened the MP3 converter", { description: "Finish the download in the new tab." });
+/** Converts in the background and saves the MP3 straight to the device. */
+async function convertToMp3(item: YtResult) {
+  const t = toast.loading("Converting to MP3…", { description: item.title });
+  try {
+    const { data, error } = await supabase.functions.invoke("youtube-mp3", {
+      body: { videoId: item.id, title: item.title },
+    });
+    if (error) throw error;
+    if (!data?.url) throw new Error(data?.error || "Conversion failed");
+
+    const filename: string = data.filename || `${item.title}.mp3`;
+    let href = data.url as string;
+    let revoke: string | null = null;
+    try {
+      const res = await fetch(data.url as string);
+      if (!res.ok) throw new Error("download failed");
+      const blob = await res.blob();
+      href = URL.createObjectURL(blob);
+      revoke = href;
+    } catch {
+      /* CORS or network hiccup — fall back to the direct link */
+    }
+
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    if (revoke) setTimeout(() => URL.revokeObjectURL(revoke), 60000);
+
+    toast.success("Saved as MP3", { id: t, description: filename });
+  } catch (e) {
+    console.error("MP3 conversion failed:", e);
+    toast.error("Couldn't convert this one", { id: t, description: "Try again in a moment." });
+  }
 }
 
 interface YouTubeTabProps {
