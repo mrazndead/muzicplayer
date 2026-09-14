@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     const serverPath = data && typeof data.server_path === "string" ? data.server_path : "";
     if (cached?.success && serverPath) {
       const cachedTitle = typeof data?.title === "string" ? data.title : title;
-      return json({ url: serverPath, filename: safeName(cachedTitle || title) });
+      return json({ url: encodeURI(serverPath), filename: safeName(cachedTitle || title) });
     }
 
     // 2. Fresh conversion.
