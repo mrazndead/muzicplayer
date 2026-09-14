@@ -53,9 +53,20 @@ async function convertToMp3(item: YtResult) {
     toast.success("Saved as MP3", { id: t, description: filename });
   } catch (e) {
     console.error("MP3 conversion failed:", e);
-    toast.error("Couldn't convert this one", {
+    // Fallback: copy the link and open the converter so it's one paste away.
+    const watch = `https://www.youtube.com/watch?v=${item.id}`;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(watch);
+      copied = true;
+    } catch {
+      /* clipboard blocked — the user can still copy from the opened tab */
+    }
+    window.open("https://cnvmp3.com/v55", "_blank", "noopener,noreferrer");
+    toast.info("Finish it on the converter tab", {
       id: t,
-      description: e instanceof Error ? e.message : "Try again in a moment.",
+      description: copied ? "Link copied — just paste and press convert." : watch,
+      duration: 8000,
     });
   }
 }
