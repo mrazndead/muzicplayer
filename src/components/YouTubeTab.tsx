@@ -70,6 +70,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState<YtResult | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [converting, setConverting] = useState<string | null>(null);
+
+  const handleConvert = useCallback(async (item: YtResult) => {
+    if (converting) return;
+    setConverting(item.id);
+    try {
+      await convertToMp3(item);
+    } finally {
+      setConverting(null);
+    }
+  }, [converting]);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const post = useCallback((func: string) => {
@@ -187,12 +198,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
             )}
           </button>
           <button
-            onClick={() => openConverter(current)}
-            aria-label="Convert to MP3"
-            title="Convert to MP3"
-            className="w-11 h-11 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            onClick={() => handleConvert(current)}
+            disabled={converting === current.id}
+            aria-label="Download as MP3"
+            title="Download as MP3"
+            className="w-11 h-11 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-60"
           >
-            <FileDown className="w-5 h-5" />
+            {converting === current.id ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <FileDown className="w-5 h-5" />
+            )}
           </button>
           <div className="sr-only" aria-hidden>
             <iframe
@@ -256,12 +272,17 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
                 )}
               </button>
               <button
-                onClick={() => openConverter(r)}
-                aria-label={`Convert ${r.title} to MP3`}
-                title="Convert to MP3"
-                className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                onClick={() => handleConvert(r)}
+                disabled={converting === r.id}
+                aria-label={`Download ${r.title} as MP3`}
+                title="Download as MP3"
+                className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-60"
               >
-                <FileDown className="w-4 h-4" />
+                {converting === r.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileDown className="w-4 h-4" />
+                )}
               </button>
             </div>
           );
