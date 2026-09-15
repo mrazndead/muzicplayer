@@ -39,6 +39,7 @@ export function MoodGrid({ activeMood, onSelectMood }: {
         {DEFAULT_MOODS.map((mood, i) => {
           const isActive = activeMood === mood.id;
           const accent = MOOD_ACCENT[mood.id] ?? "text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)]";
+          const Icon = MOOD_ICON[mood.id] ?? Music2;
           return (
             <motion.button
               key={mood.id}
@@ -52,7 +53,7 @@ export function MoodGrid({ activeMood, onSelectMood }: {
                   : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
               }`}
             >
-              <span className={`text-sm leading-none ${isActive ? "" : accent}`}>{mood.emoji}</span>
+              <Icon className={`w-4 h-4 ${isActive ? "" : accent}`} aria-hidden />
               <span className="text-[9px] font-bold uppercase tracking-tight leading-none">{mood.label}</span>
             </motion.button>
           );
