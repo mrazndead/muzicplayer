@@ -22,11 +22,24 @@ function fmt(sec: number) {
 async function convertToMp3(item: YtResult) {
   const t = toast.loading("Converting to MP3…", { description: item.title });
   try {
-    const { data, error } = await supabase.functions.invoke("youtube-mp3", {
-      body: { videoId: item.id, title: item.title },
-    });
-    if (error) throw error;
-    if (!data?.url) throw new Error(data?.error || "Conversion failed");
+    // Two attempts: the converter often rejects the first request of a session.
+    let data: { url?: string; filename?: string; error?: string } | null = null;
+    let lastErr: unknown = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt) {
+        toast.loading("Still converting…", { id: t, description: item.title });
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+      const res = await supabase.functions.invoke("youtube-mp3", {
+        body: { videoId: item.id, title: item.title },
+      });
+      if (!res.error && res.data?.url) {
+        data = res.data;
+        break;
+      }
+      lastErr = res.error ?? res.data?.error;
+    }
+    if (!data?.url) throw new Error(String(lastErr || "Conversion failed"));
 
     const filename: string = data.filename || `${item.title}.mp3`;
     let href = data.url as string;
