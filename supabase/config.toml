@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.youtube-search]
 verify_jwt = false
+
+[functions.youtube-mp3]
+verify_jwt = false
