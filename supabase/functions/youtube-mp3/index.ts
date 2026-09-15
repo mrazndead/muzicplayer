@@ -48,28 +48,35 @@ Deno.serve(async (req) => {
 
     const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-    // 1. Already converted before? Reuse the cached file.
-    const cached = await post("https://cnvmp3.com/check_database.php", {
-      youtube_id: videoId,
-      quality: 5,
-      formatValue: 1,
-    }, 20000);
-    const data = cached && typeof cached.data === "object" && cached.data
-      ? (cached.data as Record<string, unknown>)
-      : null;
-    const serverPath = data && typeof data.server_path === "string" ? data.server_path : "";
-    if (cached?.success && serverPath) {
-      const cachedTitle = typeof data?.title === "string" ? data.title : title;
-      return json({ url: encodeURI(serverPath), filename: safeName(cachedTitle || title) });
+    // 1. Already converted before? Reuse the cached file (several bitrate/format variants).
+    for (const quality of [5, 4, 3, 2, 1, 0]) {
+      const cached = await post("https://cnvmp3.com/check_database.php", {
+        youtube_id: videoId,
+        quality,
+        formatValue: 1,
+      }, 15000);
+      const data = cached && typeof cached.data === "object" && cached.data
+        ? (cached.data as Record<string, unknown>)
+        : null;
+      const serverPath = data && typeof data.server_path === "string" ? data.server_path : "";
+      if (cached?.success && serverPath) {
+        const cachedTitle = typeof data?.title === "string" ? data.title : title;
+        return json({ url: encodeURI(serverPath), filename: safeName(cachedTitle || title) });
+      }
     }
 
-    // 2. Fresh conversion.
-    const fresh = await post("https://cnvmp3.com/fetch.php", {
-      url: watchUrl,
-      downloadMode: "audio",
-      filenameStyle: "basic",
-      audioBitrate: "128",
-    });
+    // 2. Fresh conversion — retried, since the service intermittently rejects requests.
+    let fresh: Record<string, unknown> | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 1200 * attempt));
+      fresh = await post("https://cnvmp3.com/fetch.php", {
+        url: watchUrl,
+        downloadMode: "audio",
+        filenameStyle: "basic",
+        audioBitrate: "128",
+      });
+      if (fresh && typeof fresh.url === "string" && fresh.url) break;
+    }
     const url = fresh && typeof fresh.url === "string" ? fresh.url : "";
     if (!url) {
       const errObj = fresh && typeof fresh.error === "object" && fresh.error

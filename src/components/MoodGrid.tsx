@@ -1,7 +1,23 @@
 import { motion } from "framer-motion";
+import {
+  Waves, Zap, CloudRain, Heart, Target, PartyPopper, Moon, Sun, Music2,
+  type LucideIcon,
+} from "lucide-react";
 import { DEFAULT_MOODS } from "@/lib/audius";
 
-// Per-mood accent glow (color tuned to emoji vibe)
+// Icons render reliably on every platform (emoji glyphs are missing on some Androids)
+const MOOD_ICON: Record<string, LucideIcon> = {
+  chill: Waves,
+  energetic: Zap,
+  melancholy: CloudRain,
+  romantic: Heart,
+  focus: Target,
+  party: PartyPopper,
+  dreamy: Moon,
+  uplifting: Sun,
+};
+
+// Per-mood accent glow (color tuned to the mood vibe)
 const MOOD_ACCENT: Record<string, string> = {
   chill: "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.55)]",
   energetic: "text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.55)]",
@@ -23,6 +39,7 @@ export function MoodGrid({ activeMood, onSelectMood }: {
         {DEFAULT_MOODS.map((mood, i) => {
           const isActive = activeMood === mood.id;
           const accent = MOOD_ACCENT[mood.id] ?? "text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.55)]";
+          const Icon = MOOD_ICON[mood.id] ?? Music2;
           return (
             <motion.button
               key={mood.id}
@@ -36,7 +53,7 @@ export function MoodGrid({ activeMood, onSelectMood }: {
                   : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
               }`}
             >
-              <span className={`text-sm leading-none ${isActive ? "" : accent}`}>{mood.emoji}</span>
+              <Icon className={`w-4 h-4 ${isActive ? "" : accent}`} aria-hidden />
               <span className="text-[9px] font-bold uppercase tracking-tight leading-none">{mood.label}</span>
             </motion.button>
           );
