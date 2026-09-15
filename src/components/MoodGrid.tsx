@@ -1,7 +1,23 @@
 import { motion } from "framer-motion";
+import {
+  Waves, Zap, CloudRain, Heart, Target, PartyPopper, Moon, Sun, Music2,
+  type LucideIcon,
+} from "lucide-react";
 import { DEFAULT_MOODS } from "@/lib/audius";
 
-// Per-mood accent glow (color tuned to emoji vibe)
+// Icons render reliably on every platform (emoji glyphs are missing on some Androids)
+const MOOD_ICON: Record<string, LucideIcon> = {
+  chill: Waves,
+  energetic: Zap,
+  melancholy: CloudRain,
+  romantic: Heart,
+  focus: Target,
+  party: PartyPopper,
+  dreamy: Moon,
+  uplifting: Sun,
+};
+
+// Per-mood accent glow (color tuned to the mood vibe)
 const MOOD_ACCENT: Record<string, string> = {
   chill: "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.55)]",
   energetic: "text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.55)]",
