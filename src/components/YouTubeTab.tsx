@@ -42,16 +42,29 @@ async function convertToMp3(item: YtResult) {
     if (!data?.url) throw new Error(String(lastErr || "Conversion failed"));
 
     const filename: string = data.filename || `${item.title}.mp3`;
+    toast.loading("Downloading MP3…", { id: t, description: filename });
+
+    // The converter's own host blocks cross-origin reads, so stream it through our backend.
+    const proxy =
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-mp3` +
+      `?file=${encodeURIComponent(data.url)}&name=${encodeURIComponent(filename)}`;
+
     let href = data.url as string;
     let revoke: string | null = null;
-    try {
-      const res = await fetch(data.url as string);
-      if (!res.ok) throw new Error("download failed");
-      const blob = await res.blob();
-      href = URL.createObjectURL(blob);
-      revoke = href;
-    } catch {
-      /* CORS or network hiccup — fall back to the direct link */
+    for (const src of [proxy, data.url as string]) {
+      try {
+        const res = await fetch(src, {
+          headers: src === proxy ? { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } : undefined,
+        });
+        if (!res.ok) throw new Error("download failed");
+        const blob = await res.blob();
+        if (blob.size < 10000) throw new Error("empty file");
+        href = URL.createObjectURL(new Blob([blob], { type: "audio/mpeg" }));
+        revoke = href;
+        break;
+      } catch {
+        /* try the next source */
+      }
     }
 
     const a = document.createElement("a");
