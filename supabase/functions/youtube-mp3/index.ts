@@ -37,10 +37,48 @@ async function post(url: string, body: unknown, timeoutMs = 90000): Promise<Reco
   }
 }
 
+/** Streams the converted MP3 back to the browser so the download never leaves the app. */
+async function proxyFile(fileUrl: string, name: string): Promise<Response> {
+  let target: URL;
+  try {
+    target = new URL(fileUrl);
+  } catch {
+    return json({ error: "Invalid file url" }, 400);
+  }
+  if (target.protocol !== "https:" || !/(^|\.)cnvmp3\.(com|online)$/i.test(target.hostname)) {
+    return json({ error: "Unsupported file host" }, 400);
+  }
+
+  const upstream = await fetch(target.toString(), {
+    headers: { "user-agent": UA, referer: "https://cnvmp3.com/", accept: "*/*" },
+  });
+  if (!upstream.ok || !upstream.body) return json({ error: "File is no longer available" }, 502);
+
+  const filename = safeName(name.replace(/\.mp3$/i, ""));
+  return new Response(upstream.body, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "audio/mpeg",
+      "Content-Disposition": `attachment; filename="${filename.replace(/"/g, "")}"`,
+      ...(upstream.headers.get("content-length")
+        ? { "Content-Length": upstream.headers.get("content-length") as string }
+        : {}),
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Download proxy: /youtube-mp3?file=<converted url>&name=<filename>
+    const reqUrl = new URL(req.url);
+    const fileParam = reqUrl.searchParams.get("file");
+    if (fileParam) {
+      return await proxyFile(fileParam, reqUrl.searchParams.get("name") || "audio");
+    }
+
     const body = await req.json().catch(() => ({}));
     const videoId = String((body as Record<string, unknown>).videoId ?? "").trim();
     const title = String((body as Record<string, unknown>).title ?? "").trim();
