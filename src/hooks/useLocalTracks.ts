@@ -12,7 +12,9 @@ export interface LocalTrackRecord {
   duration: number;
   size: number;
   addedAt: number;
+  /** Real byte copy of the audio (never a File reference — those break after app restart). */
   blob: Blob;
+  mimeType?: string;
 }
 
 function openDB(): Promise<IDBDatabase> {
@@ -87,6 +89,22 @@ function parseFilename(name: string): { title: string; artist: string } {
   return { title: cleaned, artist: "Unknown Artist" };
 }
 
+/** Copy the bytes out of a File so the audio survives app restarts / file moves. */
+async function toStoredBlob(file: Blob): Promise<Blob> {
+  const buffer = await file.arrayBuffer();
+  return new Blob([buffer], { type: file.type || "audio/mpeg" });
+}
+
+/** A stored File reference can survive in IndexedDB but be unreadable later. */
+async function isReadable(blob: Blob): Promise<boolean> {
+  try {
+    await blob.slice(0, 1).arrayBuffer();
+    return blob.size > 0;
+  } catch {
+    return false;
+  }
+}
+
 function recordToTrack(rec: LocalTrackRecord, urlMap: Map<string, string>): AudiusTrack {
   let url = urlMap.get(rec.id);
   if (!url) {
@@ -104,6 +122,7 @@ function recordToTrack(rec: LocalTrackRecord, urlMap: Map<string, string>): Audi
     permalink: "",
     streamUrl: url,
     isLocal: true,
+    source: "local",
   };
 }
 
@@ -116,7 +135,25 @@ export function useLocalTracks() {
     try {
       const records = await getAllRecords();
       records.sort((a, b) => b.addedAt - a.addedAt);
-      setTracks(records.map((r) => recordToTrack(r, urlMap)));
+
+      const usable: LocalTrackRecord[] = [];
+      for (const rec of records) {
+        // Older versions stored the File itself; re-store a real byte copy once.
+        if (rec.blob instanceof File) {
+          try {
+            const blob = await toStoredBlob(rec.blob);
+            const healed = { ...rec, blob, mimeType: blob.type, size: blob.size };
+            await putRecord(healed);
+            usable.push(healed);
+            continue;
+          } catch {
+            /* file is gone from disk — drop it below */
+          }
+        }
+        if (await isReadable(rec.blob)) usable.push(rec);
+      }
+
+      setTracks(usable.map((r) => recordToTrack(r, urlMap)));
     } catch (err) {
       console.error("Failed to load local tracks:", err);
     } finally {
@@ -125,24 +162,18 @@ export function useLocalTracks() {
   }, [urlMap]);
 
   useEffect(() => {
-    // Request persistent storage so the browser doesn't evict IndexedDB on restart
+    // Ask the browser to keep our storage so uploads survive restarts.
     if (navigator.storage?.persist) {
-      navigator.storage.persisted()
+      navigator.storage
+        .persisted()
         .then((already) => {
-          if (!already) {
-            navigator.storage.persist().then((granted) => {
-              console.log("[LocalTracks] Persistent storage:", granted ? "granted" : "denied");
-            }).catch(() => {});
-          }
+          if (!already) navigator.storage.persist().catch(() => {});
         })
         .catch(() => {});
     }
     refresh();
-    return () => {
-      // Revoke all blob URLs on unmount
-      urlMap.forEach((url) => URL.revokeObjectURL(url));
-      urlMap.clear();
-    };
+    // Blob URLs are intentionally kept for the page lifetime so playback never
+    // breaks on re-render; they are revoked when a track is removed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -155,15 +186,17 @@ export function useLocalTracks() {
         }
         const { title, artist } = parseFilename(file.name);
         const duration = await readAudioDuration(file);
+        const blob = await toStoredBlob(file);
         const id = `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
         const record: LocalTrackRecord = {
           id,
           title,
           artist,
           duration,
-          size: file.size,
+          size: blob.size,
           addedAt: Date.now(),
-          blob: file,
+          blob,
+          mimeType: blob.type,
         };
         await putRecord(record);
       }

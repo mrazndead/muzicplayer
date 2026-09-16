@@ -219,21 +219,31 @@ const Index = () => {
     }
   }, [player, trendingTracks]);
 
+  // Saved lists (liked / recent) keep only metadata for uploaded songs, so pair
+  // them back up with the stored audio from the library before playing.
+  const resolveLocal = useCallback((list: AudiusTrack[]) => list.map((t) => {
+    if (!t.isLocal && t.source !== "local") return t;
+    const stored = localLib.tracks.find((l) => l.id === t.id);
+    return stored ?? t;
+  }), [localLib.tracks]);
+
   const handlePlayFavorite = useCallback((track: AudiusTrack, index: number) => {
     if (track.id === player.currentTrack?.id) {
       player.togglePlay();
     } else {
-      player.playTrack(track, favorites, index);
+      const list = resolveLocal(favorites);
+      player.playTrack(list[index] ?? track, list, index);
     }
-  }, [player, favorites]);
+  }, [player, favorites, resolveLocal]);
 
   const handlePlayRecent = useCallback((track: AudiusTrack, index: number) => {
     if (track.id === player.currentTrack?.id) {
       player.togglePlay();
     } else {
-      player.playTrack(track, recentlyPlayed, index);
+      const list = resolveLocal(recentlyPlayed);
+      player.playTrack(list[index] ?? track, list, index);
     }
-  }, [player, recentlyPlayed]);
+  }, [player, recentlyPlayed, resolveLocal]);
 
   const handlePlayLocal = useCallback((track: AudiusTrack, index: number) => {
     if (track.id === player.currentTrack?.id) {

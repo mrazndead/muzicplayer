@@ -3,17 +3,30 @@ import { AudiusTrack } from "@/lib/audius";
 
 const STORAGE_KEY = "pulse_favorites";
 
+/** Blob URLs die with the page, so never persist them for uploaded tracks. */
+function forStorage(track: AudiusTrack): AudiusTrack {
+  if (track.isLocal || track.source === "local") {
+    return { ...track, streamUrl: undefined };
+  }
+  return track;
+}
+
 function loadFavorites(): AudiusTrack[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
 function saveFavorites(tracks: AudiusTrack[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tracks));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tracks.map(forStorage)));
+  } catch {
+    /* storage full or unavailable — keep the in-memory list working */
+  }
 }
 
 export function useFavorites() {
