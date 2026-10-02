@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "TP Music - Streaming Player",
-        short_name: "TP Music",
+        name: "PULSE - Music Player",
+        short_name: "PULSE",
         description: "Stream and discover music with a beautiful player",
         theme_color: "#1a0a2e",
         background_color: "#0a0515",

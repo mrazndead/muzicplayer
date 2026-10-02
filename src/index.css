@@ -472,3 +472,91 @@ html[data-skin="zen"] .gradient-text {
   background: none !important;
 }
 html[data-skin="zen"] .gradient-mesh { background: hsl(var(--secondary)) !important; }
+
+/* ---------- BLUEPRINT: technical drafting grid ---------- */
+html[data-skin="blueprint"] {
+  --background: 212 72% 12% !important; --foreground: 200 80% 92% !important;
+  --card: 210 70% 16% !important; --card-foreground: 200 80% 92% !important;
+  --popover: 210 70% 16% !important; --popover-foreground: 200 80% 92% !important;
+  --secondary: 210 60% 20% !important; --secondary-foreground: 200 80% 92% !important;
+  --muted: 210 55% 19% !important; --muted-foreground: 200 40% 66% !important;
+  --border: 199 80% 70% / 0.35 !important; --input: 210 70% 16% !important;
+  --primary: 197 100% 75% !important; --primary-foreground: 212 72% 12% !important;
+  --accent: 197 100% 75% !important; --ring: 197 100% 75% !important;
+  --radius: 0.125rem !important;
+  --glass-bg: 210 70% 16% / 0.85 !important; --glass-heavy-bg: 212 72% 10% / 0.94 !important;
+  --glass-border: 199 80% 70% / 0.4 !important;
+  --font-heading: 'JetBrains Mono', 'Courier New', monospace !important;
+}
+html[data-skin="blueprint"] .app-bg {
+  background-color: hsl(var(--background)) !important;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px),
+    linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px) !important;
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px !important;
+}
+html[data-skin="blueprint"] .app-bg::before, html[data-skin="blueprint"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="blueprint"] .glass, html[data-skin="blueprint"] .glass-card, html[data-skin="blueprint"] .glass-heavy {
+  border: 1px dashed hsl(var(--primary) / 0.55) !important; border-radius: 2px !important; box-shadow: none !important;
+}
+html[data-skin="blueprint"] .glow-text, html[data-skin="blueprint"] .glow-border, html[data-skin="blueprint"] .glow-sm { text-shadow: none !important; box-shadow: none !important; }
+html[data-skin="blueprint"] h1, html[data-skin="blueprint"] h2, html[data-skin="blueprint"] h3 { letter-spacing: 0.12em !important; text-transform: uppercase !important; }
+html[data-skin="blueprint"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; }
+html[data-skin="blueprint"] img { border-radius: 2px !important; outline: 1px solid hsl(var(--primary) / 0.5); outline-offset: 2px; }
+
+/* ---------- CANDY: pop-art, bold outlines ---------- */
+html[data-skin="candy"] {
+  --background: 50 100% 85% !important; --foreground: 250 40% 12% !important;
+  --card: 0 0% 100% !important; --card-foreground: 250 40% 12% !important;
+  --popover: 0 0% 100% !important; --popover-foreground: 250 40% 12% !important;
+  --secondary: 190 90% 80% !important; --secondary-foreground: 250 40% 12% !important;
+  --muted: 50 80% 92% !important; --muted-foreground: 250 15% 35% !important;
+  --border: 250 40% 12% !important; --input: 0 0% 100% !important;
+  --primary: 335 100% 62% !important; --primary-foreground: 0 0% 100% !important;
+  --accent: 190 95% 45% !important; --ring: 335 100% 62% !important;
+  --radius: 1rem !important;
+  --glass-bg: 0 0% 100% / 1 !important; --glass-heavy-bg: 0 0% 100% / 0.97 !important; --glass-border: 250 40% 12% / 1 !important;
+  --font-heading: 'Bebas Neue', Impact, sans-serif !important;
+}
+html[data-skin="candy"] .app-bg {
+  background-color: hsl(var(--background)) !important;
+  background-image: radial-gradient(hsl(var(--primary) / 0.18) 2px, transparent 2.5px) !important;
+  background-size: 18px 18px !important;
+}
+html[data-skin="candy"] .app-bg::before, html[data-skin="candy"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="candy"] .glass, html[data-skin="candy"] .glass-card, html[data-skin="candy"] .glass-heavy {
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: 2.5px solid hsl(var(--foreground)) !important;
+  box-shadow: 4px 4px 0 hsl(var(--foreground)) !important; border-radius: 1rem !important;
+}
+html[data-skin="candy"] .glow-text, html[data-skin="candy"] .glow-sm { text-shadow: none !important; box-shadow: none !important; }
+html[data-skin="candy"] .glow-border, html[data-skin="candy"] .artwork-ring { box-shadow: 4px 4px 0 hsl(var(--foreground)) !important; }
+html[data-skin="candy"] img { border: 2.5px solid hsl(var(--foreground)); }
+html[data-skin="candy"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; text-shadow: 3px 3px 0 hsl(var(--foreground)); }
+
+/* ---------- NOIR: monochrome cinema ---------- */
+html[data-skin="noir"] {
+  --background: 0 0% 4% !important; --foreground: 0 0% 94% !important;
+  --card: 0 0% 8% !important; --card-foreground: 0 0% 94% !important;
+  --popover: 0 0% 8% !important; --popover-foreground: 0 0% 94% !important;
+  --secondary: 0 0% 12% !important; --secondary-foreground: 0 0% 94% !important;
+  --muted: 0 0% 11% !important; --muted-foreground: 0 0% 55% !important;
+  --border: 0 0% 22% !important; --input: 0 0% 8% !important;
+  --primary: 0 0% 95% !important; --primary-foreground: 0 0% 4% !important;
+  --accent: 0 0% 70% !important; --ring: 0 0% 95% !important;
+  --radius: 0 !important;
+  --glass-bg: 0 0% 6% / 0.92 !important; --glass-heavy-bg: 0 0% 3% / 0.96 !important; --glass-border: 0 0% 22% / 1 !important;
+  --font-heading: 'Playfair Display', Georgia, serif !important;
+}
+html[data-skin="noir"] .app-bg { background: radial-gradient(ellipse at 50% -10%, hsl(0 0% 14%), hsl(var(--background)) 60%) !important; }
+html[data-skin="noir"] .app-bg::before, html[data-skin="noir"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="noir"] .glass, html[data-skin="noir"] .glass-card, html[data-skin="noir"] .glass-heavy {
+  border: none !important; border-top: 1px solid hsl(var(--border)) !important; border-bottom: 1px solid hsl(var(--border)) !important;
+  border-radius: 0 !important; box-shadow: none !important;
+}
+html[data-skin="noir"] .glow-text, html[data-skin="noir"] .glow-border, html[data-skin="noir"] .glow-sm, html[data-skin="noir"] .artwork-ring { text-shadow: none !important; box-shadow: none !important; }
+html[data-skin="noir"] img { filter: grayscale(1) contrast(1.15); border-radius: 0 !important; }
+html[data-skin="noir"] h1, html[data-skin="noir"] h2, html[data-skin="noir"] h3 { font-style: italic; text-transform: none !important; letter-spacing: 0.01em !important; }
+html[data-skin="noir"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; }
