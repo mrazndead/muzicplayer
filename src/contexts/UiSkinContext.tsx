@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type UiSkinId = "pulse" | "cassette" | "vinyl" | "terminal" | "zen";
+export type UiSkinId = "pulse" | "cassette" | "vinyl" | "terminal" | "zen" | "blueprint" | "candy" | "noir";
 
 export interface UiSkin {
   id: UiSkinId;
@@ -17,6 +17,9 @@ export const UI_SKINS: UiSkin[] = [
   { id: "vinyl", label: "Vinyl", tagline: "Warm 70s lounge, gold serif", icon: "◉", swatch: ["#1b1208", "#2a1c0d", "#d9a441"] },
   { id: "terminal", label: "Terminal", tagline: "Monospace CRT console", icon: "▮", swatch: ["#000000", "#0a1a0a", "#3cff7a"] },
   { id: "zen", label: "Zen", tagline: "Quiet editorial daylight", icon: "◌", swatch: ["#faf9f7", "#ffffff", "#2f6f5e"] },
+  { id: "blueprint", label: "Blueprint", tagline: "Drafting grid, crisp cyan lines", icon: "⌗", swatch: ["#0b2a4a", "#103a63", "#7fd6ff"] },
+  { id: "candy", label: "Candy", tagline: "Pop-art color, bold outlines", icon: "◆", swatch: ["#fff3b0", "#ffffff", "#ff3d8b"] },
+  { id: "noir", label: "Noir", tagline: "Monochrome cinema, fine rules", icon: "◐", swatch: ["#0a0a0a", "#161616", "#f2f2f2"] },
 ];
 
 interface Ctx {

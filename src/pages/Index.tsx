@@ -5,6 +5,8 @@ import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { SkinSwitcher } from "@/components/SkinSwitcher";
+import { useWakeLock } from "@/hooks/useWakeLock";
+import { Sun, Moon } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -51,7 +53,16 @@ const Index = () => {
   const [searchLabel, setSearchLabel] = useState<string>("");
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    try {
+      const saved = localStorage.getItem("pulse-last-tab-v1");
+      return saved && ["home", "favorites", "library", "youtube"].includes(saved) ? (saved as TabId) : "home";
+    } catch { return "home"; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("pulse-last-tab-v1", activeTab); } catch { /* non-critical */ }
+  }, [activeTab]);
+  const wake = useWakeLock();
   const [ytPlaying, setYtPlaying] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<string>("");
   const [hasMore, setHasMore] = useState(true);
@@ -338,6 +349,17 @@ const Index = () => {
             <DailyQuote />
           )}
           <div className="ml-auto flex items-center gap-1.5">
+            {wake.supported && (
+              <button
+                onClick={wake.toggle}
+                className={`p-2 rounded-xl glass-card transition-colors ${wake.enabled ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                aria-label={wake.enabled ? "Keep screen awake: on" : "Keep screen awake: off"}
+                aria-pressed={wake.enabled}
+                title={wake.enabled ? "Screen stays awake" : "Screen may sleep"}
+              >
+                {wake.enabled ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            )}
             <SkinSwitcher />
             <ThemeSwitcher />
           </div>
