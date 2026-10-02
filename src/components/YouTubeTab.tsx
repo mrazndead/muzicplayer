@@ -53,13 +53,19 @@ async function convertToMp3(item: YtResult) {
     let revoke: string | null = null;
     for (const src of [proxy, data.url as string]) {
       try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 120000);
         const res = await fetch(src, {
+          signal: ctrl.signal,
           headers: src === proxy ? { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } : undefined,
-        });
+        }).finally(() => clearTimeout(timer));
         if (!res.ok) throw new Error("download failed");
+        const ctype = res.headers.get("content-type") || "";
+        if (ctype.includes("json") || ctype.includes("html")) throw new Error("not audio");
         const blob = await res.blob();
         if (blob.size < 10000) throw new Error("empty file");
-        href = URL.createObjectURL(new Blob([blob], { type: "audio/mpeg" }));
+        // Reuse the blob directly when already typed, avoiding a second in-memory copy.
+        href = URL.createObjectURL(blob.type === "audio/mpeg" ? blob : blob.slice(0, blob.size, "audio/mpeg"));
         revoke = href;
         break;
       } catch {
