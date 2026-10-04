@@ -274,6 +274,60 @@ const Index = () => {
     fetchTracks(artistName, `🎤 More by ${artistName}`);
   }, [player.currentTrack, fetchTracks]);
 
+  // ---- Radio: endless similar songs seeded from any track ----
+  const [radioSeed, setRadioSeed] = useState<AudiusTrack | null>(null);
+  const radioSeen = useRef<Set<string>>(new Set());
+  const radioBusy = useRef(false);
+
+  const fetchRadioBatch = useCallback(async (seed: AudiusTrack): Promise<AudiusTrack[]> => {
+    const words = seed.title.replace(/\(.*?\)|\[.*?\]|feat\..*/gi, "").split(/\s+/).filter((w) => w.length > 3).slice(0, 2).join(" ");
+    const genre = seed.genre || "";
+    const moodish = (seed as { mood?: string }).mood || "";
+    const pool = [seed.user.name, genre, `${genre} ${moodish}`.trim(), words, `${genre} mix`, `${seed.user.name} ${genre}`.trim()]
+      .filter((q) => q && q.length > 1);
+    const queries = [...new Set(pool)].sort(() => Math.random() - 0.5).slice(0, 4);
+    const results = await searchTracksMulti(queries, 15);
+    const sameGenre = genre ? results.filter((t) => !t.genre || t.genre.toLowerCase() === genre.toLowerCase()) : results;
+    const list = (sameGenre.length >= 5 ? sameGenre : results).filter((t) => !radioSeen.current.has(t.id));
+    // Cap tracks per artist so radio doesn't become one artist's discography
+    const perArtist: Record<string, number> = {};
+    const out = list.filter((t) => (perArtist[t.user.name] = (perArtist[t.user.name] ?? 0) + 1) <= 3)
+      .sort(() => Math.random() - 0.5);
+    out.forEach((t) => radioSeen.current.add(t.id));
+    return out;
+  }, []);
+
+  const handleStartRadio = useCallback(async (seed: AudiusTrack) => {
+    if (radioBusy.current) return;
+    radioBusy.current = true;
+    const id = toast.loading(`Tuning radio to "${seed.title}"…`);
+    try {
+      radioSeen.current = new Set([seed.id]);
+      const batch = await fetchRadioBatch(seed);
+      const playable = seed.isLocal ? resolveLocal(seed) : seed;
+      player.playTrack(playable, [playable, ...batch], 0);
+      setRadioSeed(seed);
+      toast.success(`Radio on · ${batch.length} songs queued, more on the way`, { id, duration: 2000 });
+    } catch (err) {
+      console.error("Radio failed:", err);
+      toast.error("Couldn't start radio", { id });
+    } finally {
+      radioBusy.current = false;
+    }
+  }, [fetchRadioBatch, player]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-extend the radio queue when near the end
+  useEffect(() => {
+    if (!radioSeed || radioBusy.current) return;
+    if (player.queue.length - player.queueIndex > 4) return;
+    radioBusy.current = true;
+    const seed = player.currentTrack && !player.currentTrack.isLocal ? player.currentTrack : radioSeed;
+    fetchRadioBatch(seed)
+      .then((more) => more.length ? player.appendToQueue(more) : fetchRadioBatch(radioSeed).then(player.appendToQueue))
+      .catch(() => {})
+      .finally(() => { radioBusy.current = false; });
+  }, [radioSeed, player.queueIndex, player.queue.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const randomBusy = useRef(false);
   const handleRandomPlay = useCallback(async () => {
     if (randomBusy.current) return;
