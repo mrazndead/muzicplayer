@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2, User } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2, User, Radio } from "lucide-react";
 import { getArtworkUrl, getShareUrl, AudiusTrack } from "@/lib/audius";
 import { Artwork } from "./Artwork";
 import { toast } from "sonner";
@@ -39,6 +39,8 @@ interface MusicPlayerProps {
   onMoreByArtist?: () => void;
   buffering?: boolean;
   inline?: boolean;
+  onStartRadio?: () => void;
+  radioActive?: boolean;
 }
 
 function formatTime(s: number): string {
@@ -77,6 +79,8 @@ export function MusicPlayer({
   onMoreByArtist,
   buffering,
   inline,
+  onStartRadio,
+  radioActive,
 }: MusicPlayerProps) {
   const [showVolume, setShowVolume] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -205,6 +209,9 @@ export function MusicPlayer({
                           </button>
                         )}
                         <button onClick={() => { const url = getShareUrl(currentTrack); if (navigator.share) { navigator.share({ title: currentTrack.title, text: `${currentTrack.title} by ${currentTrack.user.name}`, url }).catch(() => {}); } else { navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => {}); } }} className="p-2 text-muted-foreground hover:text-foreground transition-colors"><Share2 className="w-5 h-5" /></button>
+                        {onStartRadio && (
+                          <button onClick={onStartRadio} aria-label="Start radio from this song" className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-sm font-medium transition-colors hover:bg-muted ${radioActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}><Radio className="w-4 h-4" />{radioActive ? "Radio on" : "Radio"}</button>
+                        )}
                         {onMoreByArtist && (
                           <button onClick={() => { onMoreByArtist(); setExpanded(false); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"><User className="w-4 h-4" />More by {currentTrack.user.name}</button>
                         )}

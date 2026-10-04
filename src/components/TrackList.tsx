@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Heart, Headphones, Share2, Download, Loader2 } from "lucide-react";
+import { Play, Pause, Heart, Headphones, Share2, Download, Loader2, Radio } from "lucide-react";
 import { AudiusTrack, getShareUrl, formatPlayCount, getDownloadUrl, canDownload } from "@/lib/audius";
 import { Artwork } from "./Artwork";
 import { EqualizerBars } from "./EqualizerBars";
@@ -17,6 +17,7 @@ interface TrackListProps {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   hasMore?: boolean;
+  onStartRadio?: (track: AudiusTrack) => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -70,7 +71,7 @@ const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
   local: { label: "LOCAL", className: "bg-sky-500/15 text-sky-300 ring-sky-400/20" },
 };
 
-export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore }: TrackListProps) {
+export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore, onStartRadio }: TrackListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -167,6 +168,16 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   )}
                 </div>
               </button>
+
+              {onStartRadio && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onStartRadio(track); }}
+                  aria-label={`Start radio from ${track.title}`}
+                  className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                >
+                  <Radio className="w-3.5 h-3.5 text-muted-foreground hover:text-primary" />
+                </button>
+              )}
 
               {/* Share */}
               <button

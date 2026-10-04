@@ -20,7 +20,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSleepTimer } from "@/hooks/useSleepTimer";
 import { useLocalTracks } from "@/hooks/useLocalTracks";
 import { Artwork } from "@/components/Artwork";
-import { searchTracks, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
+import { searchTracks, searchTracksMulti, searchGenre, getTrendingTracks, AudiusTrack, DEFAULT_GENRES, DEFAULT_MOODS } from "@/lib/audius";
 import { TrackSkeleton } from "@/components/TrackSkeleton";
 import { EqualizerBars } from "@/components/EqualizerBars";
 import { toast } from "sonner";
@@ -318,7 +318,9 @@ const Index = () => {
 
   // Auto-extend the radio queue when near the end
   useEffect(() => {
-    if (!radioSeed || radioBusy.current) return;
+    if (!radioSeed) return;
+    if (player.queue[0]?.id !== radioSeed.id) { setRadioSeed(null); return; }
+    if (radioBusy.current) return;
     if (player.queue.length - player.queueIndex > 4) return;
     radioBusy.current = true;
     const seed = player.currentTrack && !player.currentTrack.isLocal ? player.currentTrack : radioSeed;
@@ -463,6 +465,8 @@ const Index = () => {
                   audioContext={player.audioContext}
                   eqFilters={player.eqFilters}
                   onMoreByArtist={handleMoreByArtist}
+                  onStartRadio={player.currentTrack ? () => handleStartRadio(player.currentTrack!) : undefined}
+                  radioActive={!!radioSeed}
                   buffering={player.buffering}
                   inline
                 />
@@ -571,6 +575,7 @@ const Index = () => {
                   title={searchLabel}
                   isFavorite={isFavorite}
                   onToggleFavorite={toggleFavorite}
+                  onStartRadio={handleStartRadio}
                   onLoadMore={loadMoreTracks}
                   isLoadingMore={loadingMore}
                   hasMore={hasMore}
@@ -621,6 +626,7 @@ const Index = () => {
                   onPlay={handlePlayFavorite}
                   isFavorite={isFavorite}
                   onToggleFavorite={toggleFavorite}
+                  onStartRadio={handleStartRadio}
                 />
               ) : (
                 <div className="text-center py-20">
