@@ -304,7 +304,7 @@ const Index = () => {
     try {
       radioSeen.current = new Set([seed.id]);
       const batch = await fetchRadioBatch(seed);
-      const playable = seed.isLocal ? resolveLocal(seed) : seed;
+      const playable = seed.isLocal ? resolveLocal([seed])[0] : seed;
       player.playTrack(playable, [playable, ...batch], 0);
       setRadioSeed(seed);
       toast.success(`Radio on · ${batch.length} songs queued, more on the way`, { id, duration: 2000 });
