@@ -161,7 +161,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                     );
                   })()}
                   {track.play_count > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 flex-shrink-0">
+                    <span className="hidden sm:flex items-center gap-0.5 text-[10px] text-muted-foreground/60 flex-shrink-0">
                       <Headphones className="w-2.5 h-2.5" />
                       {formatPlayCount(track.play_count)}
                     </span>
@@ -183,7 +183,7 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
               <button
                 onClick={(e) => { e.stopPropagation(); shareTrack(track); }}
                 aria-label="Share track"
-                className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                className="hidden sm:block p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
               >
                 <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
