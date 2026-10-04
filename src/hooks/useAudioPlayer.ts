@@ -332,9 +332,19 @@ export function useAudioPlayer() {
     }));
   }, []);
 
+  /** Append tracks to the end of the queue without interrupting playback (skips duplicates). */
+  const appendToQueue = useCallback((more: AudiusTrack[]) => {
+    setState((s) => {
+      const seen = new Set(s.queue.map((t) => t.id));
+      const fresh = more.filter((t) => !seen.has(t.id));
+      return fresh.length ? { ...s, queue: [...s.queue, ...fresh] } : s;
+    });
+  }, []);
+
   return {
     ...state,
     playTrack,
+    appendToQueue,
     togglePlay,
     pause,
     seek,
