@@ -303,11 +303,17 @@ const Index = () => {
     const id = toast.loading(`Tuning radio to "${seed.title}"…`);
     try {
       radioSeen.current = new Set([seed.id]);
-      const batch = await fetchRadioBatch(seed);
       const playable = seed.isLocal ? resolveLocal([seed])[0] : seed;
-      player.playTrack(playable, [playable, ...batch], 0);
+      // Start the seed right away; fill the queue in the background.
+      player.playTrack(playable, [playable], 0);
+      const batch = await Promise.race([
+        fetchRadioBatch(seed),
+        new Promise<AudiusTrack[]>((r) => setTimeout(() => r([]), 12000)),
+      ]);
+      player.appendToQueue(batch);
       setRadioSeed(seed);
-      toast.success(`Radio on · ${batch.length} songs queued, more on the way`, { id, duration: 2000 });
+      if (batch.length) toast.success(`Radio on · ${batch.length} songs queued`, { id, duration: 2000 });
+      else toast(`Radio on · finding more songs…`, { id, duration: 2000 });
     } catch (err) {
       console.error("Radio failed:", err);
       toast.error("Couldn't start radio", { id });
