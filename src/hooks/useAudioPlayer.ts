@@ -1,5 +1,14 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { AudiusTrack, getStreamUrl, getArtworkUrl } from "@/lib/audius";
+import {
+  isYouTubeTrack,
+  youTubeVideoId,
+  playYouTube,
+  pauseYouTube,
+  resumeYouTube,
+  stopYouTube,
+  setYouTubeBridgeCallbacks,
+} from "@/lib/youtubeBridge";
 
 export interface PlayerState {
   currentTrack: AudiusTrack | null;
@@ -181,6 +190,16 @@ export function useAudioPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     setState((s) => ({ ...s, buffering: true }));
+    // YouTube tracks play through the hidden iframe bridge (audio-only).
+    if (isYouTubeTrack(track.id)) {
+      audio.pause();
+      audio.removeAttribute("src");
+      playYouTube(youTubeVideoId(track.id));
+      setState((s) => ({ ...s, buffering: false, isPlaying: true, duration: track.duration || s.duration }));
+      updateMediaSession(track);
+      return;
+    }
+    stopYouTube();
     let url: string;
     try {
       url = track.streamUrl ? track.streamUrl : await getStreamUrl(track.id);
