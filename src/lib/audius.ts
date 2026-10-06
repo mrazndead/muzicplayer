@@ -86,7 +86,7 @@ async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
   return fetch(url); // fallback
 }
 
-export type TrackSource = "audius" | "jamendo" | "archive" | "local";
+export type TrackSource = "audius" | "jamendo" | "archive" | "local" | "youtube";
 
 export interface AudiusTrack {
   id: string;
