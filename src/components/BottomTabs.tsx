@@ -1,8 +1,8 @@
-import { Home, Shuffle, Heart, Library, Youtube } from "lucide-react";
+import { Home, Shuffle, Sparkles, Library, Youtube } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export type TabId = "home" | "favorites" | "library" | "youtube";
+export type TabId = "home" | "favorites" | "library" | "youtube" | "ai";
 
 interface BottomTabsProps {
   activeTab: TabId;
@@ -12,7 +12,7 @@ interface BottomTabsProps {
   hasPlayer: boolean;
 }
 
-export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, hasPlayer }: BottomTabsProps) {
+export function BottomTabs({ activeTab, onTabChange, onRandomPlay, hasPlayer }: BottomTabsProps) {
   const [randomPressed, setRandomPressed] = useState(false);
 
   const handleRandomClick = () => {
@@ -76,7 +76,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, favCount, has
 
         {tabBtn("youtube", Youtube, "YouTube")}
         {tabBtn("library", Library, "Library")}
-        {tabBtn("favorites", Heart, "Liked", favCount)}
+        {tabBtn("ai", Sparkles, "AI DJ")}
       </div>
     </nav>
   );
