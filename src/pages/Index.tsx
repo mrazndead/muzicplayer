@@ -30,6 +30,7 @@ import { toast } from "sonner";
 const MusicVisualizer = lazy(() => import("@/components/MusicVisualizer").then(m => ({ default: m.MusicVisualizer })));
 const TrendingCarousel = lazy(() => import("@/components/TrendingCarousel").then(m => ({ default: m.TrendingCarousel })));
 const LocalLibrary = lazy(() => import("@/components/LocalLibrary").then(m => ({ default: m.LocalLibrary })));
+const AiDjTab = lazy(() => import("@/components/AiDjTab").then(m => ({ default: m.AiDjTab })));
 const YouTubeTab = lazy(() => import("@/components/YouTubeTab").then(m => ({ default: m.YouTubeTab })));
 
 const LazyFallback = () => (
@@ -56,7 +57,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     try {
       const saved = localStorage.getItem("pulse-last-tab-v1");
-      return saved && ["home", "favorites", "library", "youtube"].includes(saved) ? (saved as TabId) : "home";
+      return saved && ["home", "favorites", "library", "youtube", "ai"].includes(saved) ? (saved as TabId) : "home";
     } catch { return "home"; }
   });
   useEffect(() => {
@@ -641,6 +642,28 @@ const Index = () => {
                   <p className="text-muted-foreground/50 text-xs mt-1">Tap the ❤️ on any track to save it</p>
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* AI DJ TAB */}
+          {activeTab === "ai" && (
+            <motion.div key="ai" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+              <Suspense fallback={<LazyFallback />}>
+                <AiDjTab
+                  currentTrackId={player.currentTrack?.id}
+                  isPlaying={player.isPlaying}
+                  onPlayList={(list, i) => {
+                    const t = list[i];
+                    if (t && t.id === player.currentTrack?.id) player.togglePlay();
+                    else if (t) player.playTrack(t, list, i);
+                  }}
+                  isFavorite={isFavorite}
+                  onToggleFavorite={toggleFavorite}
+                  onStartRadio={handleStartRadio}
+                  onOpenLiked={() => setActiveTab("favorites")}
+                  favCount={favorites.length}
+                />
+              </Suspense>
             </motion.div>
           )}
 

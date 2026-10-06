@@ -1,0 +1,1 @@
+- AI DJ: the ai-playlist backend function turns a description into search queries; the app resolves them through the existing federated search (keeps the AI key server-side and reuses source logic).
