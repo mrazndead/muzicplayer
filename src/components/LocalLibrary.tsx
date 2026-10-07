@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, Music, Trash2, PlayCircle, Pause } from "lucide-react";
+import { Upload, Music, Trash2, PlayCircle, Pause, ScanSearch, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { AudiusTrack } from "@/lib/audius";
 
 interface LocalLibraryProps {
@@ -9,6 +10,7 @@ interface LocalLibraryProps {
   currentTrackId?: string;
   isPlaying: boolean;
   onAddFiles: (files: FileList) => void;
+  onScanFiles: (files: File[]) => Promise<{ added: number; tooShort: number; dupes: number }>;
   onPlay: (track: AudiusTrack, index: number) => void;
   onRemove: (id: string) => void;
 }
@@ -26,10 +28,13 @@ export function LocalLibrary({
   currentTrackId,
   isPlaying,
   onAddFiles,
+  onScanFiles,
   onPlay,
   onRemove,
 }: LocalLibraryProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const scanRef = useRef<HTMLInputElement>(null);
+  const [scanning, setScanning] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -40,13 +45,46 @@ export function LocalLibrary({
             {tracks.length} local {tracks.length === 1 ? "track" : "tracks"}
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <button
+          onClick={() => scanRef.current?.click()}
+          disabled={scanning}
+          className="flex items-center gap-2 px-4 py-2.5 gradient-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity glow-sm disabled:opacity-60"
+        >
+          {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <ScanSearch className="w-4 h-4" />}
+          {scanning ? "Scanning…" : "Scan phone"}
+        </button>
         <button
           onClick={() => inputRef.current?.click()}
-          className="flex items-center gap-2 px-5 py-2.5 gradient-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity glow-sm"
+          aria-label="Upload files"
+          className="flex items-center justify-center w-10 h-10 glass-card rounded-full text-foreground hover:opacity-90"
         >
           <Upload className="w-4 h-4" />
-          Upload
         </button>
+        </div>
+        <input
+          ref={scanRef}
+          type="file"
+          accept="audio/*,.mp3"
+          multiple
+          // @ts-expect-error non-standard folder picking attribute
+          webkitdirectory=""
+          className="hidden"
+          onChange={async (e) => {
+            const files = e.target.files;
+            if (!files?.length) return;
+            const mp3s = Array.from(files).filter((f) => /\.mp3$/i.test(f.name) || f.type === "audio/mpeg");
+            e.target.value = "";
+            if (!mp3s.length) { toast.error("No MP3 files found in that folder"); return; }
+            setScanning(true);
+            try {
+              const r = await onScanFiles(mp3s);
+              toast.success(`Added ${r.added} song${r.added === 1 ? "" : "s"}`, {
+                description: `${r.tooShort} under 3 min skipped · ${r.dupes} already in library`,
+              });
+            } finally { setScanning(false); }
+          }}
+        />
         <input
           ref={inputRef}
           type="file"

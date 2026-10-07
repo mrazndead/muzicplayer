@@ -178,14 +178,20 @@ export function useLocalTracks() {
   }, []);
 
   const addFiles = useCallback(
-    async (files: FileList | File[]) => {
+    async (files: FileList | File[], opts: { minDuration?: number } = {}) => {
       const arr = Array.from(files);
+      const existing = new Set(tracks.map((t) => `${t.title}|${t.user.name}|${Math.round(t.duration)}`));
+      let added = 0, tooShort = 0, dupes = 0;
       for (const file of arr) {
         if (!file.type.startsWith("audio/") && !file.name.match(/\.(mp3|m4a|wav|ogg|flac|aac)$/i)) {
           continue;
         }
         const { title, artist } = parseFilename(file.name);
         const duration = await readAudioDuration(file);
+        if (opts.minDuration && !(duration >= opts.minDuration)) { tooShort++; continue; }
+        const key = `${title}|${artist}|${Math.round(duration)}`;
+        if (existing.has(key)) { dupes++; continue; }
+        existing.add(key);
         const blob = await toStoredBlob(file);
         const id = `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
         const record: LocalTrackRecord = {
@@ -199,10 +205,12 @@ export function useLocalTracks() {
           mimeType: blob.type,
         };
         await putRecord(record);
+        added++;
       }
       await refresh();
+      return { added, tooShort, dupes };
     },
-    [refresh]
+    [refresh, tracks]
   );
 
   const removeTrack = useCallback(
