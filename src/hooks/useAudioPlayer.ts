@@ -287,9 +287,30 @@ export function useAudioPlayer() {
     }));
   }, [playAudioForTrack]);
 
+  // YouTube bridge events feed the same player state.
+  useEffect(() => {
+    setYouTubeBridgeCallbacks({
+      onEnded: () => handleTrackEndRef.current(),
+      onState: (playing) => setState((s) => ({ ...s, isPlaying: playing, buffering: false })),
+    });
+  }, []);
+
+  // Approximate progress for YouTube tracks (embed doesn't report time without the full API).
+  useEffect(() => {
+    if (!state.isPlaying || !isYouTubeTrack(state.currentTrack?.id)) return;
+    const t = setInterval(() => setState((s) => ({ ...s, currentTime: Math.min(s.currentTime + 1, s.duration || Infinity) })), 1000);
+    return () => clearInterval(t);
+  }, [state.isPlaying, state.currentTrack?.id]);
+
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !stateRef.current.currentTrack) return;
+    const cur = stateRef.current.currentTrack;
+    if (!audio || !cur) return;
+    if (isYouTubeTrack(cur.id)) {
+      if (stateRef.current.isPlaying) pauseYouTube(); else resumeYouTube();
+      setState((s) => ({ ...s, isPlaying: !s.isPlaying }));
+      return;
+    }
     if (audio.paused) {
       audio.play().catch(console.error);
     } else {
@@ -300,6 +321,10 @@ export function useAudioPlayer() {
   /** Unconditional pause — used by the sleep timer so it can never resume playback. */
   const pause = useCallback(() => {
     audioRef.current?.pause();
+    if (isYouTubeTrack(stateRef.current.currentTrack?.id)) {
+      pauseYouTube();
+      setState((s) => ({ ...s, isPlaying: false }));
+    }
   }, []);
 
 
