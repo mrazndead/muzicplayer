@@ -683,6 +683,7 @@ const Index = () => {
                   currentTrackId={player.currentTrack?.id}
                   isPlaying={player.isPlaying}
                   onAddFiles={(files) => localLib.addFiles(files)}
+                  onScanFiles={(files) => localLib.addFiles(files, { minDuration: 180 })}
                   onPlay={handlePlayLocal}
                   onRemove={localLib.removeTrack}
                 />
