@@ -26,19 +26,39 @@ const SUGGESTIONS = [
   "High-energy workout hip hop",
 ];
 
+interface YtResult { id: string; title: string; channel: string; duration: number; thumbnail: string }
+
+async function youTubeTop(query: string): Promise<AudiusTrack | null> {
+  try {
+    const { data } = await supabase.functions.invoke("youtube-search", { body: { query } });
+    const r: YtResult | undefined = (data?.results ?? []).find((x: YtResult) => x.duration > 60 && x.duration < 900);
+    if (!r) return null;
+    return {
+      id: `yt:${r.id}`, title: r.title, user: { name: r.channel, id: r.channel },
+      artwork: { "150x150": r.thumbnail, "480x480": r.thumbnail, "1000x1000": r.thumbnail },
+      duration: r.duration, genre: "YouTube", play_count: 0,
+      permalink: `https://www.youtube.com/watch?v=${r.id}`, source: "youtube",
+    };
+  } catch { return null; }
+}
+
 async function buildFromQueries(queries: string[]): Promise<AudiusTrack[]> {
-  const results = await Promise.allSettled(
-    queries.slice(0, 25).map((q) => searchTracks(q, 6, 0, { includeArchive: false, timeoutMs: 7000 })),
-  );
+  const list = queries.slice(0, 25);
+  const [yt, results] = await Promise.all([
+    Promise.all(list.slice(0, 15).map(youTubeTop)),
+    Promise.allSettled(list.map((q) => searchTracks(q, 6, 0, { includeArchive: false, timeoutMs: 7000 }))),
+  ]);
   const seen = new Set<string>();
   const out: AudiusTrack[] = [];
   const extras: AudiusTrack[] = [];
-  results.forEach((r) => {
+  results.forEach((r, qi) => {
+    const y = yt[qi];
+    if (y && !seen.has(y.id)) { seen.add(y.id); out.push(y); }
     if (r.status !== "fulfilled") return;
     r.value.forEach((t, i) => {
       if (seen.has(t.id)) return;
       seen.add(t.id);
-      (i < 2 ? out : extras).push(t);
+      (i < 1 ? out : extras).push(t);
     });
   });
   return [...out, ...extras].slice(0, 60);
