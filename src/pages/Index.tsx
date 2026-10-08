@@ -54,6 +54,7 @@ const Index = () => {
   const [searchLabel, setSearchLabel] = useState<string>("");
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [aiDjVisited, setAiDjVisited] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     try {
       const saved = localStorage.getItem("pulse-last-tab-v1");
