@@ -63,6 +63,7 @@ const Index = () => {
   });
   useEffect(() => {
     try { localStorage.setItem("pulse-last-tab-v1", activeTab); } catch { /* non-critical */ }
+    if (activeTab === "ai") setAiDjVisited(true);
   }, [activeTab]);
   const wake = useWakeLock();
   const [ytPlaying, setYtPlaying] = useState(false);
