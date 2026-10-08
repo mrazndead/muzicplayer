@@ -645,9 +645,9 @@ const Index = () => {
             </motion.div>
           )}
 
-          {/* AI DJ TAB */}
-          {activeTab === "ai" && (
-            <motion.div key="ai" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+          {/* AI DJ TAB — kept mounted (hidden when inactive) so the playlist and chat survive tab switches */}
+          {(activeTab === "ai" || aiDjVisited) && (
+            <div className={activeTab === "ai" ? "" : "hidden"}>
               <Suspense fallback={<LazyFallback />}>
                 <AiDjTab
                   currentTrackId={player.currentTrack?.id}
@@ -664,7 +664,7 @@ const Index = () => {
                   favCount={favorites.length}
                 />
               </Suspense>
-            </motion.div>
+            </div>
           )}
 
           {/* LIBRARY TAB */}
