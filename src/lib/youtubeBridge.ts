@@ -7,11 +7,18 @@ let onEnded: (() => void) | null = null;
 let onState: ((playing: boolean) => void) | null = null;
 let listening = false;
 
-function post(func: string) {
+let volume = 70;
+
+function post(func: string, args: unknown[] = []) {
   iframe?.contentWindow?.postMessage(
-    JSON.stringify({ event: "command", func, args: [] }),
+    JSON.stringify({ event: "command", func, args }),
     "*",
   );
+}
+
+export function setYouTubeVolume(v: number) {
+  volume = Math.round(Math.max(0, Math.min(1, v)) * 100);
+  post("setVolume", [volume]);
 }
 
 function handleMessage(e: MessageEvent) {
