@@ -1,0 +1,3 @@
+- [x] Finish YouTube bridge startup and AI DJ player controls.
+- [x] Run playback regression tests and check the AI DJ flow in the browser.
+- [x] Set Vocal as the default equalizer selection for songs and test its gains.

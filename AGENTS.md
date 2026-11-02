@@ -1,1 +1,3 @@
 - AI DJ: the ai-playlist backend function turns a description into search queries; the app resolves them through the existing federated search (keeps the AI key server-side and reuses source logic).
+- YouTube playback uses origin-and-frame-validated embed events for readiness, state and progress; route all player controls through the bridge to avoid false playback state and disconnected controls.
+- Equalizer defaults and preset gains share one module used by both filter initialization and the selector, so the displayed preset matches actual audio processing.
