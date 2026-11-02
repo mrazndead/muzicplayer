@@ -1,3 +1,5 @@
+import { isConverterFileUrl } from "./validation.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -45,14 +47,18 @@ async function proxyFile(fileUrl: string, name: string): Promise<Response> {
   } catch {
     return json({ error: "Invalid file url" }, 400);
   }
-  if (target.protocol !== "https:" || !/(^|\.)cnvmp3\.(com|online)$/i.test(target.hostname)) {
+  if (!isConverterFileUrl(fileUrl)) {
     return json({ error: "Unsupported file host" }, 400);
   }
 
   const upstream = await fetch(target.toString(), {
     headers: { "user-agent": UA, referer: "https://cnvmp3.com/", accept: "*/*" },
+    signal: AbortSignal.timeout(120000),
+    redirect: "error",
   });
   if (!upstream.ok || !upstream.body) return json({ error: "File is no longer available" }, 502);
+  const type = upstream.headers.get("content-type") || "";
+  if (/html|json|text\//i.test(type)) return json({ error: "Converter returned an error page, not audio" }, 502);
 
   const filename = safeName(name.replace(/\.mp3$/i, ""));
   return new Response(upstream.body, {
