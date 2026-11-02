@@ -49,7 +49,7 @@ async function convertToMp3(item: YtResult) {
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-mp3` +
       `?file=${encodeURIComponent(data.url)}&name=${encodeURIComponent(filename)}`;
 
-    let href = data.url as string;
+    let href: string | null = null;
     let revoke: string | null = null;
     for (const src of [proxy, data.url as string]) {
       try {
@@ -58,7 +58,8 @@ async function convertToMp3(item: YtResult) {
         const res = await fetch(src, {
           signal: ctrl.signal,
           headers: src === proxy ? { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } : undefined,
-        }).finally(() => clearTimeout(timer));
+        });
+        try {
         if (!res.ok) throw new Error("download failed");
         const ctype = res.headers.get("content-type") || "";
         if (ctype.includes("json") || ctype.includes("html")) throw new Error("not audio");
@@ -68,10 +69,13 @@ async function convertToMp3(item: YtResult) {
         href = URL.createObjectURL(blob.type === "audio/mpeg" ? blob : blob.slice(0, blob.size, "audio/mpeg"));
         revoke = href;
         break;
+        } finally { clearTimeout(timer); }
       } catch {
         /* try the next source */
       }
     }
+
+    if (!href) throw new Error("The converted MP3 could not be downloaded. Try again.");
 
     const a = document.createElement("a");
     a.href = href;
