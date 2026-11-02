@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import { AudiusTrack, getStreamUrl, getArtworkUrl } from "@/lib/audius";
 import {
   isYouTubeTrack,
@@ -8,6 +9,8 @@ import {
   resumeYouTube,
   stopYouTube,
   setYouTubeBridgeCallbacks,
+  setYouTubeVolume,
+  seekYouTube,
 } from "@/lib/youtubeBridge";
 
 export interface PlayerState {
@@ -77,6 +80,7 @@ export function useAudioPlayer() {
       handleTrackEndRef.current();
     });
     audio.addEventListener("pause", () => {
+      if (isYouTubeTrack(stateRef.current.currentTrack?.id)) return;
       setState((s) => ({ ...s, isPlaying: false }));
       if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
     });
@@ -150,6 +154,7 @@ export function useAudioPlayer() {
 
 
     return () => {
+      stopYouTube();
       audio.pause();
       audio.src = "";
     };
@@ -174,8 +179,14 @@ export function useAudioPlayer() {
   // Keep MediaSession action handlers in sync
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
-    navigator.mediaSession.setActionHandler("play", () => audioRef.current?.play());
-    navigator.mediaSession.setActionHandler("pause", () => audioRef.current?.pause());
+    navigator.mediaSession.setActionHandler("play", () => {
+      if (isYouTubeTrack(stateRef.current.currentTrack?.id)) resumeYouTube();
+      else audioRef.current?.play().catch(() => toast.error("Tap Play to start audio."));
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      if (isYouTubeTrack(stateRef.current.currentTrack?.id)) pauseYouTube();
+      else audioRef.current?.pause();
+    });
     navigator.mediaSession.setActionHandler("previoustrack", () => handleTrackEndRef.current && prevTrackRef.current());
     navigator.mediaSession.setActionHandler("nexttrack", () => nextTrackRef.current());
     return () => {
@@ -189,13 +200,14 @@ export function useAudioPlayer() {
   const playAudioForTrack = useCallback(async (track: AudiusTrack) => {
     const audio = audioRef.current;
     if (!audio) return;
-    setState((s) => ({ ...s, buffering: true }));
+    setState((s) => ({ ...s, buffering: true, isPlaying: false }));
     // YouTube tracks play through the hidden iframe bridge (audio-only).
     if (isYouTubeTrack(track.id)) {
       audio.pause();
       audio.removeAttribute("src");
+      setYouTubeVolume(stateRef.current.volume);
       playYouTube(youTubeVideoId(track.id));
-      setState((s) => ({ ...s, buffering: false, isPlaying: true, duration: track.duration || s.duration }));
+      setState((s) => ({ ...s, duration: track.duration || 0 }));
       updateMediaSession(track);
       return;
     }
@@ -226,6 +238,8 @@ export function useAudioPlayer() {
       await audio.play();
     } catch (err) {
       console.error("audio.play() failed:", err);
+      setState((s) => ({ ...s, buffering: false, isPlaying: false }));
+      toast.error("Audio couldn't start. Tap Play to try again.");
     }
     updateMediaSession(track);
   }, [updateMediaSession]);
@@ -255,6 +269,11 @@ export function useAudioPlayer() {
   const handleTrackEnd = useCallback(() => {
     const s = stateRef.current;
     if (s.repeat === "one") {
+      if (s.currentTrack && isYouTubeTrack(s.currentTrack.id)) {
+        seekYouTube(0);
+        resumeYouTube();
+        return;
+      }
       const audio = audioRef.current;
       if (audio) {
         audio.currentTime = 0;
@@ -276,39 +295,43 @@ export function useAudioPlayer() {
   handleTrackEndRef.current = handleTrackEnd;
 
   const playTrack = useCallback(async (track: AudiusTrack, queue?: AudiusTrack[], index?: number) => {
-    await playAudioForTrack(track);
     setState((s) => ({
       ...s,
       currentTrack: track,
-      isPlaying: true,
+      isPlaying: false,
       currentTime: 0,
       queue: queue || s.queue,
       queueIndex: index ?? s.queueIndex,
     }));
+    await playAudioForTrack(track);
   }, [playAudioForTrack]);
 
   // YouTube bridge events feed the same player state.
   useEffect(() => {
     setYouTubeBridgeCallbacks({
       onEnded: () => handleTrackEndRef.current(),
-      onState: (playing) => setState((s) => ({ ...s, isPlaying: playing, buffering: false })),
+      onState: (playing) => {
+        setState((s) => ({ ...s, isPlaying: playing, buffering: false }));
+        if ("mediaSession" in navigator) navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+      },
+      onProgress: (currentTime, duration) => setState((s) => ({ ...s, currentTime, duration: duration || s.duration })),
+      onError: (message) => toast.error(message),
     });
+    return () => setYouTubeBridgeCallbacks({});
   }, []);
-
-  // Approximate progress for YouTube tracks (embed doesn't report time without the full API).
-  useEffect(() => {
-    if (!state.isPlaying || !isYouTubeTrack(state.currentTrack?.id)) return;
-    const t = setInterval(() => setState((s) => ({ ...s, currentTime: Math.min(s.currentTime + 1, s.duration || Infinity) })), 1000);
-    return () => clearInterval(t);
-  }, [state.isPlaying, state.currentTrack?.id]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     const cur = stateRef.current.currentTrack;
     if (!audio || !cur) return;
     if (isYouTubeTrack(cur.id)) {
-      if (stateRef.current.isPlaying) pauseYouTube(); else resumeYouTube();
-      setState((s) => ({ ...s, isPlaying: !s.isPlaying }));
+      if (stateRef.current.isPlaying || stateRef.current.buffering) {
+        pauseYouTube();
+        setState((s) => ({ ...s, isPlaying: false, buffering: false }));
+      } else {
+        resumeYouTube();
+        setState((s) => ({ ...s, buffering: true }));
+      }
       return;
     }
     if (audio.paused) {
@@ -329,6 +352,10 @@ export function useAudioPlayer() {
 
 
   const seek = useCallback((time: number) => {
+    if (isYouTubeTrack(stateRef.current.currentTrack?.id)) {
+      seekYouTube(time);
+      return;
+    }
     const audio = audioRef.current;
     if (!audio) return;
     audio.currentTime = time;
@@ -338,6 +365,7 @@ export function useAudioPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = vol;
+    setYouTubeVolume(vol);
     setState((s) => ({ ...s, volume: vol }));
   }, []);
 
@@ -351,6 +379,10 @@ export function useAudioPlayer() {
     const s = stateRef.current;
     // If more than 3 seconds in, restart current track
     if (s.currentTime > 3) {
+      if (isYouTubeTrack(s.currentTrack?.id)) {
+        seekYouTube(0);
+        return;
+      }
       const audio = audioRef.current;
       if (audio) audio.currentTime = 0;
       return;
