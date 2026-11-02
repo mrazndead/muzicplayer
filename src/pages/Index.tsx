@@ -647,28 +647,6 @@ const Index = () => {
             </motion.div>
           )}
 
-          {/* AI DJ TAB — kept mounted (hidden when inactive) so the playlist and chat survive tab switches */}
-          {(activeTab === "ai" || aiDjVisited) && (
-            <div className={activeTab === "ai" ? "" : "hidden"}>
-              <Suspense fallback={<LazyFallback />}>
-                <AiDjTab
-                  currentTrackId={player.currentTrack?.id}
-                  isPlaying={player.isPlaying}
-                  onPlayList={(list, i) => {
-                    const t = list[i];
-                    if (t && t.id === player.currentTrack?.id) player.togglePlay();
-                    else if (t) player.playTrack(t, list, i);
-                  }}
-                  isFavorite={isFavorite}
-                  onToggleFavorite={toggleFavorite}
-                  onStartRadio={handleStartRadio}
-                  onOpenLiked={() => setActiveTab("favorites")}
-                  favCount={favorites.length}
-                />
-              </Suspense>
-            </div>
-          )}
-
           {/* LIBRARY TAB */}
           {activeTab === "library" && (
             <motion.div
@@ -708,6 +686,27 @@ const Index = () => {
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Keep persistent chat outside AnimatePresence, which removes exiting children. */}
+        {(activeTab === "ai" || aiDjVisited) && (
+          <div className={activeTab === "ai" ? "" : "hidden"}>
+            <Suspense fallback={<LazyFallback />}>
+              <AiDjTab
+                currentTrackId={player.currentTrack?.id}
+                isPlaying={player.isPlaying}
+                onPlayList={(list, i) => {
+                  const t = list[i];
+                  if (t && t.id === player.currentTrack?.id) player.togglePlay();
+                  else if (t) player.playTrack(t, list, i);
+                }}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+                onStartRadio={handleStartRadio}
+                onOpenLiked={() => setActiveTab("favorites")}
+                favCount={favorites.length}
+              />
+            </Suspense>
+          </div>
+        )}
       </main>
 
 
