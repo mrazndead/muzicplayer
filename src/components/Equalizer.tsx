@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X } from "lucide-react";
-
-const EQ_PRESETS: { name: string; values: number[] }[] = [
-  { name: "Flat", values: [0, 0, 0, 0, 0] },
-  { name: "Bass Boost", values: [6, 4, 0, -1, -2] },
-  { name: "Treble Boost", values: [-2, -1, 0, 3, 6] },
-  { name: "Vocal", values: [-2, 0, 4, 3, -1] },
-  { name: "Rock", values: [4, 2, -1, 2, 4] },
-  { name: "Electronic", values: [4, 2, 0, 2, 5] },
-];
+import { EQ_PRESETS, DEFAULT_EQ_PRESET } from "@/lib/equalizer";
 
 const BAND_LABELS = ["60Hz", "230Hz", "910Hz", "3.6kHz", "14kHz"];
 
@@ -20,9 +12,11 @@ interface EqualizerProps {
 
 export function Equalizer({ audioContext, filters }: EqualizerProps) {
   const [open, setOpen] = useState(false);
-  const [activePreset, setActivePreset] = useState("Flat");
+  const [activePreset, setActivePreset] = useState(() =>
+    filters.length > 0 ? EQ_PRESETS.find(p => p.values.every((v, i) => v === filters[i]?.gain.value))?.name ?? "" : DEFAULT_EQ_PRESET.name
+  );
   const [gains, setGains] = useState<number[]>(() =>
-    filters.length > 0 ? filters.map(f => f.gain.value) : [0, 0, 0, 0, 0]
+    filters.length > 0 ? filters.map(f => f.gain.value) : [...DEFAULT_EQ_PRESET.values]
   );
 
   const applyGain = (index: number, value: number) => {
@@ -46,6 +40,7 @@ export function Equalizer({ audioContext, filters }: EqualizerProps) {
   return (
     <>
       <button
+        aria-label="Equalizer"
         onClick={() => setOpen(!open)}
         className={`p-2 transition-colors ${open ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
       >
@@ -72,6 +67,7 @@ export function Equalizer({ audioContext, filters }: EqualizerProps) {
               {EQ_PRESETS.map((preset) => (
                 <button
                   key={preset.name}
+                  aria-pressed={activePreset === preset.name}
                   onClick={() => applyPreset(preset)}
                   className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
                     activePreset === preset.name

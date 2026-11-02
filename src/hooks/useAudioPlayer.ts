@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "sonner";
+import { defaultEqualizerGain } from "@/lib/equalizer";
 import { AudiusTrack, getStreamUrl, getArtworkUrl } from "@/lib/audius";
 import {
   isYouTubeTrack,
@@ -100,7 +101,7 @@ export function useAudioPlayer() {
             const f = ctx.createBiquadFilter();
             f.type = i === 0 ? "lowshelf" : i === EQ_FREQS.length - 1 ? "highshelf" : "peaking";
             f.frequency.value = freq;
-            f.gain.value = 0;
+            f.gain.value = defaultEqualizerGain(i);
             f.Q.value = 1;
             return f;
           });
