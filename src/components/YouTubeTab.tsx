@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Search, Play, Pause, Youtube, Loader2, X, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Artwork } from "./Artwork";
 
 export interface YtResult {
   id: string;
@@ -224,8 +225,8 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
       {/* Audio-only player: the YouTube frame is required for playback but kept out of sight. */}
       {current && (
         <div className="rounded-2xl glass-heavy border border-white/10 p-3 flex items-center gap-3">
-          <img
-            src={current.thumbnail || `https://i.ytimg.com/vi/${current.id}/mqdefault.jpg`}
+          <Artwork
+            track={{ id: `yt:${current.id}`, title: current.title, source: "youtube", artwork: { "480x480": current.thumbnail } }}
             alt=""
             className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
           />
@@ -303,10 +304,10 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
                 aria-label={isCurrent && playing ? `Pause ${r.title}` : `Play ${r.title}`}
                 className="min-w-0 flex-1 flex items-center gap-3 text-left"
               >
-                <img
-                  src={r.thumbnail || `https://i.ytimg.com/vi/${r.id}/mqdefault.jpg`}
+                <Artwork
+                  track={{ id: `yt:${r.id}`, title: r.title, source: "youtube", artwork: { "480x480": r.thumbnail } }}
                   alt=""
-                  loading="lazy"
+                  shape="wide"
                   className="w-16 h-11 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="min-w-0 flex-1">

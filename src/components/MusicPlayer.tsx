@@ -1,5 +1,5 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Repeat1, Heart, ChevronDown, ListMusic, Timer, X, Share2, User, Radio } from "lucide-react";
-import { getArtworkUrl, getShareUrl, AudiusTrack } from "@/lib/audius";
+import { getShareUrl, AudiusTrack } from "@/lib/audius";
 import { Artwork } from "./Artwork";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -115,7 +115,7 @@ export function MusicPlayer({
               className="fixed inset-0 z-[60] flex flex-col overflow-hidden"
             >
               <div className="absolute inset-0">
-                <img src={getArtworkUrl(currentTrack, "1000x1000")} alt="" className="w-full h-full object-cover scale-110 blur-[60px] opacity-40" />
+                <Artwork track={currentTrack} size="1000x1000" eager shape="wide" alt="" className="w-full h-full object-cover scale-110 blur-[60px] opacity-40" />
                 <div className="absolute inset-0 bg-background/80" />
               </div>
               <div className="relative z-10 flex flex-col h-full">

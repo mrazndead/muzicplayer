@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { AudiusTrack, getArtworkUrl, pickLocalCover } from "@/lib/audius";
+import { ArtworkTrack, getArtworkUrl, getYouTubeArtworkUrl, pickLocalCover } from "@/lib/audius";
 
 type Size = "150x150" | "480x480" | "1000x1000";
 
 interface ArtworkProps {
-  track: AudiusTrack;
+  track: ArtworkTrack;
   size?: Size;
   className?: string;
   alt?: string;
@@ -33,10 +33,14 @@ export function Artwork({ track, size = "480x480", className, alt, eager, shape 
       className={className}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
+      referrerPolicy="no-referrer"
       draggable={false}
       onError={() => {
         const fb = pickLocalCover(track.id);
-        if (src !== fb) setSrc(fb);
+        const youtube = getYouTubeArtworkUrl(track);
+        // Provider proxies can expire: try the original thumbnail before the local cover.
+        if (src === primary && youtube && src !== youtube) setSrc(youtube);
+        else if (src !== fb) setSrc(fb);
       }}
     />
   );

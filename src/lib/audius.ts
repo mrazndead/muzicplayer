@@ -301,10 +301,18 @@ export function canDownload(track: AudiusTrack): boolean {
   return src === "audius" || src === "jamendo" || src === "archive";
 }
 
-export function getArtworkUrl(track: AudiusTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
+export type ArtworkTrack = Pick<AudiusTrack, "id" | "title" | "artwork" | "isLocal" | "source">;
+
+export function getYouTubeArtworkUrl(track: ArtworkTrack): string | undefined {
+  if (track.source !== "youtube" && !track.id.startsWith("yt:")) return undefined;
+  const videoId = track.id.replace(/^yt:/, "");
+  return /^[\w-]{11}$/.test(videoId) ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : undefined;
+}
+
+export function getArtworkUrl(track: ArtworkTrack, size: "150x150" | "480x480" | "1000x1000" = "480x480"): string {
   if (track.isLocal) return pickLocalCover(track.id);
   const art = track.artwork?.[size] || track.artwork?.["480x480"] || track.artwork?.["150x150"] || track.artwork?.["1000x1000"];
-  return art || pickLocalCover(track.id);
+  return art || getYouTubeArtworkUrl(track) || pickLocalCover(track.id);
 }
 
 export function formatPlayCount(count: number): string {
