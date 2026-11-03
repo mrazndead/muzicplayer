@@ -82,6 +82,8 @@ export function LocalLibrary({
               toast.success(`Added ${r.added} song${r.added === 1 ? "" : "s"}`, {
                 description: `${r.tooShort} under 3 min skipped · ${r.dupes} already in library`,
               });
+            } catch {
+              toast.error("Couldn't finish importing these files. Check available storage and try again.");
             } finally { setScanning(false); }
           }}
         />

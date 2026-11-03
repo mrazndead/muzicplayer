@@ -40,12 +40,13 @@ function safeFileName(track: AudiusTrack) {
 }
 
 async function downloadTrack(track: AudiusTrack) {
-  const url = await getDownloadUrl(track);
-  if (!url) {
-    toast.error("This track can't be downloaded");
-    return;
-  }
+  let url: string | null = null;
   try {
+    url = await getDownloadUrl(track);
+    if (!url) {
+      toast.error("This track can't be downloaded");
+      return;
+    }
     const res = await fetch(url);
     if (!res.ok) throw new Error(String(res.status));
     const blob = await res.blob();
@@ -60,7 +61,8 @@ async function downloadTrack(track: AudiusTrack) {
     toast.success("Saved as MP3");
   } catch {
     // Fall back to opening the file directly (e.g. when CORS blocks the fetch).
-    window.open(url, "_blank", "noopener");
+    if (url) window.open(url, "_blank", "noopener");
+    else toast.error("Couldn't prepare the download. Please try again.");
   }
 }
 
@@ -194,8 +196,8 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                   onClick={async (e) => {
                     e.stopPropagation();
                     setDownloadingId(track.id);
-                    await downloadTrack(track);
-                    setDownloadingId(null);
+                    try { await downloadTrack(track); }
+                    finally { setDownloadingId(null); }
                   }}
                   disabled={downloadingId === track.id}
                   aria-label={`Download ${track.title} as MP3`}
