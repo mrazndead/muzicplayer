@@ -2,3 +2,4 @@
 - YouTube playback uses origin-and-frame-validated embed events for readiness, state and progress; route all player controls through the bridge to avoid false playback state and disconnected controls.
 - Equalizer defaults and preset gains share one module used by both filter initialization and the selector, so the displayed preset matches actual audio processing.
 - Local imports run serially and read saved records before deduplicating, so overlapping selections cannot create duplicate songs.
+- Song images use shared Artwork handling; failed YouTube provider thumbnails retry the original YouTube image, then a local cover, so all views avoid broken images.
