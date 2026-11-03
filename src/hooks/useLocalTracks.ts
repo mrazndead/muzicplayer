@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { AudiusTrack } from "@/lib/audius";
 
 const DB_NAME = "pulse_local_tracks";
@@ -130,6 +130,7 @@ export function useLocalTracks() {
   const [tracks, setTracks] = useState<AudiusTrack[]>([]);
   const [loading, setLoading] = useState(true);
   const [urlMap] = useState<Map<string, string>>(() => new Map());
+  const importQueue = useRef<Promise<unknown>>(Promise.resolve());
 
   const refresh = useCallback(async () => {
     try {
@@ -178,9 +179,11 @@ export function useLocalTracks() {
   }, []);
 
   const addFiles = useCallback(
-    async (files: FileList | File[], opts: { minDuration?: number } = {}) => {
+    (files: FileList | File[], opts: { minDuration?: number } = {}) => {
       const arr = Array.from(files);
-      const existing = new Set(tracks.map((t) => `${t.title}|${t.user.name}|${Math.round(t.duration)}`));
+      const task = importQueue.current.catch(() => {}).then(async () => {
+      const records = await getAllRecords();
+      const existing = new Set(records.map((t) => `${t.title}|${t.artist}|${Math.round(t.duration)}`));
       let added = 0, tooShort = 0, dupes = 0;
       for (const file of arr) {
         if (!file.type.startsWith("audio/") && !file.name.match(/\.(mp3|m4a|wav|ogg|flac|aac)$/i)) {
@@ -209,8 +212,11 @@ export function useLocalTracks() {
       }
       await refresh();
       return { added, tooShort, dupes };
+      });
+      importQueue.current = task;
+      return task;
     },
-    [refresh, tracks]
+    [refresh]
   );
 
   const removeTrack = useCallback(

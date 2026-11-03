@@ -55,11 +55,11 @@ async function convertToMp3(item: YtResult) {
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 120000);
+        try {
         const res = await fetch(src, {
           signal: ctrl.signal,
           headers: src === proxy ? { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } : undefined,
         });
-        try {
         if (!res.ok) throw new Error("download failed");
         const ctype = res.headers.get("content-type") || "";
         if (ctype.includes("json") || ctype.includes("html")) throw new Error("not audio");
