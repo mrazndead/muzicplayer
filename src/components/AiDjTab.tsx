@@ -16,8 +16,6 @@ interface Props {
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (t: AudiusTrack) => void;
   onStartRadio: (t: AudiusTrack) => void;
-  onOpenLiked: () => void;
-  favCount: number;
 }
 
 const SUGGESTION_GROUPS = [

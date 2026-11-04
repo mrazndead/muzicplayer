@@ -701,8 +701,6 @@ const Index = () => {
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
                 onStartRadio={handleStartRadio}
-                onOpenLiked={() => setActiveTab("favorites")}
-                favCount={favorites.length}
               />
             </Suspense>
           </div>
