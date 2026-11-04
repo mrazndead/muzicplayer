@@ -171,12 +171,15 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   const playItem = (item: YtResult) => {
     onBeforePlay?.();
     if (current?.id === item.id) {
-      post(playing ? "pauseVideo" : "playVideo");
-      setPlaying((p) => !p);
+      const willPlay = !playing;
+      post(willPlay ? "playVideo" : "pauseVideo");
+      setPlaying(willPlay);
+      if (willPlay) armStartup(); else clearStartup();
       return;
     }
     setCurrent(item);
     setPlaying(true);
+    armStartup();
   };
 
   useEffect(() => {
@@ -284,8 +287,10 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
           </div>
           <button
             onClick={() => {
-              post(playing ? "pauseVideo" : "playVideo");
-              setPlaying((p) => !p);
+              const willPlay = !playing;
+              post(willPlay ? "playVideo" : "pauseVideo");
+              setPlaying(willPlay);
+              if (willPlay) armStartup(); else clearStartup();
             }}
             aria-label={playing ? "Pause" : "Play"}
             className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center flex-shrink-0"
