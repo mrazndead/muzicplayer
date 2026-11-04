@@ -134,9 +134,9 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   }, [converting]);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
-  const post = useCallback((func: string) => {
+  const post = useCallback((func: string, args: unknown[] = []) => {
     iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: "command", func, args: [] }),
+      JSON.stringify({ event: "command", func, args }),
       "*"
     );
   }, []);
@@ -176,6 +176,48 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
   useEffect(() => {
     onPlayingChange?.(playing && !!current);
   }, [playing, current, onPlayingChange]);
+
+  // Playback state comes from the player itself, so a track that ends, pauses or
+  // fails to start stops the header equalizer instead of animating forever.
+  const readyRef = useRef(false);
+  useEffect(() => {
+    const frame = iframeRef.current;
+    if (!frame || !current) return;
+    const YT_ORIGIN = "https://www.youtube.com";
+    readyRef.current = false;
+    const onMessage = (e: MessageEvent) => {
+      if (e.source !== frame.contentWindow || e.origin !== YT_ORIGIN) return;
+      try {
+        const msg = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (!msg || typeof msg !== "object") return;
+        if (msg.event === "onReady" || (!readyRef.current && msg.event === "infoDelivery")) {
+          readyRef.current = true;
+          clearInterval(handshake);
+          post("addEventListener", ["onStateChange"]);
+          post("addEventListener", ["onError"]);
+        }
+        if (msg.event === "onError") {
+          setPlaying(false);
+          return;
+        }
+        const state = msg.event === "onStateChange"
+          ? msg.info
+          : msg.event === "infoDelivery" ? msg.info?.playerState : undefined;
+        if (state === 1) setPlaying(true);
+        else if (state === 0 || state === 2 || state === 5 || state === -1) setPlaying(false);
+      } catch { /* Ignore non-player messages. */ }
+    };
+    window.addEventListener("message", onMessage);
+    const subscribe = () => {
+      frame.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: "pulse-yt-tab" }), YT_ORIGIN);
+    };
+    subscribe();
+    const handshake = setInterval(subscribe, 500);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      clearInterval(handshake);
+    };
+  }, [current, post]);
 
   // Keep media session-ish title updated
   useEffect(() => {
