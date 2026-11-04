@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Send, Loader2, Heart, PlayCircle } from "lucide-react";
+import { Sparkles, Send, Loader2, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AudiusTrack, searchTracks } from "@/lib/audius";
 import { TrackList } from "./TrackList";
@@ -129,15 +129,9 @@ export function AiDjTab(p: Props) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-heading text-3xl tracking-[0.05em] uppercase gradient-text flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" /> AI DJ
-          </h2>
-          <p className="text-muted-foreground text-xs mt-1">Describe anything — I'll build the playlist and press play.</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={p.onOpenLiked} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-xs text-muted-foreground hover:text-foreground">
-          <Heart className="w-3.5 h-3.5" /> Liked {p.favCount > 0 && `(${p.favCount})`}
-        </Button>
+        <h2 className="font-heading text-3xl tracking-[0.05em] uppercase gradient-text flex items-center gap-2">
+          <Sparkles className="w-6 h-6 text-primary" /> AI DJ
+        </h2>
       </div>
 
       <div className="glass-card rounded-3xl p-3 space-y-3">
