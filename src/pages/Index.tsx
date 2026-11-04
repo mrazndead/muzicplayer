@@ -6,7 +6,7 @@ import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { SkinSwitcher } from "@/components/SkinSwitcher";
 import { useWakeLock } from "@/hooks/useWakeLock";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Heart } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { GenreGrid } from "@/components/GenreGrid";
 import { TrackList } from "@/components/TrackList";
@@ -425,6 +425,14 @@ const Index = () => {
                 {wake.enabled ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             )}
+            <button
+              onClick={() => setActiveTab("favorites")}
+              aria-label="Open liked songs"
+              title="Liked songs"
+              className="p-2 rounded-xl glass-card text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Heart className="w-4 h-4" />
+            </button>
             <SkinSwitcher />
             <ThemeSwitcher />
           </div>
