@@ -133,6 +133,12 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
     }
   }, [converting]);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const startupRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const clearStartup = () => clearTimeout(startupRef.current);
+  const armStartup = () => {
+    clearStartup();
+    startupRef.current = setTimeout(() => setPlaying(false), 15000);
+  };
 
   const post = useCallback((func: string, args: unknown[] = []) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -203,7 +209,7 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
         const state = msg.event === "onStateChange"
           ? msg.info
           : msg.event === "infoDelivery" ? msg.info?.playerState : undefined;
-        if (state === 1) setPlaying(true);
+        if (state === 1) { clearStartup(); setPlaying(true); }
         else if (state === 0 || state === 2 || state === 5 || state === -1) setPlaying(false);
       } catch { /* Ignore non-player messages. */ }
     };
