@@ -139,6 +139,7 @@ export function YouTubeTab({ onBeforePlay, onPlayingChange }: YouTubeTabProps) {
     clearStartup();
     startupRef.current = setTimeout(() => setPlaying(false), 15000);
   };
+  useEffect(() => () => clearTimeout(startupRef.current), []);
 
   const post = useCallback((func: string, args: unknown[] = []) => {
     iframeRef.current?.contentWindow?.postMessage(
