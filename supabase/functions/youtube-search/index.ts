@@ -15,9 +15,11 @@ const INVIDIOUS_HOSTS = [
   "https://inv.nadeko.net",
   "https://invidious.nerdvpn.de",
   "https://yewtu.be",
+  "https://invidious.f5.si",
+  "https://iv.melmac.space",
 ];
 
-const TARGET = 60;
+const TARGET = 120;
 
 interface Result {
   id: string;
@@ -117,21 +119,25 @@ Deno.serve(async (req) => {
         const np = asRecord(data).nextpage;
         if (!nextpage && typeof np === "string") nextpage = np;
       }
-      if (merged.length < TARGET && nextpage) {
+      // Follow up to two continuation pages per host for deeper results.
+      for (let page = 0; page < 2 && merged.length < TARGET && nextpage; page++) {
         const more = await tryFetch(
           `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=videos`,
         );
         add(fromPiped(asRecord(more).items ?? more));
+        const np = asRecord(more).nextpage;
+        nextpage = typeof np === "string" ? np : null;
       }
     }
 
     // Invidious: extra pages to top up the list.
     for (const host of INVIDIOUS_HOSTS) {
       if (merged.length >= TARGET) break;
-      const pages = await Promise.all([
-        tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=1`),
-        tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=2`),
-      ]);
+      const pages = await Promise.all(
+        [1, 2, 3, 4].map((page) =>
+          tryFetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video&page=${page}`)
+        ),
+      );
       for (const data of pages) add(fromInvidious(data));
     }
 
