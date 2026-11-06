@@ -560,3 +560,85 @@ html[data-skin="noir"] .glow-text, html[data-skin="noir"] .glow-border, html[dat
 html[data-skin="noir"] img { filter: grayscale(1) contrast(1.15); border-radius: 0 !important; }
 html[data-skin="noir"] h1, html[data-skin="noir"] h2, html[data-skin="noir"] h3 { font-style: italic; text-transform: none !important; letter-spacing: 0.01em !important; }
 html[data-skin="noir"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; }
+
+/* ---------- SUNSET: dusk glow, warm coral ---------- */
+html[data-skin="sunset"] {
+  --background: 332 48% 11% !important; --foreground: 24 90% 92% !important;
+  --card: 330 45% 15% !important; --card-foreground: 24 90% 92% !important;
+  --popover: 330 45% 15% !important; --popover-foreground: 24 90% 92% !important;
+  --secondary: 340 40% 20% !important; --secondary-foreground: 24 90% 92% !important;
+  --muted: 335 35% 19% !important; --muted-foreground: 20 40% 68% !important;
+  --border: 16 85% 65% / 0.3 !important; --input: 330 45% 15% !important;
+  --primary: 16 100% 65% !important; --primary-foreground: 332 48% 11% !important;
+  --accent: 38 100% 60% !important; --ring: 16 100% 65% !important;
+  --radius: 1.25rem !important;
+  --glass-bg: 330 45% 15% / 0.82 !important; --glass-heavy-bg: 332 48% 9% / 0.94 !important;
+  --glass-border: 16 85% 65% / 0.35 !important;
+  --font-heading: 'Bebas Neue', Impact, sans-serif !important;
+}
+html[data-skin="sunset"] .app-bg {
+  background: linear-gradient(180deg, hsl(332 48% 9%) 0%, hsl(345 50% 14%) 45%, hsl(16 60% 18%) 100%) !important;
+}
+html[data-skin="sunset"] .app-bg::before { opacity: 0.5 !important; }
+html[data-skin="sunset"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="sunset"] .glass, html[data-skin="sunset"] .glass-card, html[data-skin="sunset"] .glass-heavy {
+  border: 1px solid hsl(var(--glass-border)) !important; border-radius: 1.25rem !important;
+}
+html[data-skin="sunset"] .glow-text { text-shadow: 0 0 18px hsl(var(--primary) / 0.55) !important; }
+html[data-skin="sunset"] .gradient-text { -webkit-text-fill-color: transparent !important; background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent))) !important; -webkit-background-clip: text !important; background-clip: text !important; }
+html[data-skin="sunset"] img { border-radius: 1rem !important; }
+
+/* ---------- FOREST: deep botanical, mossy serif ---------- */
+html[data-skin="forest"] {
+  --background: 150 40% 8% !important; --foreground: 90 30% 90% !important;
+  --card: 152 38% 12% !important; --card-foreground: 90 30% 90% !important;
+  --popover: 152 38% 12% !important; --popover-foreground: 90 30% 90% !important;
+  --secondary: 150 35% 16% !important; --secondary-foreground: 90 30% 90% !important;
+  --muted: 150 30% 15% !important; --muted-foreground: 100 15% 60% !important;
+  --border: 120 25% 30% / 0.5 !important; --input: 152 38% 12% !important;
+  --primary: 110 45% 62% !important; --primary-foreground: 150 40% 8% !important;
+  --accent: 80 55% 55% !important; --ring: 110 45% 62% !important;
+  --radius: 0.5rem !important;
+  --glass-bg: 152 38% 12% / 0.88 !important; --glass-heavy-bg: 150 40% 6% / 0.95 !important;
+  --glass-border: 120 25% 32% / 0.55 !important;
+  --font-heading: 'Playfair Display', Georgia, serif !important;
+}
+html[data-skin="forest"] .app-bg {
+  background-color: hsl(var(--background)) !important;
+  background-image: radial-gradient(ellipse at 20% 0%, hsl(140 45% 14% / 0.9), transparent 55%), radial-gradient(ellipse at 90% 100%, hsl(90 40% 12% / 0.8), transparent 50%) !important;
+}
+html[data-skin="forest"] .app-bg::before, html[data-skin="forest"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="forest"] .glass, html[data-skin="forest"] .glass-card, html[data-skin="forest"] .glass-heavy {
+  border: 1px solid hsl(var(--glass-border)) !important; box-shadow: inset 0 1px 0 hsl(90 30% 90% / 0.06) !important;
+}
+html[data-skin="forest"] .glow-text, html[data-skin="forest"] .glow-border, html[data-skin="forest"] .glow-sm { text-shadow: none !important; box-shadow: none !important; }
+html[data-skin="forest"] h1, html[data-skin="forest"] h2, html[data-skin="forest"] h3 { letter-spacing: 0.01em !important; font-weight: 600; }
+html[data-skin="forest"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; }
+html[data-skin="forest"] img { border-radius: 0.5rem !important; filter: saturate(0.85) hue-rotate(8deg); }
+
+/* ---------- ARCTIC: glacial light, crisp ice blue ---------- */
+html[data-skin="arctic"] {
+  --background: 205 45% 95% !important; --foreground: 210 45% 14% !important;
+  --card: 0 0% 100% !important; --card-foreground: 210 45% 14% !important;
+  --popover: 0 0% 100% !important; --popover-foreground: 210 45% 14% !important;
+  --secondary: 205 55% 90% !important; --secondary-foreground: 210 45% 18% !important;
+  --muted: 205 40% 92% !important; --muted-foreground: 210 20% 42% !important;
+  --border: 205 35% 82% !important; --input: 0 0% 100% !important;
+  --primary: 202 90% 44% !important; --primary-foreground: 0 0% 100% !important;
+  --accent: 190 85% 42% !important; --ring: 202 90% 44% !important;
+  --radius: 0.75rem !important;
+  --glass-bg: 0 0% 100% / 0.8 !important; --glass-heavy-bg: 205 45% 97% / 0.95 !important;
+  --glass-border: 205 35% 80% / 0.9 !important;
+  --font-heading: 'Barlow', 'Helvetica Neue', sans-serif !important;
+}
+html[data-skin="arctic"] .app-bg {
+  background: linear-gradient(160deg, hsl(205 60% 96%) 0%, hsl(200 55% 90%) 50%, hsl(215 50% 93%) 100%) !important;
+}
+html[data-skin="arctic"] .app-bg::before, html[data-skin="arctic"] .app-bg::after { opacity: 0 !important; }
+html[data-skin="arctic"] .glass, html[data-skin="arctic"] .glass-card, html[data-skin="arctic"] .glass-heavy {
+  border: 1px solid hsl(var(--glass-border)) !important;
+  box-shadow: 0 8px 24px hsl(210 45% 30% / 0.08) !important;
+}
+html[data-skin="arctic"] .glow-text, html[data-skin="arctic"] .glow-border, html[data-skin="arctic"] .glow-sm, html[data-skin="arctic"] .artwork-ring { text-shadow: none !important; box-shadow: none !important; }
+html[data-skin="arctic"] h1, html[data-skin="arctic"] h2, html[data-skin="arctic"] h3 { letter-spacing: -0.02em !important; font-weight: 700; }
+html[data-skin="arctic"] .gradient-text { -webkit-text-fill-color: hsl(var(--primary)) !important; background: none !important; }
