@@ -107,9 +107,10 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Piped: songs + videos filters, plus a page-2 continuation when available.
+    // Piped: songs + videos filters, plus continuation pages when available.
     for (const host of PIPED_HOSTS) {
       if (merged.length >= TARGET) break;
+      const before = merged.length;
       const pages = await Promise.all([
         tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=music_songs`),
         tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=videos`),
@@ -120,6 +121,7 @@ Deno.serve(async (req) => {
         const np = asRecord(data).nextpage;
         if (!nextpage && typeof np === "string") nextpage = np;
       }
+      console.log(`[diag] ${host} first pages: +${merged.length - before}, nextpage=${nextpage ? "yes" : "no"}`);
       // Follow up to three continuation pages per host for deeper results.
       for (let page = 0; page < 3 && merged.length < TARGET && nextpage; page++) {
         const more = await tryFetch(
@@ -128,6 +130,7 @@ Deno.serve(async (req) => {
         add(fromPiped(asRecord(more).items ?? more));
         const np = asRecord(more).nextpage;
         nextpage = typeof np === "string" ? np : null;
+        console.log(`[diag] ${host} continuation ${page + 1}: total=${merged.length}, more=${nextpage ? "yes" : "no"}`);
       }
     }
 
