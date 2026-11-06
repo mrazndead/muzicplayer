@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
         const np = asRecord(data).nextpage;
         if (!nextpage && typeof np === "string") nextpage = np;
       }
-      // Follow up to two continuation pages per host for deeper results.
-      for (let page = 0; page < 2 && merged.length < TARGET && nextpage; page++) {
+      // Follow up to three continuation pages per host for deeper results.
+      for (let page = 0; page < 3 && merged.length < TARGET && nextpage; page++) {
         const more = await tryFetch(
           `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=videos`,
         );
