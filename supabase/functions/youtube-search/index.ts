@@ -5,9 +5,10 @@ const corsHeaders = {
 
 // Public Piped / Invidious style instances (keyless YouTube search).
 const PIPED_HOSTS = [
+  "https://api.piped.private.coffee",
+  "https://pipedapi.ducks.party",
   "https://pipedapi.kavin.rocks",
   "https://pipedapi.adminforge.de",
-  "https://api.piped.private.coffee",
   "https://pipedapi.reallyaweso.me",
 ];
 
