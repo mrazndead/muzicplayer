@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type UiSkinId = "pulse" | "cassette" | "vinyl" | "terminal" | "zen" | "blueprint" | "candy" | "noir";
+export type UiSkinId = "pulse" | "cassette" | "vinyl" | "terminal" | "zen" | "blueprint" | "candy" | "noir" | "sunset" | "forest" | "arctic";
 
 export interface UiSkin {
   id: UiSkinId;
@@ -20,6 +20,9 @@ export const UI_SKINS: UiSkin[] = [
   { id: "blueprint", label: "Blueprint", tagline: "Drafting grid, crisp cyan lines", icon: "⌗", swatch: ["#0b2a4a", "#103a63", "#7fd6ff"] },
   { id: "candy", label: "Candy", tagline: "Pop-art color, bold outlines", icon: "◆", swatch: ["#fff3b0", "#ffffff", "#ff3d8b"] },
   { id: "noir", label: "Noir", tagline: "Monochrome cinema, fine rules", icon: "◐", swatch: ["#0a0a0a", "#161616", "#f2f2f2"] },
+  { id: "sunset", label: "Sunset", tagline: "Dusk glow, warm coral haze", icon: "☀", swatch: ["#2b0f1e", "#3d1526", "#ff7a4d"] },
+  { id: "forest", label: "Forest", tagline: "Deep botanical, mossy serif", icon: "❦", swatch: ["#0d1f16", "#163024", "#8fd694"] },
+  { id: "arctic", label: "Arctic", tagline: "Glacial light, crisp ice blue", icon: "❄", swatch: ["#eef4f8", "#ffffff", "#0e7fd6"] },
 ];
 
 interface Ctx {
