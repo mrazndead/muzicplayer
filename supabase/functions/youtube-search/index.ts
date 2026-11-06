@@ -107,30 +107,23 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Piped: songs + videos filters, plus continuation pages when available.
+    // Piped: songs + videos filters, each with its own continuation chain
+    // (a continuation token is only valid for the filter that produced it).
     for (const host of PIPED_HOSTS) {
       if (merged.length >= TARGET) break;
-      const before = merged.length;
-      const pages = await Promise.all([
-        tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=music_songs`),
-        tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=videos`),
-      ]);
-      let nextpage: string | null = null;
-      for (const data of pages) {
-        add(fromPiped(asRecord(data).items ?? data));
-        const np = asRecord(data).nextpage;
-        if (!nextpage && typeof np === "string") nextpage = np;
-      }
-      console.log(`[diag] ${host} first pages: +${merged.length - before}, nextpage=${nextpage ? "yes" : "no"}`);
-      // Follow up to three continuation pages per host for deeper results.
-      for (let page = 0; page < 3 && merged.length < TARGET && nextpage; page++) {
-        const more = await tryFetch(
-          `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=videos`,
-        );
-        add(fromPiped(asRecord(more).items ?? more));
-        const np = asRecord(more).nextpage;
-        nextpage = typeof np === "string" ? np : null;
-        console.log(`[diag] ${host} continuation ${page + 1}: total=${merged.length}, more=${nextpage ? "yes" : "no"}`);
+      for (const filter of ["music_songs", "videos"]) {
+        if (merged.length >= TARGET) break;
+        const first = await tryFetch(`${host}/search?q=${encodeURIComponent(q)}&filter=${filter}`);
+        add(fromPiped(asRecord(first).items ?? first));
+        let nextpage = asRecord(first).nextpage;
+        for (let page = 0; page < 2 && merged.length < TARGET && typeof nextpage === "string"; page++) {
+          const more = await tryFetch(
+            `${host}/nextpage/search?nextpage=${encodeURIComponent(nextpage)}&q=${encodeURIComponent(q)}&filter=${filter}`,
+          );
+          add(fromPiped(asRecord(more).items ?? more));
+          const np = asRecord(more).nextpage;
+          nextpage = typeof np === "string" ? np : null;
+        }
       }
     }
 
