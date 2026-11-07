@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3, Clock, PlayCircle, ArrowLeft } from "lucide-react";
-import { DailyQuote } from "@/components/DailyQuote";
 import { useAppTheme, APP_THEMES } from "@/contexts/AppThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { SkinSwitcher } from "@/components/SkinSwitcher";
@@ -406,12 +405,10 @@ const Index = () => {
               </h1>
             </div>
           </button>
-          {activeTab === "youtube" ? (
+          {activeTab === "youtube" && (
             <div className="flex-1 min-w-0 flex justify-center">
               <EqualizerBars isPlaying={ytPlaying} barCount={14} className="h-5" />
             </div>
-          ) : (
-            <DailyQuote />
           )}
           <div className="ml-auto flex items-center gap-1.5">
             {wake.supported && (
