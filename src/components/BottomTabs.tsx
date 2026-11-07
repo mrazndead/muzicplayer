@@ -50,7 +50,7 @@ export function BottomTabs({ activeTab, onTabChange, onRandomPlay, hasPlayer }: 
 
 
   return (
-    <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[90px]" : "bottom-[20px]"}`}>
+    <nav className={`fixed left-3 right-3 z-40 transition-all ${hasPlayer ? "bottom-[70px]" : "bottom-0"}`}>
       <div className="flex items-center justify-around max-w-sm mx-auto py-2 px-1 rounded-full glass-heavy border border-border shadow-2xl">
         {tabBtn("home", Home, "Home")}
 
