@@ -3,3 +3,5 @@
 - [x] Set Vocal as the default equalizer selection for songs and test its gains.
 - [x] Expand AI DJ preset ideas and keep them available during conversations.
 - [x] Run whole-app lint, tests, and browser checks; fix confirmed issues and report limits.
+- [x] Remove the music quote from the top header.
+- [x] Redesign the Sunset, Forest and Arctic skins into distinct graphical identities, not just color swaps.
