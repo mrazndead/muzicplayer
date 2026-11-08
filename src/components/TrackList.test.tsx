@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { TrackList } from "./TrackList";
+import { downloadYouTubeTrack } from "@/lib/youtubeMp3";
 
 vi.mock("@/lib/audius", () => ({
   getDownloadUrl: vi.fn().mockRejectedValue(new Error("Source unavailable")),
