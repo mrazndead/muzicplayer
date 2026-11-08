@@ -7,3 +7,4 @@
 - [x] Redesign the Sunset, Forest and Arctic skins into distinct graphical identities, not just color swaps.
 - [x] Lift the bottom menu up 5px across all pages.
 - [x] Make MP3 download work from the YouTube page and the AI DJ page.
+- [ ] Refresh AI DJ with a music-studio design and clearer mix ideas; verify the page and existing playlist flow.
