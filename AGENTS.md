@@ -3,3 +3,4 @@
 - Equalizer defaults and preset gains share one module used by both filter initialization and the selector, so the displayed preset matches actual audio processing.
 - Local imports run serially and read saved records before deduplicating, so overlapping selections cannot create duplicate songs.
 - Song images use shared Artwork handling; failed YouTube provider thumbnails retry the original YouTube image, then a local cover, so all views avoid broken images.
+- YouTube-to-MP3 conversion lives in one shared module used by both the YouTube tab and every song list, so any view that offers an MP3 button converts and saves the file the same way.
