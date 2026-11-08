@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Heart, Headphones, Share2, Download, Loader2, Radio } from "lucide-react";
 import { AudiusTrack, getShareUrl, formatPlayCount, getDownloadUrl, canDownload } from "@/lib/audius";
+import { isYouTubeTrack, downloadYouTubeTrack } from "@/lib/youtubeMp3";
 import { Artwork } from "./Artwork";
 import { EqualizerBars } from "./EqualizerBars";
 import { toast } from "sonner";
@@ -71,6 +72,7 @@ const SOURCE_LABELS: Record<string, { label: string; className: string }> = {
   jamendo: { label: "JAMENDO", className: "bg-emerald-500/15 text-emerald-300 ring-emerald-400/20" },
   archive: { label: "ARCHIVE", className: "bg-amber-500/15 text-amber-300 ring-amber-400/20" },
   local: { label: "LOCAL", className: "bg-sky-500/15 text-sky-300 ring-sky-400/20" },
+  youtube: { label: "YOUTUBE", className: "bg-red-500/15 text-red-300 ring-red-400/20" },
 };
 
 export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, isFavorite, onToggleFavorite, onLoadMore, isLoadingMore, hasMore, onStartRadio }: TrackListProps) {
@@ -190,17 +192,20 @@ export function TrackList({ tracks, currentTrackId, isPlaying, onPlay, title, is
                 <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
               </button>
 
-              {/* Download (freely licensed sources only) */}
-              {canDownload(track) && (
+              {/* Download: converter for YouTube songs, direct file for freely licensed sources */}
+              {(isYouTubeTrack(track) || canDownload(track)) && (
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
                     setDownloadingId(track.id);
-                    try { await downloadTrack(track); }
-                    finally { setDownloadingId(null); }
+                    try {
+                      if (isYouTubeTrack(track)) await downloadYouTubeTrack(track);
+                      else await downloadTrack(track);
+                    } finally { setDownloadingId(null); }
                   }}
                   disabled={downloadingId === track.id}
                   aria-label={`Download ${track.title} as MP3`}
+                  title={isYouTubeTrack(track) ? "Convert to MP3 and download" : "Download as MP3"}
                   className="p-1.5 rounded-full transition-colors flex-shrink-0 opacity-60 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 disabled:opacity-100"
                 >
                   {downloadingId === track.id ? (
