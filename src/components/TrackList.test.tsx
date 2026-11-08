@@ -10,6 +10,10 @@ vi.mock("@/lib/audius", () => ({
   formatPlayCount: () => "0",
 }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+vi.mock("@/lib/youtubeMp3", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/youtubeMp3")>();
+  return { ...actual, downloadYouTubeTrack: vi.fn().mockResolvedValue(undefined) };
+});
 
 describe("track downloads", () => {
   it("allows retry when resolving the download URL fails", async () => {
