@@ -101,6 +101,23 @@
 .yt-discovery { transition: border-color 180ms ease, transform 180ms ease; }
 .yt-discovery:hover { border-color: hsl(var(--primary) / 0.6); transform: translateY(-2px); }
 .yt-deck { box-shadow: var(--session-inset); padding-left: 12px; }
+.ai-dj-cover { color: hsl(var(--session-foreground)); }
+.ai-dj-page .ai-dj-cover-image {
+  border: none !important; border-radius: 0 !important; outline: none !important;
+  filter: none !important; object-position: 65% center;
+}
+.ai-dj-page .ai-dj-title {
+  color: hsl(var(--session-foreground)); letter-spacing: 0 !important;
+  line-height: 1; border: none; padding: 0; text-transform: none !important;
+}
+.ai-dj-page .ai-dj-title::before, .ai-dj-page .ai-dj-title::after { display: none; }
+.ai-dj-page h3 { letter-spacing: 0 !important; }
+.ai-dj-composer { box-shadow: var(--session-inset); }
+.ai-dj-idea { transition: background-color 180ms ease, border-color 180ms ease; }
+.ai-dj-idea:hover { border-color: hsl(var(--primary)); background: hsl(var(--secondary)); color: hsl(var(--foreground)); }
+@media (prefers-reduced-motion: reduce) {
+  .ai-dj-idea, .ai-dj-idea svg { transition: none; }
+}
 .youtube-page h2 { letter-spacing: 0 !important; }
 @media (prefers-reduced-motion: reduce) {
   .yt-discovery { transition: none; }

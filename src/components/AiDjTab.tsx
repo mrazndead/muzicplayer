@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Sparkles, Send, Loader2, PlayCircle } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Sparkles, Send, Loader2, PlayCircle, Disc3, CalendarDays, Mic2, Heart, Headphones, ArrowUpRight } from "lucide-react";
+import studioImage from "@/assets/ai-dj-studio.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { AudiusTrack, searchTracks } from "@/lib/audius";
 import { TrackList } from "./TrackList";
@@ -36,6 +37,7 @@ const SUGGESTION_GROUPS = [
     "Jazz for a relaxed dinner", "Reggae for a sunny afternoon", "Epic film scores for focused work",
   ] },
 ];
+const GROUP_ICONS = [CalendarDays, Mic2, Heart, Headphones];
 
 interface YtResult { id: string; title: string; channel: string; duration: number; thumbnail: string }
 
@@ -83,6 +85,7 @@ export function AiDjTab(p: Props) {
   const endRef = useRef<HTMLDivElement>(null);
   const requestInFlight = useRef(false);
   const [ideaGroup, setIdeaGroup] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [msgs, busy]);
 
@@ -127,37 +130,41 @@ export function AiDjTab(p: Props) {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-3xl tracking-[0.05em] uppercase gradient-text flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-primary" /> AI DJ
-        </h2>
-      </div>
+    <div className="ai-dj-page space-y-6">
+      <header className="ai-dj-cover relative -mx-4 overflow-hidden px-5 py-7 sm:mx-0 sm:px-8 sm:py-10">
+        <img src={studioImage} width={1536} height={768} alt="DJ mixer and red vinyl in a music studio" className="ai-dj-cover-image absolute inset-0 h-full w-full object-cover" />
+        <div className="yt-session-shade absolute inset-0" />
+        <div className="relative flex min-h-28 items-end justify-between gap-4 sm:min-h-36">
+          <div>
+            <div className="mb-3 flex items-center gap-2 text-xs font-medium"><Sparkles className="h-4 w-4" /> PULSE / MIX STUDIO</div>
+            <h2 className="ai-dj-title text-6xl font-heading sm:text-7xl">AI DJ</h2>
+          </div>
+          <Disc3 aria-hidden="true" className="mb-1 h-12 w-12 shrink-0 opacity-80 sm:h-16 sm:w-16" />
+        </div>
+      </header>
 
-      <div className="glass-card rounded-3xl p-3 space-y-3">
-        <details open={msgs.length === 0} className="space-y-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground">Mix ideas</summary>
-          <div role="tablist" aria-label="Playlist idea categories" className="grid grid-cols-2 gap-1 rounded-lg bg-background/50 p-1 sm:grid-cols-4">
-            {SUGGESTION_GROUPS.map((group, i) => (
-              <Button key={group.name} role="tab" aria-selected={ideaGroup === i} aria-controls="ai-dj-ideas" id={`ai-dj-group-${i}`}
-                variant={ideaGroup === i ? "secondary" : "ghost"} size="sm" onClick={() => setIdeaGroup(i)} className="min-w-0 px-2 text-xs">
-                {group.name}
-              </Button>
-            ))}
-          </div>
-          <div id="ai-dj-ideas" role="tabpanel" aria-labelledby={`ai-dj-group-${ideaGroup}`} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {SUGGESTION_GROUPS[ideaGroup].ideas.map((s) => (
-              <Button key={s} variant="secondary" disabled={!!busy} onClick={() => send(s)}
-                className="h-auto min-h-10 justify-start whitespace-normal break-words px-3 py-2 text-left text-xs font-normal">
-                <Sparkles className="shrink-0 text-primary" /> {s}
-              </Button>
-            ))}
-          </div>
-        </details>
-        <div className="space-y-2 max-h-72 overflow-y-auto">
+      <section aria-label="Create a mix" className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="ai-dj-composer relative rounded-lg border border-border bg-card p-3 transition-colors focus-within:border-primary sm:p-4">
+          <label htmlFor="ai-dj-prompt" className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"><Sparkles className="h-4 w-4 text-primary" /> Your mix</label>
+          <textarea
+            id="ai-dj-prompt"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
+            rows={3}
+            aria-label="Describe your playlist"
+            placeholder="90s R&B slow jams, Prince deep cuts, songs for a rainy Sunday…"
+            className="w-full resize-none bg-transparent pr-12 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <Button size="icon" type="submit" disabled={!input.trim() || !!busy} aria-label="Send"
+            className="absolute bottom-3 right-3 h-10 w-10 rounded-full sm:bottom-4 sm:right-4">
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </form>
+        <div aria-live="polite" className="space-y-3 max-h-72 overflow-y-auto">
           {msgs.map((m, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-              className={`text-sm px-3 py-2 rounded-2xl max-w-[85%] whitespace-pre-wrap ${m.role === "user" ? "ml-auto gradient-primary text-primary-foreground" : "bg-secondary/60 text-foreground"}`}>
+            <motion.div key={i} initial={reducedMotion ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+              className={`text-sm px-3 py-2 rounded-lg max-w-[90%] whitespace-pre-wrap break-words ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "border-l-2 border-primary bg-secondary/40 text-foreground"}`}>
               {m.content}
             </motion.div>
           ))}
@@ -169,27 +176,37 @@ export function AiDjTab(p: Props) {
           )}
           <div ref={endRef} />
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
-            rows={2}
-            aria-label="Describe your playlist"
-            placeholder="e.g. 90s R&B slow jams, Prince deep cuts, songs for a rainy Sunday…"
-            className="flex-1 resize-none bg-background/50 border border-border rounded-2xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-          <Button size="icon" type="submit" disabled={!input.trim() || !!busy} aria-label="Send"
-            className="w-10 h-10 rounded-full gradient-primary text-primary-foreground flex items-center justify-center disabled:opacity-40">
-            <Send className="w-4 h-4" />
-          </Button>
-        </form>
-      </div>
+      </section>
+
+      <section aria-label="Mix ideas" className="space-y-3">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h3 className="text-xl font-heading text-foreground">Mix ideas</h3>
+          <span className="text-xs text-muted-foreground">24 starting points</span>
+        </div>
+        <div role="tablist" aria-label="Playlist idea categories" className="grid grid-cols-2 gap-1 rounded-lg bg-muted/50 p-1 sm:grid-cols-4">
+          {SUGGESTION_GROUPS.map((group, i) => {
+            const Icon = GROUP_ICONS[i];
+            return <Button key={group.name} role="tab" aria-selected={ideaGroup === i} aria-controls="ai-dj-ideas" id={`ai-dj-group-${i}`}
+              variant={ideaGroup === i ? "default" : "ghost"} size="sm" onClick={() => setIdeaGroup(i)} className="min-w-0 gap-1.5 px-2 text-xs">
+              <Icon className="h-3.5 w-3.5" /> {group.name}
+            </Button>;
+          })}
+        </div>
+        <div id="ai-dj-ideas" role="tabpanel" aria-labelledby={`ai-dj-group-${ideaGroup}`} className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {SUGGESTION_GROUPS[ideaGroup].ideas.map((s, i) => (
+            <Button key={s} variant="outline" disabled={!!busy} onClick={() => send(s)}
+              className="ai-dj-idea group flex h-auto min-h-28 min-w-0 flex-col items-start justify-between gap-3 rounded-lg border-border bg-card/70 p-3 text-left whitespace-normal sm:p-4">
+              <span className="flex w-full items-center justify-between text-primary"><span className="font-mono text-[10px] text-muted-foreground">0{i + 1}</span><ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></span>
+              <span className="w-full break-words text-xs font-medium leading-relaxed sm:text-sm">{s}</span>
+            </Button>
+          ))}
+        </div>
+      </section>
 
       {playlist && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-heading text-xl tracking-wide uppercase text-foreground">{playlist.title}</h3>
+          <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+            <div className="min-w-0"><span className="text-xs text-muted-foreground">{playlist.tracks.length} tracks / Your playlist</span><h3 className="font-heading text-xl break-words text-foreground">{playlist.title}</h3></div>
             <Button size="sm" onClick={() => p.onPlayList(playlist.tracks, 0)} className="shrink-0 flex items-center gap-1.5 px-4 py-2 gradient-primary text-primary-foreground rounded-full text-xs font-medium">
               <PlayCircle className="w-4 h-4" /> Play all
             </Button>
