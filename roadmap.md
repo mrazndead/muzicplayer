@@ -6,4 +6,4 @@
 - [x] Remove the music quote from the top header.
 - [x] Redesign the Sunset, Forest and Arctic skins into distinct graphical identities, not just color swaps.
 - [x] Lift the bottom menu up 5px across all pages.
-- [ ] Make MP3 download work from the YouTube page and the AI DJ page.
+- [x] Make MP3 download work from the YouTube page and the AI DJ page.
